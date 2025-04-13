@@ -37,7 +37,6 @@ return new class extends Migration
             $table->date('date');
         });
 
-        
         Schema::create('winning', function (Blueprint $table) {
             $table->id('winning_id');
             $table->foreignId('result_id')->index();
