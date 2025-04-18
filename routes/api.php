@@ -9,7 +9,7 @@ Route::get('/', function () {
         'ApiName' => 'STWAG',
         'laravel_version' => app()->version(), // Get the Laravel version
         'message' => 'This API is under development. Please check back soon.',
-        'By' => 'Mr. Ebrahim Diangca and John Louis Mercaral', 
+        'By' => 'Mr. Ebrahim Diangca and John Louis Mercaral, MIS', 
     ]);
 });
 
