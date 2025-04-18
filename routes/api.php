@@ -8,6 +8,8 @@ Route::get('/', function () {
     return response()->json([
         'ApiName' => 'STWAG',
         'laravel_version' => app()->version(), // Get the Laravel version
+        'status' => 'Under Development', 
+        'By' => 'Mr. Ebrahim Diangca and John Louis Mercaral', 
     ]);
 });
 
