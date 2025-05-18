@@ -13,13 +13,39 @@ class AuthController extends Controller
     //
 
 
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+
+        $users = User::all();
+
+
+        if ($users->isEmpty()) {
+            return response()->json(['message' => 'No users found'], 404);
+        }
+        return response()->json($users);
+    }
+
     public function register(Request $request)
     {
 
         Log::info('Register request received', $request->all());
 
-        if (!$request->has('email') || !$request->has('username') || !$request->has('password')) {
-            return response()->json(['message' => 'Email, username and password are required'], 400);
+        if (
+            !$request->has('firstname') ||
+            !$request->has('lastname') ||
+            !$request->has('birthdate') ||
+            !$request->has('email') ||
+            !$request->has('password') ||
+            !$request->has('uplinecode') ||
+            !$request->has('avatar') ||
+            !$request->has('uuid') ||
+            !$request->has('devicemodel')
+        ) {
+            return response()->json(['message' => 'Firstname, Lastname, Birthdate, Email, Password, Type, Uplinecode, UUID, Devicename are required.
+            '], 400);
         }
 
         if (!filter_var($request->email, FILTER_VALIDATE_EMAIL)) {
@@ -28,34 +54,82 @@ class AuthController extends Controller
 
         try {
             $request->validate([
-                'name' => 'required|string|max:255',
+                'firstname' => 'required|string|max:255',
+                'lastname' => 'required|string|max:255',
+                'birthdate' => 'required|date',
                 'email' => 'required|string|email|max:255|unique:users',
-                'username' => 'required|string|max:255',
                 'password' => 'required|string|min:6',
+                'type' => 'required|string|max:255|default:user',
+                'referencecode' => 'required|string|max:255', //generated
+                'uplinecode' => 'required|string|max:255',
+                'avatar' => 'required|integer|default:0',
+                'level' => 'required|integer',
+                'uuid' => 'required|string|max:255|unique:users',
+                'devicemodel' => 'required|string|max:255',
             ]);
             Log::info('Validation passed');
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Validation failed', ['errors' => $e->errors()]);
             return response()->json(['errors' => $e->errors()], 422);
         }
-        
+
 
         $user_id = DB::selectOne('SELECT GenerateUserAccID() AS user_id')->user_id;
         Log::info('Generated user_id', ['user_id' => $user_id]);
 
+        // Generate referencecode
+        $referencecode = $this->generateReferenceCode();
+        Log::info('Generated referencecode', ['referencecode' => $referencecode]);
+
+        if ($request->uplinecode != "root") {
+            $isReferenceExist = User::where('referencecode', $request->uplinecode)->first();
+            if (!$isReferenceExist) {
+                return response()->json(['message' => 'Reference Code not found.'], 404);
+            }
+        }
+
+        $level = DB::selectOne('SELECT count(*) as noOfDownline from users where referencecode = ?', [$request->uplinecode])->noOfDownline;
+        if ($level == 0) {
+            $level = 1;
+        } else {
+            $level = $level + 1;
+        }
+
+        Log::info('Upline level', ['level' => $level]);
+
+        if ($level >= 11) {
+            return response()->json(['message' => 'Level exceeded.'], 404);
+        }
 
         $user = User::create([
             'user_id' => $user_id, // Pass the generated user_id
-            'name' => $request->name,
-            'username' => $request->username,
+            'firstname' => $request->firstname,
+            'lastname' => $request->lastname,
+            'birthdate' => $request->birthdate,
             'email' => $request->email,
             'password' => bcrypt($request->password),
+            'type' => $request->type,
+            'referencecode' => $referencecode, //generated
+            // 'referencecode' => $request->referencecode,
+            'uplinecode' => $request->uplinecode,
+            'avatar' => $request->avatar,
+            'level' => $level,
+            'uuid' => $request->uuid,
+            'devicemodel' => $request->devicemodel,
         ]);
 
         return response()->json([
             'message' => 'User registered successfully',
             'user' => $user
         ], 201);
+    }
+
+    private function generateReferenceCode(): string
+    {
+        $prefix = 'REF';
+        $date = date('YHmMds'); // Current date in YYYYMMDD format
+        $randomString = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6)); // Random alphanumeric string
+        return "{$prefix}-{$date}-{$randomString}";
     }
 
     public function login(Request $request)
@@ -74,7 +148,10 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
+            'uuid' => 'required',
         ]);
+
+
 
         $user = User::where('email', $request->email)->first();
 
@@ -82,9 +159,11 @@ class AuthController extends Controller
         if (!$user) {
             return response()->json(['message' => 'Email not yet Registered'], 401);
         }
-
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid Password'], 401);
+        }
+        if ($user->uuid != $request->uuid) {
+            return response()->json(['message' => 'Device is not registered'], 401);
         }
 
         Log::info('User check', ['user_id' => optional($user)->user_id, 'email' => $request->email]);
@@ -104,14 +183,28 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        try {
+            if ($request->user() == null) {
+                return response()->json(['message' => 'User not authenticated'], 401);
+            }
+            // Attempt to delete the current access token
+            $request->user()->currentAccessToken()->delete();
 
-        return response()->json(['message' => 'Logged out successfully']);
+            return response()->json(['message' => 'Logged out successfully']);
+        } catch (\Exception $e) {
+            // Log the exception for debugging
+            Log::error('Logout failed', ['error' => $e->getMessage()]);
+
+            // Return a generic error response
+            return response()->json(['message' => 'Failed to log out. Please try again later.'], 500);
+        }
     }
+
     public function user(Request $request)
     {
         return response()->json($request->user());
     }
+
     public function refresh(Request $request)
     {
         $user = $request->user();
@@ -129,6 +222,7 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'User deleted successfully']);
     }
+
     public function update(Request $request)
     {
         $user = $request->user();
@@ -136,6 +230,7 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'User updated successfully']);
     }
+
     public function updatePassword(Request $request)
     {
         $request->validate([
@@ -167,15 +262,20 @@ class AuthController extends Controller
         return response()->json(['message' => 'Email updated successfully']);
     }
 
-    public function getAllUsers(Request $request)
+    public function getUserByType(Request $request, $type)
     {
-        $users = User::all();
 
+        // $users = User::where('type', $request->type)->get();
+        $users = User::where('type', $type)->get();
+
+        // return response()->json($types);
         if ($users->isEmpty()) {
-            return response()->json(['message' => 'No users found'], 404);
+            return response()->json(['message' => 'No Users found for ' . $request->type], 404);
         }
+
         return response()->json($users);
     }
+
 
     public function getUserById(Request $request, $id)
     {
@@ -187,7 +287,8 @@ class AuthController extends Controller
 
         return response()->json($user);
     }
-    public function deleteUserById(Request $request, $id)
+
+    public function getUserByIdWithToken(Request $request, $id)
     {
         $user = User::find($id);
 
@@ -195,10 +296,15 @@ class AuthController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        $user->delete();
+        // Get the user's tokens
+        $tokens = $user->tokens;
 
-        return response()->json(['message' => 'User deleted successfully']);
+        return response()->json([
+            'user' => $user,
+            'tokens' => $tokens
+        ]);
     }
+
     public function updateUserById(Request $request, $id)
     {
         $user = User::find($id);
@@ -233,6 +339,7 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Password updated successfully']);
     }
+
     public function updateUserEmailById(Request $request, $id)
     {
         $request->validate([
@@ -250,6 +357,44 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Email updated successfully']);
     }
+
+
+    public function updateAvatarById(Request $request, $id)
+    {
+        if (!$request->has('avatar')) {
+            return response()->json(['message' => 'Avatar is required'], 400);
+        }
+
+        $user = User::where('user_id', $id)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $request->validate([
+            'avatar' => 'required|integer',
+        ]);
+
+        $user->avatar = $request->avatar;
+        $user->save();
+
+        return response()->json(['message' => 'Avatar updated successfully']);
+    }
+
+
+    public function deleteUserById(Request $request, $id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $user->delete();
+
+        return response()->json(['message' => 'User deleted successfully']);
+    }
+
     public function getUserByEmail(Request $request, $email)
     {
         $user = User::where('email', $email)->first();
@@ -259,5 +404,43 @@ class AuthController extends Controller
         }
 
         return response()->json($user);
+    }
+
+    public function getDownlines(Request $request, $id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $downlines = User::where('uplinecode', $user->referencecode)->get();
+
+        if ($downlines->isEmpty()) {
+            return response()->json(['message' => 'No downlines found'], 404);
+        }
+
+        return response()->json($downlines);
+    }
+
+    public function getUpline(Request $request, $id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $upline = User::where('referencecode', $user->uplinecode)->first();
+
+        if ($user->level == 0) {
+            return response()->json(['message' => 'Root user has no upline'], 404);
+        }
+
+        if (!$upline) {
+            return response()->json(['message' => 'No upline found'], 404);
+        }
+
+        return response()->json($upline);
     }
 }

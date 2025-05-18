@@ -16,17 +16,18 @@ return new class extends Migration
             $table->id('lottery_id');
             $table->string('lottery_session');
             $table->time('time');
+            $table->timestamps();
         });
-        Schema::create('bet', function (Blueprint $table) {
+        Schema::create('bets', function (Blueprint $table) {
             $table->id('bet_id');
-            $table->foreignId('result_id')->nullable()->index();
-            $table->foreignId('user_id')->index();  
+            $table->string('result_id')->nullable()->index();
+            $table->string('user_id')->index();  
             $table->integer('number');  
             $table->double('points');  
             $table->timestamps();
         });
 
-        Schema::create('result', function (Blueprint $table) {
+        Schema::create('results', function (Blueprint $table) {
             $table->id('result_id');
             $table->foreignId('lottery_id')->index();
             $table->double('winning_points');  
@@ -53,7 +54,7 @@ return new class extends Migration
     {
         //
         Schema::dropIfExists('lottery');
-        Schema::dropIfExists('bet');
+        Schema::dropIfExists('bets');
         Schema::dropIfExists('result');
         Schema::dropIfExists('winning');
     }
