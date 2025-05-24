@@ -19,6 +19,5 @@ class Bet extends Model
         'user_id',
         'number',
         'points',
-        'Datetime',
     ];
 }

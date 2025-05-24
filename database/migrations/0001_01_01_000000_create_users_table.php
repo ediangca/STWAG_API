@@ -45,36 +45,56 @@ return new class extends Migration
             $table->integer('last_activity')->index();
         });
 
-        Schema::create('members', function (Blueprint $table) {
-            $table->string('member_id')->primary();
-            $table->foreignId('user_id')->index();
-            $table->string('firstname', 45);
-            $table->string('lastname', 45);
-            $table->char('mi')->nullable();
-            $table->string('type');
-            $table->integer('level');
-            $table->string('referencecode')->unique();
-            $table->string('uplinecode');
-            $table->timestamps();
-        });
+        // Schema::create('members', function (Blueprint $table) {
+        //     $table->string('member_id')->primary();
+        //     $table->foreignId('user_id')->index();
+        //     $table->string('firstname', 45);
+        //     $table->string('lastname', 45);
+        //     $table->char('mi')->nullable();
+        //     $table->string('type');
+        //     $table->integer('level');
+        //     $table->string('referencecode')->unique();
+        //     $table->string('uplinecode');
+        //     $table->timestamps();
+        // });
 
         Schema::create('device', function (Blueprint $table) {
-            $table->string('deviceid')->primary();
+            $table->id('deviceid');
             $table->string('devicename', 45);
             $table->foreignId('user_id')->index();
             $table->timestamps();
         });
         
         Schema::create('wallets', function (Blueprint $table) {
-            $table->string('wallet_id')->primary();
+            $table->id('wallet_id');
             $table->foreignId('user_id')->index();
+            $table->double('points');  
+            $table->string('ref_id', 45)->nullable(); //result_id, bet_id, etc.
+            // $table->string('source', 45); //Source of points (Bunos, TopUp, Incentives, Cashback (Unwithdrawable), Bet (Negative), Winning, Withdraw (negative)
+            $table->enum('source', ['BUN','TOP','INC','CBK','BET','WIN','WTH'])->default('BET');
+            $table->boolean('withdrawableFlag')->default(0); // 0 = not confirmed, 1 = confirmed
+            $table->boolean('confirmFlag')->default(0); // 0 = not confirmed, 1 = confirmed
             $table->timestamps();
         });
+        
+
+        // Schema::create('wallets', function (Blueprint $table) {
+        //     $table->string('wallet_id')->primary();
+        //     $table->foreignId('user_id')->index();
+        //     $table->timestamps();
+        // });
 
         Schema::create('wallet_item', function (Blueprint $table) {
             $table->string('walletitem_id')->primary();
             $table->foreignId('user_id')->index();
             $table->double('points')->default(0);
+            $table->timestamps();
+        });
+        
+        Schema::create('topups', function (Blueprint $table) {
+            $table->id('topup_id');
+            $table->foreignId('user_id')->index();
+            $table->double('points');  
             $table->timestamps();
         });
     }

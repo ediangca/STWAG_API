@@ -5,13 +5,19 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BetController;
 use App\Http\Controllers\LotteryController;
+use App\Http\Controllers\WalletController;
 
 Route::get('/', function () {
     return response()->json([
         'ApiName' => 'STWAG',
         'laravel_version' => app()->version(), // Get the Laravel version
+        // 'environment' => config('app.env'), // Get the environment,
+        // 'environment' => env('APP_ENV', 'production'), // Get the environment,
+        'version' => '1.0.0',
+        'timezone' => config('app.timezone'), // Get the timezone
+        'timestamp' => now()->toDateTimeString(),
         'message' => 'This API is under development. Please check back soon.',
-        'By' => 'Mr. Ebrahim Diangca and John Louis Mercaral, MIS',
+        'Develop By' => 'Mr. Ebrahim Diangca and John Louis Mercaral, MIS',
     ]);
 });
 
@@ -37,10 +43,29 @@ Route::get('/users', [AuthController::class, 'index']);
 // Route::get('/users/type/{type}', [AuthController::class, 'getUserByType']);
 
 // Lottery Routes
+// Route::apiResource('lottery_sessions', LotteryController::class);
 Route::get('/lottery', [LotteryController::class, 'index']);
 Route::post('/lottery', [LotteryController::class, 'store']);
 
-Route::get('/stwag', [BetController::class, 'spinResult']);
+
+// Bet Routes
+// Route::apiResource('bets', BetController::class);
+Route::get('/betReady', [BetController::class, 'betSignal']);
+Route::post('/bets', [BetController::class, 'storeMultipleBets']);
+Route::get('/showBetsByResultId/{resultId}', [BetController::class, 'showBetsByResultId']);
+
+//Wallet Routes
+// Route::apiResource('bets', WalletController::class);
+Route::get('/wallets', [WalletController::class, 'index']);
+Route::get('/wallets/{user_id}', [WalletController::class, 'show']);
+Route::get('/wallets/withdrawable/{user_id}', [WalletController::class, 'withdrawableSources']);
+
+Route::post('/wallets/topup', [WalletController::class, 'topup']);
+Route::put('/wallets/topup/confirm/{topup_id}', [WalletController::class, 'updateTopUpConfirmFlagByTopupId']);
+Route::get('/wallets/topup/{user_id}', [WalletController::class, 'showTopUpWallets']);
+
+
+
 
 // Authentication
 Route::middleware('auth:sanctum')->group(function () {
@@ -73,5 +98,3 @@ Route::controller(AuthController::class)->group(function () {
     
 });
 
-
-Route::apiResource('bets', BetController::class);

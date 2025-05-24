@@ -4,9 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Bet;
+use App\Models\Lottery;
+use App\Models\Result;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+
+use function Laravel\Prompts\spin;
 
 class BetController extends Controller
 {
@@ -15,9 +20,6 @@ class BetController extends Controller
      */
     public function index()
     {
-
-
-
         $bets = Bet::all();
 
         if ($bets->isEmpty()) {
@@ -34,50 +36,24 @@ class BetController extends Controller
 
         Log::info('Bet request received', $request->all());
 
-        if (!$request->has('result_id') || !$request->has('user_id') || !$request->has('number')) {
-            return response()->json(['message' => 'result_id, user and number are required'], 400);
-        }
+        // if (!$request->has('result_id') || !$request->has('user_id') || !$request->has('number')) {
+        //     return response()->json(['message' => 'result_id, user and number are required'], 400);
+        // }
 
         $user = User::where('user_id', $request->user_id)->first();
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        $request->validate([
-            'result_id' => 'nullable|string', //RES<YEAR><MM><DD><SESSION>
-            'user_id' => 'required|string',
-            'number' => 'required|string',
-            'points' => 'nullable|numeric',
-            'Datetime' => 'required|date',
-        ]);
-
-        $bet = Bet::create($request->all());
-        return response()->json($bet, 201);
-    }
-
-    /**
-     * Spin and determine the winning number based on the algorithm.
-     */
-    public function spinResult(Request $request)
-    {
-        // Validate the request data
-        if (!$request->has('time')) {
-            return response()->json(['message' => 'time is required'], 400);
-        }
-
-        // Check if the time is in the correct format
-        if (!preg_match('/^\d{2}:\d{2}:\d{2}$/', $request->time)) {
-            return response()->json(['message' => 'Invalid time format'], 400);
-        }
 
         // Get sessions from Lottery table, ordered by start time
         $sessions = \App\Models\Lottery::orderBy('time')->get();
 
-        // $now = DB::raw("TIME(NOW())");
-        // $now = DB::select("SELECT TIME(NOW()) as now")[0]->now;
-        $now = $request->time;
+        $now = now()->format('H:i:s');
 
+        $isReady = false;
         $currentSession = null;
+        $result_id = null;
 
         foreach ($sessions as $session) {
             Log::info('Current time: ' . $now);
@@ -85,6 +61,7 @@ class BetController extends Controller
 
             $sessionStart = date('H:i:s', strtotime($session->time) - 30 * 60);
             $sessionEnd = $session->time;
+            $currentSession = $session;
 
             // Check if current time is within the 30-minute window before session time up to session time
             if ($now >= $sessionStart && $now <= $sessionEnd) {
@@ -94,7 +71,221 @@ class BetController extends Controller
             }
 
             if (!($now >= $sessionStart)) {
-                $currentSession = $session;
+                $result_id = 'RES' . date('Ymd') . $session->id;
+                break;
+            }
+        }
+
+        // try{
+        // $request->validate([
+        //     'result_id' => 'nullable|string', //RES<YEAR><MM><DD><SESSION>
+        //     'user_id' => 'required|string',
+        //     'number' => 'required|string',
+        //     'points' => 'nullable|numeric',
+        //     'Datetime' => 'required|date',
+        // ]);
+
+        // } catch (ValidationException $e) {
+        //     return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
+        // }
+
+        // $bet = Bet::create($request->all());
+        // return response()->json($bet, 201);
+
+        return response()->json([
+            'current_time' => $now,
+            'session' => $currentSession,
+            'result_id' => $result_id
+        ]);
+    }
+
+    /**
+     * Place multiple bets for a user.
+     * Expects: user_id, bets: [ {number, points}, ... ]
+     */
+    public function storeMultipleBets(Request $request)
+    {
+        // Validate the request data\
+        if (!$request->has('user_id') || !$request->has('bets')) {
+            return response()->json(['message' => 'User ID and Bets are required'], 400);
+        }
+
+        try {
+            $request->validate([
+                'user_id' => 'required|string|exists:users,user_id',
+                'bets' => 'required|array|min:1',
+                'bets.*.number' => 'required|numeric|min:1|max:100',
+                'bets.*.points' => 'required|numeric|min:1',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
+        }
+
+
+        $user = User::where('user_id', $request->user_id)->first();
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $sessions = Lottery::orderBy('time')->get();
+
+        // $now = DB::raw("TIME(NOW())");
+        // $now = DB::select("SELECT TIME(NOW()) as now")[0]->now;
+        $now = $request->has('time') ? $request->time : now()->format('H:i:s');
+        // $now = date('H:i:s');
+        // $now = $request->time;
+
+        $isReady = false;
+        $currentSession = null;
+        $result_id = null;
+
+
+        foreach ($sessions as $session) {
+            Log::info('Current time: ' . $now);
+            Log::info('Session time: ' . $session->time);
+
+            $sessionStart = date('H:i:s', strtotime($session->time) - 30 * 60);
+            $sessionEnd = $session->time;
+            $currentSession = $session;
+            $result_id = 'RES' . date('Ymd') . $session->id;
+
+            // Check if current time is within the 30-minute window before session time up to session time
+            if ($now >= $sessionStart && $now <= $sessionEnd) {
+                $isReady = false;
+                break;
+            }
+
+            if (!($now >= $sessionStart)) {
+                $isReady = true;
+                break;
+            }
+        }
+
+
+
+        if (!$isReady) {
+            return response()->json([
+                'session' => $currentSession,
+                'message' => 'Camnnot place bet! \n Session ' . $currentSession->lottery_session . ' Draw has been started and processing.'
+            ], 403);
+        }
+
+
+        log::info('Result ID: ' . 'From Request ' . $request->has('result_id') ? $request->result_id : 'Generated from Session: ' . $result_id);
+
+        $result_id = $request->has('result_id') ? $request->result_id : $result_id;
+
+        $result = Result::where('result_id', $result_id)->first();
+        if ($result) {
+            return response()->json(['message' => 'Bet cannot placed. Draw has been already done!'], 403);
+        }
+
+
+        // Validate bet limit for each number
+        $numbers = collect($request->bets)->pluck('number')->unique();
+        foreach ($numbers as $number) {
+            $currentCount = Bet::where('number', $number)->count();
+            $incomingCount = collect($request->bets)->where('number', $number)->count();
+            if (($currentCount + $incomingCount) > 1000) {
+                return response()->json([
+                    'message' => "Bet limit exceeded for number {$number}. Only " . (1000 - $currentCount) . " bets allowed."
+                ], 403);
+            }
+        }
+
+        // Place bets
+        foreach ($request->bets as $bet) {
+            if (Bet::where('result_id', $result_id)
+                ->where('user_id', $request->user_id)
+                ->where('number', $bet['number'])
+                ->exists()
+            ) {
+                return response()->json([
+                    'session' => $currentSession->lottery_session,
+                    'time' => date('h:i A', strtotime($currentSession->time)),
+                    'message' => "You have already placed a bet for number {$bet['number']}."
+                ], 409);
+            }
+            Bet::create([
+                'result_id' => $result_id,
+                'user_id' => $request->user_id,
+                'number' => $bet['number'],
+                'points' => $bet['points'],
+                // 'Datetime' => now(),
+            ]);
+        }
+
+        $bets = Bet::where('user_id', $request->user_id)->where('result_id', $result_id)->get();
+
+        if ($bets->isEmpty()) {
+            return response()->json(['message' => 'No bets found'], 404);
+        }
+
+        return response()->json([
+            'bets' => $bets,
+            'message' => 'Bet has been successfully placed.'
+        ], 201);
+    }
+
+    /**
+     * Display all bets for a given result_id.
+     */
+    public function showBetsByResultId(Request $request, $result_id)
+    {
+        $bets = Bet::where('result_id', $result_id)->get();
+
+        if ($bets->isEmpty()) {
+            return response()->json(['message' => 'No bets found for this result ID'], 404);
+        }
+
+        return response()->json($bets);
+    }
+
+    /**
+     * Spin and determine the winning number based on the algorithm.
+     */
+    // public function betsignal(Request $request)
+
+    public function betSignal(Request $request)
+    {
+        // Validate the request data
+        // if (!$request->has('time')) {
+        //     return response()->json(['message' => 'time is required'], 400);
+        // }
+
+        // Check if the time is in the correct format
+        if ($request->has('time') && !preg_match('/^\d{2}:\d{2}:\d{2}$/', $request->time)) {
+            return response()->json(['message' => 'Invalid time format'], 400);
+        }
+
+        // Get sessions from Lottery table, ordered by start time
+        $sessions = \App\Models\Lottery::orderBy('time')->get();
+
+        // $now = DB::raw("TIME(NOW())");
+        // $now = DB::select("SELECT TIME(NOW()) as now")[0]->now;
+        $now = $request->has('time') ? $request->time : now()->format('H:i:s');
+        // $now = date('H:i:s');
+        // $now = $request->time;
+
+        $currentSession = null;
+        $isReady = false;
+
+        foreach ($sessions as $session) {
+            Log::info('Current time: ' . $now);
+            Log::info('Session time: ' . $session->time);
+
+            $sessionStart = date('H:i:s', strtotime($session->time) - 30 * 60);
+            $sessionEnd = $session->time;
+            $currentSession = $session;
+
+            // Check if current time is within the 30-minute window before session time up to session time
+            if ($now >= $sessionStart && $now <= $sessionEnd) {
+                $isReady = false;
+                break;
+            }
+
+            if (!($now >= $sessionStart)) {
+                $isReady = true;
                 break;
             }
         }
@@ -115,87 +306,10 @@ class BetController extends Controller
 
         return response()->json([
             'current_time' => $now,
+            'isReady' => $isReady,
+            'message' => ($isReady ? 'Bet is Ready for ' . $currentSession->lottery_session . ' session ' : 'Draw has been started and processing') . '!',
             'session' => $currentSession
         ]);
-
-
-
-        // // Get all bets for the result_id
-        // $bets = Bet::where('result_id', $request->result_id)->get();
-
-        // if ($bets->isEmpty()) {
-        //     return response()->json(['message' => 'No bets found for this result ID'], 404);
-        // }
-
-        // // Calculate total bet amount and group by number
-        // $grouped = $bets->groupBy('number')->map(function ($group) {
-        //     return $group->sum('points');
-        // });
-
-        // $totalBet = $grouped->sum();
-
-        // // Find numbers with min and max bet
-        // $minBet = $grouped->min();
-        // $maxBet = $grouped->max();
-
-        // $numbersWithMinBet = $grouped->filter(function ($points) use ($minBet) {
-        //     return $points == $minBet;
-        // })->keys()->toArray();
-
-        // $numbersWithMaxBet = $grouped->filter(function ($points) use ($maxBet) {
-        //     return $points == $maxBet;
-        // })->keys()->toArray();
-
-        // // Numbers with no bets
-        // $allNumbers = range(1, 10);
-        // $numbersWithNoBets = array_diff($allNumbers, $grouped->keys()->map('intval')->toArray());
-
-        // // Win Low Mechanic
-        // if ($totalBet < 9000) {
-        //     $candidates = !empty($numbersWithNoBets) ? $numbersWithNoBets : $numbersWithMinBet;
-        //     $winningNumber = $candidates[array_rand($candidates)];
-        // } else {
-        //     // Win High Mechanic
-        //     // Check if max bet is 1000 and 70% of total pot is at least 7000
-        //     if ($maxBet == 1000 && ($totalBet * 0.7) < 7000) {
-        //         // Exclude numbers with 1000 points from winning
-        //         $eligibleNumbers = $grouped->filter(function ($points) {
-        //             return $points < 1000;
-        //         })->keys()->toArray();
-        //         if (empty($eligibleNumbers)) {
-        //             // fallback to all numbers
-        //             $eligibleNumbers = $grouped->keys()->toArray();
-        //         }
-        //         $winningNumber = $eligibleNumbers[array_rand($eligibleNumbers)];
-        //     } else {
-        //         $winningNumber = $numbersWithMaxBet[array_rand($numbersWithMaxBet)];
-        //     }
-        // }
-
-        // // Simulate 2 spinning wheels for each digit (for fun, not affecting result)
-        // $spin1 = rand(0, 9);
-        // $spin2 = rand(0, 9);
-
-        // // Calculate winners and payouts
-        // $winners = $bets->where('number', $winningNumber)->values();
-        // $payouts = [];
-        // foreach ($winners as $winner) {
-        //     $payout = $winner->points * 7;
-        //     $payouts[] = [
-        //         'user_id' => $winner->user_id,
-        //         'number' => $winner->number,
-        //         'bet_points' => $winner->points,
-        //         'payout' => $payout
-        //     ];
-        // }
-
-        // return response()->json([
-        //     'result_id' => $request->result_id,
-        //     'winning_number' => $winningNumber,
-        //     'spin' => [$spin1, $spin2],
-        //     'total_bet' => $totalBet,
-        //     'payouts' => $payouts
-        // ]);
     }
     /**
      * Display the specified resource.

@@ -28,14 +28,14 @@ return new class extends Migration
         });
 
         Schema::create('results', function (Blueprint $table) {
-            $table->id('result_id');
+            $table->string('result_id')->primary(true);
             $table->foreignId('lottery_id')->index();
             $table->double('winning_points');  
             $table->double('incentives_share');  
             $table->double('mother_share');  
             $table->double('admin_share');  
             $table->double('other_share');  
-            $table->date('date');
+            $table->timestamps();
         });
 
         Schema::create('winning', function (Blueprint $table) {
