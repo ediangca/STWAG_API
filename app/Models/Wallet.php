@@ -9,6 +9,8 @@ class Wallet extends Model
     //
     protected $table = 'wallets';
     protected $primaryKey = 'wallet_id'; // Set the primary key to wallet_id
+    public $incrementing = false; // Disable auto-incrementing since wallet_id is a string
+    protected $keyType = 'string'; // Set the key type to string since wallet_id is a string
     // public $timestamps = false; // Disable timestamps if not needed
 
     /**

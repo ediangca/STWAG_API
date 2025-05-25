@@ -25,7 +25,7 @@ return new class extends Migration
             $table->integer('level'); // 1, 2, 3 and if type is member it will automatically generated depended on the uplinecode
             $table->integer('avatar')->default(0);
             $table->string('uuid')->unique();
-            $table->string('devicenmodel');
+            $table->string('devicemodel');
             $table->rememberToken();
             $table->timestamps();
         });
@@ -66,8 +66,8 @@ return new class extends Migration
         });
         
         Schema::create('wallets', function (Blueprint $table) {
-            $table->id('wallet_id');
-            $table->foreignId('user_id')->index();
+            $table->string('wallet_id')->primary();
+            $table->string('user_id')->index();
             $table->double('points');  
             $table->string('ref_id', 45)->nullable(); //result_id, bet_id, etc.
             // $table->string('source', 45); //Source of points (Bunos, TopUp, Incentives, Cashback (Unwithdrawable), Bet (Negative), Winning, Withdraw (negative)
@@ -86,15 +86,16 @@ return new class extends Migration
 
         Schema::create('wallet_item', function (Blueprint $table) {
             $table->string('walletitem_id')->primary();
-            $table->foreignId('user_id')->index();
+            $table->string('user_id')->index();
             $table->double('points')->default(0);
             $table->timestamps();
         });
         
         Schema::create('topups', function (Blueprint $table) {
-            $table->id('topup_id');
-            $table->foreignId('user_id')->index();
+            $table->string('walletitem_id')->primary();
+            $table->string('user_id')->index();
             $table->double('points');  
+            $table->string('gcash_ref_no', 255);
             $table->timestamps();
         });
     }
