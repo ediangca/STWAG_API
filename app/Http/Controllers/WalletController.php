@@ -220,6 +220,7 @@ class WalletController extends Controller
             'wallet_id' => uniqid('WLT').'-'.substr($request->input('user_id'), 3).date('YmdHis'),
             'user_id' => $request->input('user_id'),
             'points' => $request->input('points'),
+            'withdrawableFlag' => true,
             'ref_id' => $topup_id,
             'source' => 'TOP',
         ]);
