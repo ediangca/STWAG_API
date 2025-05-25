@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -39,6 +40,7 @@ class AuthController extends Controller
             !$request->has('birthdate') ||
             !$request->has('email') ||
             !$request->has('password') ||
+            !$request->has('type') ||
             !$request->has('uplinecode') ||
             !$request->has('avatar') ||
             !$request->has('uuid') ||
@@ -59,16 +61,16 @@ class AuthController extends Controller
                 'birthdate' => 'required|date',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:6',
-                'type' => 'required|string|max:255|default:user',
+                'type' => 'required|string|max:255|nullable', //default user
                 'referencecode' => 'required|string|max:255', //generated
-                'uplinecode' => 'required|string|max:255',
-                'avatar' => 'required|integer|default:0',
-                'level' => 'required|integer',
+                'uplinecode' => 'string|max:255',
+                'avatar' => 'required|integer|nullable', //default 0
+                'level' => 'required|integer|nullable',
                 'uuid' => 'required|string|max:255|unique:users',
                 'devicemodel' => 'required|string|max:255',
             ]);
             Log::info('Validation passed');
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             Log::error('Validation failed', ['errors' => $e->errors()]);
             return response()->json(['errors' => $e->errors()], 422);
         }
@@ -81,7 +83,7 @@ class AuthController extends Controller
         $referencecode = $this->generateReferenceCode();
         Log::info('Generated referencecode', ['referencecode' => $referencecode]);
 
-        if ($request->uplinecode != "root") {
+        if ($request->type != "root" && $request->type != "admin" && $request->type != "member") {
             $isReferenceExist = User::where('referencecode', $request->uplinecode)->first();
             if (!$isReferenceExist) {
                 return response()->json(['message' => 'Reference Code not found.'], 404);
@@ -111,7 +113,7 @@ class AuthController extends Controller
             'type' => $request->type,
             'referencecode' => $referencecode, //generated
             // 'referencecode' => $request->referencecode,
-            'uplinecode' => $request->uplinecode,
+            'uplinecode' => in_array($request->type, ["root", "admin", "member"]) ? $request->type : $request->referencecode, 
             'avatar' => $request->avatar,
             'level' => $level,
             'uuid' => $request->uuid,
@@ -137,7 +139,9 @@ class AuthController extends Controller
 
         Log::info('Login request received', $request->all());
 
-        if (!$request->has('email') || !$request->has('password')) {
+        if (!$request->has('email') || !$request->has('password')
+        //  || !$request->has('uuid')
+        ) {
             return response()->json(['message' => 'Email and password are required'], 400);
         }
 
@@ -145,12 +149,18 @@ class AuthController extends Controller
             return response()->json(['message' => 'Invalid email format'], 400);
         }
 
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-            'uuid' => 'required',
-        ]);
+        try {
+            $request->validate([
+                'email' => 'required|email',
+                'password' => 'required',
+                // 'uuid' => 'required',
+            ]);
 
+            Log::info('Validation passed');
+        } catch (ValidationException $e) {
+            Log::error('Validation failed', ['errors' => $e->errors()]);
+            return response()->json(['errors' => $e->errors()], 422);
+        }
 
 
         $user = User::where('email', $request->email)->first();
@@ -162,9 +172,9 @@ class AuthController extends Controller
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid Password'], 401);
         }
-        if ($user->uuid != $request->uuid) {
-            return response()->json(['message' => 'Device is not registered'], 401);
-        }
+        // if ($user->uuid != $request->uuid) {
+        //     return response()->json(['message' => 'Device is not registered'], 401);
+        // }
 
         Log::info('User check', ['user_id' => optional($user)->user_id, 'email' => $request->email]);
 

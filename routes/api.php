@@ -27,6 +27,11 @@ Route::get('/ping', function () {
 });
 
 
+Route::get('/mercaral', function () {
+    return response()->json(['message' => 'pangit']);
+});
+
+
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/auth', [AuthController::class, 'login']);
 
