@@ -33,16 +33,13 @@
 
 
 # ---------------------------------------------------------
-
 FROM php:8.2-fpm
 
-# System dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     git curl zip unzip libonig-dev libxml2-dev libzip-dev libpng-dev libjpeg-dev libfreetype6-dev \
-    libpq-dev libssl-dev libmcrypt-dev libmysqlclient-dev
-
-# PHP extensions
-RUN docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl
+    libpq-dev libssl-dev libmcrypt-dev default-libmysqlclient-dev \
+    && docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -50,10 +47,14 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www
 
+# Copy Laravel project files
 COPY . .
 
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader \
-    && chown -R www-data:www-data /var/www \
-    && chmod -R 775 storage bootstrap/cache
+ && chown -R www-data:www-data /var/www \
+ && chmod -R 775 storage bootstrap/cache
 
+# Start Laravel server
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8080"]
+
