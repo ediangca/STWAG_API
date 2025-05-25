@@ -82,7 +82,7 @@ class AuthController extends Controller
         $referencecode = $this->generateReferenceCode();
         Log::info('Generated referencecode', ['referencecode' => $referencecode]);
 
-        if ($request->type != "root" && $request->type != "admin" && $request->type != "member") {
+        if ($request->type == "user") {
             $isUplineReferenceExist = User::where('uplinecode', $request->uplinecode)->first();
             if (!$isUplineReferenceExist) {
                 return response()->json(['message' => 'Reference Code not found.'], 404);
