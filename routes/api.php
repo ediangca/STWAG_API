@@ -39,6 +39,7 @@ Route::post('/auth', [AuthController::class, 'login']);
 // Route::put('/users/avatar/{id}', [AuthController::class, 'updateAvatarById']);
 
 Route::get('/users', [AuthController::class, 'index']);
+Route::get('/users/{user_id}', [AuthController::class, 'userInfo']);
 // Route::get('/users/{id}', [AuthController::class, 'getUserById']);
 
 // Route::get('/users/{id}/downline', [AuthController::class, 'getDownlines']);

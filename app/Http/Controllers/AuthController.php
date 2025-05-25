@@ -212,11 +212,21 @@ class AuthController extends Controller
         }
     }
 
-    public function user(Request $request)
+    public function userInfo($user_id)
     {
-        return response()->json($request->user());
+        // Find the user by user_id
+        $user = User::where('user_id', $user_id)->first();
+
+        // Check if the user exists
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        // Return the user's information
+        return response()->json($user);
     }
 
+    
     public function refresh(Request $request)
     {
         $user = $request->user();
