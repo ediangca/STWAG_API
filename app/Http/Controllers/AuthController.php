@@ -75,7 +75,6 @@ class AuthController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-
         $user_id = DB::selectOne('SELECT GenerateUserAccID() AS user_id')->user_id;
         Log::info('Generated user_id', ['user_id' => $user_id]);
 
