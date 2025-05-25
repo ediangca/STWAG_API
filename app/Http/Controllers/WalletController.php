@@ -253,7 +253,6 @@ class WalletController extends Controller
         }
         return response()->json(
             [
-                'user_id' => $userId,
                 'total_points' => $totalPoints,
                 'wallets' => $wallets
             ],200);
