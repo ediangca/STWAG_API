@@ -118,7 +118,7 @@ class BetController extends Controller
                 'bets.*.points' => 'required|numeric|min:1',
             ]);
         } catch (ValidationException $e) {
-            return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
+            return response()->json(['message' => 'Validation faileddasdasdasd', 'errors' => $e->errors()], 422);
         }
 
         $user = User::where('user_id', $request->user_id)->first();
@@ -170,8 +170,6 @@ class BetController extends Controller
                 break;
             }
         }
-
-
 
         if (!$isReady) {
             return response()->json([
