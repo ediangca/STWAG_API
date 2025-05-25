@@ -150,7 +150,7 @@ class BetController extends Controller
             $sessionStart = date('H:i:s', strtotime($session->time) - 30 * 60);
             $sessionEnd = $session->time;
             $currentSession = $session;
-            $result_id = 'RES' . date('Ymd') . $session->id;
+            $result_id = 'RES' . date('Ymd') .'-000'. $currentSession->lottery_id;
 
             // Check if current time is within the 30-minute window before session time up to session time
             if ($now >= $sessionStart && $now <= $sessionEnd) {
@@ -181,7 +181,7 @@ class BetController extends Controller
         log::info('Result ID: ' . 'From Request ' . $request->has('result_id') ? $request->result_id : 'Generated from Session: ' . $result_id);
 
         // date('His', strtotime($currentSession->time))
-        $result_id = $request->has('result_id') ? $request->result_id : $result_id.'-000' . $currentSession->lottery_id ;
+        $result_id = $request->has('result_id') ? $request->result_id : $result_id ;
 
         $result = Result::where('result_id', $result_id)->first();
         if ($result) {
