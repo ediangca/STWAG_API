@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: stwag-api
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    buildCommand: ""
+    startCommand: ""
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        value: base64:V10CocZFLBhef6yF9KUXFSjg/+JoMV/whbTs0qPwTRo=
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        value: mysql-stwag.alwaysdata.net
+      - key: DB_PORT
+        value: 3306
+      - key: DB_DATABASE
+        value: stwag_api
+      - key: DB_USERNAME
+        value: stwag
+      - key: DB_PASSWORD
+        value: alwaysdata@n0t4u2c
