@@ -225,7 +225,19 @@ class AuthController extends Controller
         // Return the user's information
         return response()->json($user);
     }
+    public function user(Request $request)
+    {
+        // Get the authenticated user
+        $user = $request->user();
 
+        // Check if the user is authenticated
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+
+        // Return the user's information
+        return response()->json($user);
+    }
     
     public function refresh(Request $request)
     {
