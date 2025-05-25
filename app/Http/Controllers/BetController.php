@@ -114,8 +114,8 @@ class BetController extends Controller
             $request->validate([
                 'user_id' => 'required|string|exists:users,user_id',
                 'bets' => 'required|array|min:1',
-                'bets.*.number' => 'required|numeric|min:1|max:100',
-                'bets.*.points' => 'required|numeric|min:1',
+                'bets.*.number' => 'required|numeric|min:0|max:99',
+                'bets.*.points' => 'required|numeric|min:1|max:1000',
             ]);
         } catch (ValidationException $e) {
             return response()->json(['message' => 'Validation faileddasdasdasd', 'errors' => $e->errors()], 422);
