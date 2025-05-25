@@ -92,7 +92,7 @@ return new class extends Migration
         });
         
         Schema::create('topups', function (Blueprint $table) {
-            $table->string('walletitem_id')->primary();
+            $table->string('topup_id')->primary();
             $table->string('user_id')->index();
             $table->double('points');  
             $table->string('gcash_ref_no', 255);

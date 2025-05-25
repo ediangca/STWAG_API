@@ -246,10 +246,17 @@ class WalletController extends Controller
             ->whereNotIn('source', ['BET', 'WTH'])
             ->get();
 
+        $totalPoints = $wallets->sum('points');
+
         if ($wallets->isEmpty()) {
             return response()->json(['message' => 'No wallets found for this user'], 404);
         }
-        return response()->json($wallets);
+        return response()->json(
+            [
+                'user_id' => $userId,
+                'total_points' => $totalPoints,
+                'wallets' => $wallets
+            ],200);
     }
     
     /**
