@@ -242,7 +242,9 @@ class WalletController extends Controller
             return response()->json(['message' => 'User ID is required'], 400);
         }
 
-        $wallets = Wallet::where('user_id', $userId)->get();
+        $wallets = Wallet::where('user_id', $userId)
+            ->whereNotIn('source', ['BET', 'WTH'])
+            ->get();
 
         if ($wallets->isEmpty()) {
             return response()->json(['message' => 'No wallets found for this user'], 404);
