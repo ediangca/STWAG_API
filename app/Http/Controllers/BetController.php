@@ -129,6 +129,10 @@ class BetController extends Controller
 
         $sessions = Lottery::orderBy('time')->get();
 
+        if($sessions->isEmpty()) {
+            return response()->json(['message' => 'No lottery sessions found'], 404);
+        }
+      
         // $now = DB::raw("TIME(NOW())");
         // $now = DB::select("SELECT TIME(NOW()) as now")[0]->now;
         $now = $request->has('time') ? $request->time : now()->format('H:i:s');
