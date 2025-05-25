@@ -121,7 +121,6 @@ class BetController extends Controller
             return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
         }
 
-
         $user = User::where('user_id', $request->user_id)->first();
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
@@ -160,6 +159,13 @@ class BetController extends Controller
             }
 
             if (!($now >= $sessionStart)) {
+                $isReady = true;
+                break;
+            }
+            
+            if ($now > $sessions->last()->time) {
+                // If current time is after the last session, set to the first (morning) session of the next day
+                $currentSession = $sessions->first();
                 $isReady = true;
                 break;
             }
@@ -267,7 +273,8 @@ class BetController extends Controller
 
         // $now = DB::raw("TIME(NOW())");
         // $now = DB::select("SELECT TIME(NOW()) as now")[0]->now;
-        $now = $request->has('time') ? $request->time : now()->format('H:i:s');
+        $date = $request->has('date') ? $request->date : now()->format('Y-d-m');
+        $time = $request->has('time') ? $request->time : now()->format('H:i:s');
         // $now = date('H:i:s');
         // $now = $request->time;
 
@@ -275,7 +282,7 @@ class BetController extends Controller
         $isReady = false;
 
         foreach ($sessions as $session) {
-            Log::info('Current time: ' . $now);
+            Log::info('Current time: ' . $time);
             Log::info('Session time: ' . $session->time);
 
             $sessionStart = date('H:i:s', strtotime($session->time) - 30 * 60);
@@ -283,12 +290,19 @@ class BetController extends Controller
             $currentSession = $session;
 
             // Check if current time is within the 30-minute window before session time up to session time
-            if ($now >= $sessionStart && $now <= $sessionEnd) {
+            if ($time >= $sessionStart && $time <= $sessionEnd) {
                 $isReady = false;
                 break;
             }
 
-            if (!($now >= $sessionStart)) {
+            if (!($time >= $sessionStart )) {
+                $isReady = true;
+                break;
+            }
+
+            if ($time > $sessions->last()->time) {
+                // If current time is after the last session, set to the first (morning) session of the next day
+                $currentSession = $sessions->first();
                 $isReady = true;
                 break;
             }
@@ -297,7 +311,7 @@ class BetController extends Controller
         if (!$currentSession) {
             // If not in any session, pick the next closest session
             foreach ($sessions as $session) {
-                if ($now < $session->time) {
+                if ($time < $session->time) {
                     $currentSession = $session;
                     break;
                 }
@@ -309,7 +323,8 @@ class BetController extends Controller
         }
 
         return response()->json([
-            'current_time' => $now,
+            'current_date' => $date,
+            'current_time' => $time,
             'isReady' => $isReady,
             'message' => ($isReady ? 'Bet is Ready for ' . $currentSession->lottery_session . ' session ' : 'Draw has been started and processing') . '!',
             'session' => $currentSession
