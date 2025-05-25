@@ -83,8 +83,8 @@ class AuthController extends Controller
         Log::info('Generated referencecode', ['referencecode' => $referencecode]);
 
         if ($request->type != "root" && $request->type != "admin" && $request->type != "member") {
-            $isReferenceExist = User::where('uplinecode', $request->uplinecode)->first();
-            if (!$isReferenceExist) {
+            $isUplineReferenceExist = User::where('uplinecode', $request->uplinecode)->first();
+            if (!$isUplineReferenceExist) {
                 return response()->json(['message' => 'Reference Code not found.'], 404);
             }
         }
@@ -187,7 +187,9 @@ class AuthController extends Controller
         // ]);
 
         return response()->json([
-            'token' => $user->createToken('API Token')->plainTextToken
+            'user' => $user,
+            'token' => $user->createToken('API Token')->plainTextToken,
+            'message' => 'Login successful'
         ]);
     }
 
