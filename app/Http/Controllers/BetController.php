@@ -128,10 +128,10 @@ class BetController extends Controller
 
         $sessions = Lottery::orderBy('time')->get();
 
-        if($sessions->isEmpty()) {
+        if ($sessions->isEmpty()) {
             return response()->json(['message' => 'No lottery sessions found'], 404);
         }
-      
+
         // $now = DB::raw("TIME(NOW())");
         // $now = DB::select("SELECT TIME(NOW()) as now")[0]->now;
         $now = $request->has('time') ? $request->time : now()->format('H:i:s');
@@ -162,7 +162,7 @@ class BetController extends Controller
                 $isReady = true;
                 break;
             }
-            
+
             if ($now > $sessions->last()->time) {
                 // If current time is after the last session, set to the first (morning) session of the next day
                 $currentSession = $sessions->first();
@@ -178,10 +178,10 @@ class BetController extends Controller
             ], 403);
         }
 
-
         log::info('Result ID: ' . 'From Request ' . $request->has('result_id') ? $request->result_id : 'Generated from Session: ' . $result_id);
 
-        $result_id = $request->has('result_id') ? $request->result_id : $result_id;
+        // date('His', strtotime($currentSession->time))
+        $result_id = $request->has('result_id') ? $request->result_id . '-000' . $currentSession->lottery_id : $result_id;
 
         $result = Result::where('result_id', $result_id)->first();
         if ($result) {
@@ -293,7 +293,7 @@ class BetController extends Controller
                 break;
             }
 
-            if (!($time >= $sessionStart )) {
+            if (!($time >= $sessionStart)) {
                 $isReady = true;
                 break;
             }
