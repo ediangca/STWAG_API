@@ -169,18 +169,29 @@ class WalletController extends Controller
             'topup' => $topup
         ]);
     }
-    
-    /**
-     * Display a listing of the all wallet topups.
-     */
-    public function indexTopUp()
-    {
-        $topups = TopUp::all();
 
-        if ($topups->isEmpty()) {
-            return response()->json(['message' => 'No topups found'], 404);
+
+    /**
+     * Display a listing of the wallets, optionally filtered by source.
+     * Example: /api/wallets?source=TOP
+     */
+    public function indexTopUp(Request $request)
+    {
+        $query = Wallet::query();
+
+        if (!$request->has('source')) {
+            return response()->json(['message' => 'Source is required'], 400);
         }
-        return response()->json($topups);
+
+        $source = trim($request->input('source'), '"');
+        $query->where('source', $source);
+
+        $wallets = $query->get();
+
+        if ($wallets->isEmpty()) {
+            return response()->json(['message' => 'No wallets found'], 404);
+        }
+        return response()->json($wallets);
     }
 
     /**
@@ -209,7 +220,7 @@ class WalletController extends Controller
             return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
         }
 
-        $topup_id = $request->has('topup_id') ? $request->input('topup_id') : uniqid('TOPUP').date('YmdHis');
+        $topup_id = $request->has('topup_id') ? $request->input('topup_id') : uniqid('TOPUP') . date('YmdHis');
 
         if (TopUp::where('gcash_ref_no', $request->input('gcash_ref_no'))->exists()) {
             return response()->json(['message' => 'GCASH Reference No. already exists'], 409);
@@ -230,7 +241,7 @@ class WalletController extends Controller
         ]);
 
         $wallet = Wallet::create([
-            'wallet_id' => uniqid('WLT').'-'.substr($request->input('user_id'), 3).date('YmdHis'),
+            'wallet_id' => uniqid('WLT') . '-' . substr($request->input('user_id'), 3) . date('YmdHis'),
             'user_id' => $request->input('user_id'),
             'points' => $request->input('points'),
             'withdrawableFlag' => true,
@@ -268,9 +279,11 @@ class WalletController extends Controller
             [
                 'total_points' => $totalPoints,
                 'wallets' => $wallets
-            ],200);
+            ],
+            200
+        );
     }
-    
+
     /**
      * Show all wallets with source 'TOP' (TopUp wallets), or filter by a specific topup (ref_id).
      */
@@ -311,7 +324,7 @@ class WalletController extends Controller
         if ($wallets->isEmpty()) {
             return response()->json(['message' => 'No withdrawable sources found for this user'], 404);
         }
-        
+
         $sum = Wallet::where('user_id', $user_id)
             ->whereIn('source', ['BUN', 'TOP', 'INC', 'WIN'])
             ->where('withdrawableFlag', 1)
@@ -348,7 +361,4 @@ class WalletController extends Controller
     {
         //
     }
-
-
-
 }
