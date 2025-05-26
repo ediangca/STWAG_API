@@ -11,8 +11,18 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    //
 
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        // $this->middleware('auth:api', ['except' => ['register', 'login']]);
+        // $this->middleware('auth:api', ['except' => ['index', 'register', 'login']]);
+        // $this->middleware('auth:api', ['except' => ['index', 'register', 'login', 'userInfo', 'getUserByType', 'getUserById', 'getUserByIdWithToken']]);
+    }
 
     /**
      * Display a listing of the resource.
@@ -75,11 +85,19 @@ class AuthController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
+        if (User::where('uuid', $request->uuid)->exists()) {
+            return response()->json(['message' => 'UUID already exists'], 409);
+        }
+
         $user_id = DB::selectOne('SELECT GenerateUserAccID() AS user_id')->user_id;
         Log::info('Generated user_id', ['user_id' => $user_id]);
 
         // Generate referencecode
-        $referencecode = $this->generateReferenceCode();
+        // Generate unique referencecode
+        do {
+            $referencecode = $this->generateReferenceCode();
+            $exists = User::where('referencecode', $referencecode)->exists();
+        } while ($exists);
         Log::info('Generated referencecode', ['referencecode' => $referencecode]);
 
         if ($request->type == "user") {
@@ -113,25 +131,63 @@ class AuthController extends Controller
             'type' => $request->type,
             'referencecode' => $referencecode, //generated
             // 'referencecode' => $request->referencecode,
-            'uplinecode' => in_array($request->type, ["root", "admin", "member"]) ? $request->type : $request->referencecode, 
+            'uplinecode' => in_array($request->type, ["root", "admin", "member"]) ? $request->type : $request->referencecode,
             'avatar' => $request->avatar,
             'level' => $level,
             'uuid' => $request->uuid,
             'devicemodel' => $request->devicemodel,
         ]);
 
+        try {
+            // Send email verification notification if needed
+            if (method_exists($user, 'sendEmailVerificationNotification')) {
+                $user->sendEmailVerificationNotification();
+            }
+        } catch (\Exception $e) {
+            Log::error('Error sending email verification', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'User registered but failed to send verification email.'], 201);
+        }
+
         return response()->json([
-            'message' => 'User registered successfully',
+            'message' => 'User successfully registered! Please check your email for verification.',
             'user' => $user
         ], 201);
     }
+
+    public function verifyEmail(Request $request, $id, $hash)
+    {
+        Log::info('Email verification request received', ['id' => $id, 'hash' => $hash]);
+
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Email already verified'], 200);
+        }
+
+        // Correct hash check
+        if (!hash_equals(sha1($user->getEmailForVerification()), $hash)) {
+            return response()->json(['message' => 'Invalid verification link'], 400);
+        }
+
+        $user->markEmailAsVerified();
+
+        Log::info('Email verified successfully', ['user_id' => $user->id]);
+
+        return response()->json(['message' => 'Email verified successfully. Enjoy and Thank you!']);
+    }
+
 
     private function generateReferenceCode(): string
     {
         $prefix = 'REF';
         $date = date('YHmMds'); // Current date in YYYYMMDD format
         $randomString = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6)); // Random alphanumeric string
-        return "{$prefix}-{$date}-{$randomString}";
+        // return "{$prefix}-{$date}-{$randomString}";
+        return "{$randomString}";
     }
 
     public function login(Request $request)
@@ -139,8 +195,9 @@ class AuthController extends Controller
 
         Log::info('Login request received', $request->all());
 
-        if (!$request->has('email') || !$request->has('password')
-        //  || !$request->has('uuid')
+        if (
+            !$request->has('email') || !$request->has('password')
+            //  || !$request->has('uuid')
         ) {
             return response()->json(['message' => 'Email and password are required'], 400);
         }
@@ -165,6 +222,9 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
+        if ($user && !$user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Email not verified. Please verify your email before logging in.'], 403);
+        }
 
         if (!$user) {
             return response()->json(['message' => 'Email not yet Registered'], 401);
@@ -175,6 +235,7 @@ class AuthController extends Controller
         // if ($user->uuid != $request->uuid) {
         //     return response()->json(['message' => 'Device is not registered'], 401);
         // }
+
 
         Log::info('User check', ['user_id' => optional($user)->user_id, 'email' => $request->email]);
 
@@ -238,7 +299,7 @@ class AuthController extends Controller
         // Return the user's information
         return response()->json($user);
     }
-    
+
     public function refresh(Request $request)
     {
         $user = $request->user();

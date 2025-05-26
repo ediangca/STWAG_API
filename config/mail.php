@@ -98,6 +98,10 @@ return [
         ],
 
     ],
+    'from' => [
+        'address' => env('MAIL_FROM_ADDRESS', 'stwagsupport@gmail.com'),
+        'name' => env('MAIL_FROM_NAME', 'STWAG Support'),
+    ],
 
     /*
     |--------------------------------------------------------------------------

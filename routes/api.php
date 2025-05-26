@@ -7,6 +7,8 @@ use App\Http\Controllers\BetController;
 use App\Http\Controllers\LotteryController;
 use App\Http\Controllers\WalletController;
 
+use Illuminate\Support\Facades\Mail;
+
 Route::get('/', function () {
     return response()->json([
         'ApiName' => 'STWAG',
@@ -33,6 +35,9 @@ Route::get('/mercaral', function () {
 
 
 Route::post('/register', [AuthController::class, 'register']);
+Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+    ->middleware(['signed'])
+    ->name('verification.verify');
 Route::post('/auth', [AuthController::class, 'login']);
 
 
@@ -73,10 +78,19 @@ Route::post('/wallets/topup', [WalletController::class, 'topup']);
 Route::put('/wallets/topup/confirm/{topup_id}', [WalletController::class, 'updateTopUpConfirmFlagByTopupId']);
 Route::get('/wallets/topup/{user_id}', [WalletController::class, 'showTopUpWallets']);
 
+Route::get('/test-mail', function () {
+    Mail::raw('This is a test email from STWAG using Gmail SMTP.', function ($message) {
+        $message->to('ediangca22@gmail.com')
+                ->subject('Test Email from STWAG');
+    });
 
+    return 'Test email sent!';
+});
 
 
 // Authentication
+ 
+// Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
