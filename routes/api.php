@@ -35,6 +35,11 @@ Route::get('/mercaral', function () {
 
 
 Route::post('/register', [AuthController::class, 'register']);
+
+Route::get('/email/resend', [AuthController::class, 'resendVerificationEmail'])
+    ->middleware(['auth:sanctum', 'throttle:6,1'])
+    ->name('verification.resend');
+
 Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
     ->middleware(['signed'])
     ->name('verification.verify');

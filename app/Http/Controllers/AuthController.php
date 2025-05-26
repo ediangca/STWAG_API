@@ -180,6 +180,40 @@ class AuthController extends Controller
         return response()->json(['message' => 'Email verified successfully. Enjoy and Thank you!']);
     }
 
+    public function resendVerificationEmail(Request $request)
+    {
+        Log::info('Resend verification email request received', $request->all());
+
+        try {
+            $request->validate([
+                'email' => 'required|email'
+            ]);
+            Log::info('Validation passed');
+        } catch (ValidationException $e) {
+            Log::error('Validation failed', ['errors' => $e->errors()]);
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Email already verified'], 200);
+        }
+
+        try {
+            $user->sendEmailVerificationNotification();
+            Log::info('Verification email sent', ['user_id' => $user->id]);
+            return response()->json(['message' => 'Verification email resent successfully']);
+        } catch (\Exception $e) {
+            Log::error('Error sending verification email', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Failed to resend verification email. Please try again later.'], 500);
+        }
+    }
+
 
     private function generateReferenceCode(): string
     {
