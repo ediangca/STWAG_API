@@ -178,7 +178,7 @@ class BetController extends Controller
             return response()->json([
                 'result_id' => $result_id,
                 'session' => $currentSession,
-                'message' => 'Cannot generate result for Session ' . date('Y-m-d') . '-' . $currentSession->lottery_session . ' Draw has been started and processing.'
+                'message' => 'No result yet for Session ' . date('Y-m-d') . '-' . $currentSession->lottery_session 
             ], 403);
         }
 
