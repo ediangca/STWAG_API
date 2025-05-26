@@ -171,6 +171,19 @@ class WalletController extends Controller
     }
     
     /**
+     * Display a listing of the all wallet topups.
+     */
+    public function indexTopUp()
+    {
+        $topups = TopUp::all();
+
+        if ($topups->isEmpty()) {
+            return response()->json(['message' => 'No topups found'], 404);
+        }
+        return response()->json($topups);
+    }
+
+    /**
      * Top up points to a user's wallet.
      */
     public function topUp(Request $request)

@@ -66,6 +66,7 @@ Route::get('/wallets', [WalletController::class, 'index']);
 Route::get('/wallets/{user_id}', [WalletController::class, 'show']);
 Route::get('/wallets/withdrawable/{user_id}', [WalletController::class, 'withdrawableSources']);
 
+Route::get('/wallets/topups', [WalletController::class, 'indexTopUp']);
 Route::post('/wallets/topup', [WalletController::class, 'topup']);
 Route::put('/wallets/topup/confirm/{topup_id}', [WalletController::class, 'updateTopUpConfirmFlagByTopupId']);
 Route::get('/wallets/topup/{user_id}', [WalletController::class, 'showTopUpWallets']);
