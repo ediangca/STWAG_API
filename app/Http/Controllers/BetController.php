@@ -111,24 +111,31 @@ class BetController extends Controller
             return response()->json(['message' => 'result_id is required'], 400);
         }
 
-        // Check if result already exists
-        $existing = Result::where('result_id', $result_id)->first();
-        if ($existing) {
-            return response()->json(['message' => 'Result already exists', 'result' => $existing], 409);
-        }
-
         // Get all bets for this result_id
         $bets = Bet::where('result_id', $result_id)->get();
         if ($bets->isEmpty()) {
             return response()->json(['message' => 'No bets found for this result_id'], 404);
         }
+        // $firstBet = $bets->first();
+        // if ($firstBet && $firstBet->created_at->toDateString() !== now()->toDateString()) {
+        //     return response()->json(['message' => 'Bets must be from the current date only.'], 422);
+        // }
+
+        // Check if result already exists
+        $existing = Result::where('result_id', $result_id)->first();
+        if ($existing) {
+            return response()->json([
+            'result' => $existing,
+            'message' => 'Result already exists'
+            ]);
+        }
 
         $sessions = Lottery::orderBy('time')->get();
 
-        if($sessions->isEmpty()) {
+        if ($sessions->isEmpty()) {
             return response()->json(['message' => 'No lottery sessions found'], 404);
         }
-      
+
         // $now = DB::raw("TIME(NOW())");
         // $now = DB::select("SELECT TIME(NOW()) as now")[0]->now;
         $now = $request->has('time') ? $request->time : now()->format('H:i:s');
@@ -144,7 +151,7 @@ class BetController extends Controller
             $sessionStart = date('H:i:s', strtotime($session->time) - 30 * 60);
             $sessionEnd = $session->time;
             $currentSession = $session;
-            $result_id = 'RES' . date('Ymd') .'-000'. $currentSession->lottery_id;
+            $result_id = 'RES' . date('Ymd') . '-000' . $currentSession->lottery_id;
 
             // Check if current time is within the 30-minute window before session time up to session time
             if ($now >= $sessionStart && $now <= $sessionEnd) {
@@ -156,7 +163,7 @@ class BetController extends Controller
                 $isReady = true;
                 break;
             }
-            
+
             if ($now > $sessions->last()->time) {
                 // If current time is after the last session, set to the first (morning) session of the next day
                 $currentSession = $sessions->first();
@@ -165,11 +172,13 @@ class BetController extends Controller
             }
         }
 
+        Log::info('Lottery Session: ' . $currentSession);
+
         if ($isReady) {
             return response()->json([
                 'result_id' => $result_id,
                 'session' => $currentSession,
-                'message' => 'Cannot generate result for Session ' . date('Y-m-d').'-'.$currentSession->lottery_session . ' Draw has been started and processing.'
+                'message' => 'Cannot generate result for Session ' . date('Y-m-d') . '-' . $currentSession->lottery_session . ' Draw has been started and processing.'
             ], 403);
         }
 
@@ -259,7 +268,8 @@ class BetController extends Controller
             'spin2' => $spin2,
             'total_pot' => $totalPot,
             'winners' => $winners->pluck('user_id'),
-            'mechanic' => $totalPot < 9000 ? 'Win Low' : 'Win High'
+            'mechanic' => $totalPot < 9000 ? 'Win Low' : 'Win High',
+            'bets' => $bets->pluck('number')->unique()->values(),
         ]);
     }
 
@@ -292,10 +302,10 @@ class BetController extends Controller
 
         $sessions = Lottery::orderBy('time')->get();
 
-        if($sessions->isEmpty()) {
+        if ($sessions->isEmpty()) {
             return response()->json(['message' => 'No lottery sessions found'], 404);
         }
-      
+
         // $now = DB::raw("TIME(NOW())");
         // $now = DB::select("SELECT TIME(NOW()) as now")[0]->now;
         $now = $request->has('time') ? $request->time : now()->format('H:i:s');
@@ -314,7 +324,7 @@ class BetController extends Controller
             $sessionStart = date('H:i:s', strtotime($session->time) - 30 * 60);
             $sessionEnd = $session->time;
             $currentSession = $session;
-            $result_id = 'RES' . date('Ymd') .'-000'. $currentSession->lottery_id;
+            $result_id = 'RES' . date('Ymd') . '-000' . $currentSession->lottery_id;
 
             // Check if current time is within the 30-minute window before session time up to session time
             if ($now >= $sessionStart && $now <= $sessionEnd) {
@@ -326,7 +336,7 @@ class BetController extends Controller
                 $isReady = true;
                 break;
             }
-            
+
             if ($now > $sessions->last()->time) {
                 // If current time is after the last session, set to the first (morning) session of the next day
                 $currentSession = $sessions->first();
@@ -345,7 +355,7 @@ class BetController extends Controller
         log::info('Result ID: ' . 'From Request ' . $request->has('result_id') ? $request->result_id : 'Generated from Session: ' . $result_id);
 
         // date('His', strtotime($currentSession->time))
-        $result_id = $request->has('result_id') ? $request->result_id : $result_id ;
+        $result_id = $request->has('result_id') ? $request->result_id : $result_id;
 
         $result = Result::where('result_id', $result_id)->first();
         if ($result) {
@@ -475,7 +485,7 @@ class BetController extends Controller
                 break;
             }
 
-            if (!($time >= $sessionStart )) {
+            if (!($time >= $sessionStart)) {
                 $isReady = true;
                 break;
             }

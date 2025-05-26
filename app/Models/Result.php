@@ -17,12 +17,9 @@ class Result extends Model
     // public $timestamps = false; // Disable timestamps if not needed
 
     protected $fillable = [
-        'user_id',
-        'number',
-        'points',
-        'Datetime',
         'result_id',
-        // 'lottery_id',
+        'lottery_id',
+        'number',
         // 'winning_points', 
         // 'incentives_share',  
         // 'mother_share',  
