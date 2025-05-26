@@ -30,11 +30,12 @@ return new class extends Migration
         Schema::create('results', function (Blueprint $table) {
             $table->string('result_id')->primary(true);
             $table->foreignId('lottery_id')->index();
-            $table->double('winning_points');  
-            $table->double('incentives_share');  
-            $table->double('mother_share');  
-            $table->double('admin_share');  
-            $table->double('other_share');  
+            $table->integer('number');  
+            $table->double('winning_points')->nullable()->default(0);  
+            $table->double('incentives_share')->nullable()->default(0);  
+            $table->double('mother_share')->nullable()->default(0);  
+            $table->double('admin_share')->nullable()->default(0);  
+            $table->double('other_share')->nullable()->default(0);  
             $table->timestamps();
         });
 

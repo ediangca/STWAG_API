@@ -106,6 +106,7 @@ class AuthController extends Controller
                 return response()->json(['message' => 'Reference Code not found.'], 404);
             }
         }
+        
         Log::info('Upline code exists', ['uplinecode' => $request->uplinecode]);
 
         $level = DB::selectOne('SELECT count(*) as noOfDownline from users where referencecode = ?', [$request->uplinecode])->noOfDownline;
