@@ -81,7 +81,7 @@ Route::put('/wallets/topup/confirm/{topup_id}', [WalletController::class, 'updat
 Route::get('/wallets/topup/{user_id}', [WalletController::class, 'showTopUpWallets']);
 
 // Result
-Route::get('/lottery/results/{result_id}', [BetController::class, 'createResult']);
+Route::get('/lottery/results/', [BetController::class, 'createResult']);
 
 Route::get('/test-mail', function () {
     Mail::raw('This is a test email from STWAG using Gmail SMTP.', function ($message) {
