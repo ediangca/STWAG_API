@@ -72,7 +72,7 @@ class AuthController extends Controller
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:6',
                 'type' => 'required|string|max:255|nullable', //default user
-                'referencecode' => 'required|string|max:255', //generated
+                // 'referencecode' => 'required|string|max:255', //generated
                 'uplinecode' => 'string|max:255',
                 'avatar' => 'required|integer|nullable', //default 0
                 'level' => 'required|integer|nullable',
