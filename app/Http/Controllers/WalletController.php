@@ -175,21 +175,56 @@ class WalletController extends Controller
      * Display a listing of the wallets, optionally filtered by source.
      * Example: /api/wallets?source=TOP
      */
-    public function indexTopUp(Request $request)
+    public function walletSource(Request $request)
     {
-        $query = Wallet::query();
 
         if (!$request->has('source')) {
             return response()->json(['message' => 'Source is required'], 400);
         }
+        $query = Wallet::query();
 
         $source = trim($request->input('source'), '"');
         $query->where('source', $source);
 
         $wallets = $query->get();
 
+        $type = null;
+
+        switch ($source) {
+            case 'BUN':
+                // Bonus wallets
+                $type = 'BUNOS';
+                break;
+            case 'TOP':
+                // TopUp wallets
+                $type = 'TOPUP';
+                break;
+            case 'INC':
+                // Incentives wallets
+                $type = 'INCETNIVES';
+                break;
+            case 'CBK':
+                // Cashback wallets (Unwithdrawable)
+                $type = 'CASH BACK';
+                break;
+            case 'BET':
+                // Bet wallets (Negative)
+                $type = 'BET';
+                break;
+            case 'WIN':
+                // Winning wallets
+                $type = 'WINNING';
+                break;
+            case 'WTH':
+                // Withdraw wallets (Unwithdrawable)
+                $type = 'WITHDRAW';
+                break;
+            default:
+                return response()->json(['message' => 'Invalid source type ' . $type ], 400);
+        }
+
         if ($wallets->isEmpty()) {
-            return response()->json(['message' => 'No wallets found'], 404);
+            return response()->json(['message' => 'No ' . $type . ' found!'], 404);
         }
         return response()->json($wallets);
     }

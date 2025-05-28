@@ -66,7 +66,7 @@ Route::post('/lottery', [LotteryController::class, 'store']);
 // Route::apiResource('bets', BetController::class);
 Route::get('/betReady', [BetController::class, 'betSignal']);
 Route::post('/bets', [BetController::class, 'storeMultipleBets']);
-Route::get('/showBetsByResultId/{resultId}', [BetController::class, 'showBetsByResultId']);
+Route::get('/showBetsByResultId/{result_id}', [BetController::class, 'showBetsByResultId']);
 Route::get('/bet-limit-exceeded/{result_id}/{number}', [BetController::class, 'isBetLimitExceeded']);
 
 //Wallet Routes
@@ -75,13 +75,14 @@ Route::get('/wallets', [WalletController::class, 'index']);
 Route::get('/wallets/{user_id}', [WalletController::class, 'show']);
 Route::get('/wallets/withdrawable/{user_id}', [WalletController::class, 'withdrawableSources']);
 
-Route::get('/wallets', [WalletController::class, 'indexTopUp']);
+Route::get('/wallets/source/filter', [WalletController::class, 'walletSource']);
 Route::post('/wallets/topup', [WalletController::class, 'topup']);
 Route::put('/wallets/topup/confirm/{topup_id}', [WalletController::class, 'updateTopUpConfirmFlagByTopupId']);
 Route::get('/wallets/topup/{user_id}', [WalletController::class, 'showTopUpWallets']);
 
 // Result
-Route::get('/lottery/results/', [BetController::class, 'createResult']);
+// Route::get('/lottery/results/ID/{result_id}', [LotteryController::class, 'createResult']);
+Route::get('/lottery/results/{result_id?}', [LotteryController::class, 'listResults']);
 
 Route::get('/test-mail', function () {
     Mail::raw('This is a test email from STWAG using Gmail SMTP.', function ($message) {

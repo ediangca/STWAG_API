@@ -57,4 +57,6 @@ RUN composer install --no-dev --optimize-autoloader \
 
 # Start Laravel server
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8080"]
+# while true; do php artisan spin:run; sleep 60; done
+CMD ["php", "while", "do", "php", "artisan", "spin:run;", "sleep", "60;", "done"]
 
