@@ -48,6 +48,8 @@ class SpinningService
             }
 
             if (!($now >= $sessionStart)) {
+                // If current time is before the session start, set to the current session
+                $currentSession = $session;
                 $isReady = true;
                 break;
             }
@@ -66,8 +68,16 @@ class SpinningService
 
         if ($isReady) {
             // Log::info('Betting is on process : ' .  date('Ymd') . ' - ' . $currentSession->lottery_session);
-            return 'Betting is on process for session ' . date('Y-m-d') . ' - ' . $currentSession->lottery_session. '(' . $currentSession->time . '). ' .
-                'Please wait for the result.';  
+
+            $result = Result::orderBy('created_at', 'desc')->first();
+            if ($result) {
+                $lastsession = Lottery::find($result->lottery_id);
+                Log::info('Last winning # result for session ' .  $result->created_at->format('Y-m-d') . ' - ' .  $lastsession->lottery_session . '(' . $lastsession->time . ') : ' . $result->number);
+                // return response()->json(['message' => 'No results found'], 404);
+            }
+
+            return 'Betting is on process for session ' . date('Y-m-d') . ' - ' . $currentSession->lottery_session . '(' . $currentSession->time . '). \n ' .
+                'Please wait for the result.';
         }
 
 
@@ -150,19 +160,49 @@ class SpinningService
         $spin1 = $digits[0];
         $spin2 = $digits[1];
 
-        // Save result
-        // $result = Result::create([
-        //     'result_id' => $result_id,
-        //     'lottery_id' => $currentSession->lottery_id,
-        //     'number' => $winningNumber,
-        //     'winning_points' => $totalPot,
-        // ]);
 
-        // Calculate winnings for users
-        $winners = $bets->where('number', $winningNumber);
-        foreach ($winners as $winner) {
-            $winner->user->increment('points', $winner->points * 7);
-            // Optionally, log or notify winner
+
+        /**
+         * Checks if the current time matches the session's scheduled time.
+         * If it does, it updates or creates a result with the winning number and total pot.
+         * It also calculates winnings for users who bet on the winning number.
+         */
+        if ($now == $currentSession->time) {
+
+
+            $result = Result::updateOrCreate(
+                ['result_id' => $result_id],
+                [
+                    'lottery_id' => $currentSession->lottery_id,
+                    'number' => $winningNumber,
+                    'winning_points' => $totalPot,
+                ]
+            );
+
+
+            // Calculate winnings for users
+            $winners = $bets->where('number', $winningNumber);
+            foreach ($winners as $winner) {
+                $winner->user->increment('points', $winner->points * 7);
+                // Optionally, log or notify winner
+            }
+
+
+            // Log::info('Final Result Data:', [
+            //     'result' => $result,
+            //     'lottery_id' => $currentSession->lottery_id,
+            //     'winning_number' => $winningNumber,
+            //     'spin1' => $spin1,
+            //     'spin2' => $spin2,
+            //     'total_pot' => $totalPot,
+            //     'winners' => $winners->pluck('user_id'),
+            //     'mechanic' => $totalPot < 9000 ? 'Win Low' : 'Win High',
+            //     'bets' => $bets->pluck('number')->unique()->values(),
+            // ]);
+
+            return 'Final Result for Result ID ' . $result_id . '-' .  date('Y-m-d') . ' - ' . $currentSession->lottery_session . '( ' . $currentSession->time . '). ' .
+                ' with winning number ' . $winningNumber .
+                ' (Spin1: ' . $spin1 . ', Spin2: ' . $spin2 . ')';
         }
 
 
@@ -190,7 +230,7 @@ class SpinningService
         //     'bets' => $bets->pluck('number')->unique()->values(),
         // ]);
 
-        return 'Generate Result for ' . $result_id . ' with winning number ' . $winningNumber .
+        return 'Attemp Spin for ' . $result_id . ' with winning number ' . $winningNumber .
             ' (Spin1: ' . $spin1 . ', Spin2: ' . $spin2 . ')';
 
         // Simulate a spinning result based on time
