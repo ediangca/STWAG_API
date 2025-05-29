@@ -50,13 +50,27 @@ WORKDIR /var/www
 # Copy Laravel project files
 COPY . .
 
+# Copy start.sh script into the container
+COPY start.sh /start.sh
+
+# Make the script executable
+RUN chmod +x /start.sh
+
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader \
  && chown -R www-data:www-data /var/www \
  && chmod -R 775 storage bootstrap/cache
 
+# Expose the port your Laravel app will use
+EXPOSE 10000
+
 # Start Laravel server
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8080"]
+# CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8080"]
+# ---------------------------------------------------------
 # while true; do php artisan spin:run; sleep 60; done
-CMD ["php", "while", "do", "php", "artisan", "spin:run;", "sleep", "60;", "done"]
+# CMD ["php", "while", "do", "php", "artisan", "spin:run;", "sleep", "60;", "done"]
+# CMD ["sh", "-c", "while true; do php artisan spin:run; sleep 60; done"]
+
+# Start the container using your custom start script
+CMD ["/start.sh"]
 
