@@ -31,11 +31,11 @@ return new class extends Migration
             $table->string('result_id')->primary(true);
             $table->foreignId('lottery_id')->index();
             $table->integer('number');  
-            $table->double('winning_points')->nullable()->default(0);  
-            $table->double('incentives_share')->nullable()->default(0);  
-            $table->double('mother_share')->nullable()->default(0);  
-            $table->double('admin_share')->nullable()->default(0);  
-            $table->double('other_share')->nullable()->default(0);  
+            $table->double('winning_points', 10, 2)->nullable()->default(0.00);  
+            $table->double('incentives_share', 10, 2)->nullable()->default(0.00);  
+            $table->double('mother_share', 10, 2)->nullable()->default(0.00);  
+            $table->double('admin_share', 10, 2)->nullable()->default(0.00);  
+            $table->double('other_share', 10, 2)->nullable()->default(0.00);  
             $table->timestamps();
         });
 

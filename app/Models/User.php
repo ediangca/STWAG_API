@@ -135,4 +135,20 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->email;
     }
+    
+    /**
+     * Get the wallet relationship for the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    // App\Models\User.php
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class);
+    } 
+    // App\Models\User.php
+    public function upline()
+    {
+        return $this->belongsTo(User::class, 'upline_id');
+    }
 }

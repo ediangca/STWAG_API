@@ -20,4 +20,10 @@ class Bet extends Model
         'number',
         'points',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+    
 }

@@ -138,38 +138,6 @@ class WalletController extends Controller
         ], 201);
     }
 
-    /**
-     * Update the confirmFlag of a TopUp record by topup_id.
-     */
-    public function updateTopUpConfirmFlagByTopupId(Request $request, string $topup_id)
-    {
-        if (!$topup_id) {
-            return response()->json(['message' => 'TopUp ID is required'], 400);
-        }
-        if (!$request->has('confirmFlag')) {
-            return response()->json(['message' => 'confirmFlag is required'], 400);
-        }
-
-        $confirmFlag = (bool) $request->input('confirmFlag');
-
-        $topup = Wallet::where('ref_id', $topup_id)->first();
-
-        if (!$topup) {
-            return response()->json(['message' => 'TopUp not found'], 404);
-        }
-        if ($topup->confirmFlag) {
-            return response()->json(['message' => 'TopUp has already been confirmed'], 409);
-        }
-
-        $topup->confirmFlag = $confirmFlag;
-        $topup->save();
-
-        return response()->json([
-            'message' => 'TopUp confirmed successfully',
-            'topup' => $topup
-        ]);
-    }
-
 
     /**
      * Display a listing of the wallets, optionally filtered by source.
@@ -317,27 +285,6 @@ class WalletController extends Controller
             ],
             200
         );
-    }
-
-    /**
-     * Show all wallets with source 'TOP' (TopUp wallets), or filter by a specific topup (ref_id).
-     */
-    public function showTopUpWallets(Request $request, $user_id)
-    {
-        $user_id = $request->has('user_id') ? $request->input('user_id') : $user_id;
-        if (!$user_id) {
-            return response()->json(['message' => 'User ID is required'], 400);
-        }
-
-        $wallets = Wallet::where('user_id', $user_id)
-            ->where('source', 'TOP')
-            ->get();
-
-        if ($wallets->isEmpty()) {
-            return response()->json(['message' => 'No TopUp wallets found'], 404);
-        }
-
-        return response()->json($wallets);
     }
 
     /**

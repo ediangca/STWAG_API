@@ -5,8 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BetController;
 use App\Http\Controllers\LotteryController;
+use App\Http\Controllers\TopUpController;
 use App\Http\Controllers\WalletController;
-
+use App\Models\TopUp;
 use Illuminate\Support\Facades\Mail;
 
 Route::get('/', function () {
@@ -64,23 +65,29 @@ Route::post('/lottery', [LotteryController::class, 'store']);
 
 // Bet Routes
 // Route::apiResource('bets', BetController::class);
-Route::get('/betReady', [BetController::class, 'betSignal']);
-Route::post('/bets', [BetController::class, 'storeMultipleBets']);
-Route::get('/showBetsByResultId/{result_id}', [BetController::class, 'showBetsByResultId']);
-Route::get('/bet-limit-exceeded/{result_id}/{number}', [BetController::class, 'isBetLimitExceeded']);
+Route::get('/betReady', [BetController::class, 'betSignal'])->name('betReady');
+Route::post('/bets', [BetController::class, 'storeMultipleBets'])->name('bets.store');
+Route::get('/showBetsByResultId/{result_id}', [BetController::class, 'showBetsByResultId'])->name('bets.showByResultId');
+Route::get('/bet-limit-exceeded/{result_id}/{number}', [BetController::class, 'isBetLimitExceeded'])->name('bets.isBetLimitExceeded');
 
 //Wallet Routes
 // Route::apiResource('bets', WalletController::class);
-Route::get('/wallets', [WalletController::class, 'index']);
-Route::get('/wallets/{user_id}', [WalletController::class, 'show']);
+Route::get('/wallets', [WalletController::class, 'index'])->name('wallets.index');
+Route::get('/wallets/{user_id}', [WalletController::class, 'show'])->name('wallets.show');
+Route::get('/wallets/source/filter', [WalletController::class, 'walletSource'])->name('wallets.source.filter');
+
+
+// Withdraw
 Route::get('/wallets/withdrawable/{user_id}', [WalletController::class, 'withdrawableSources']);
 
-Route::get('/wallets/source/filter', [WalletController::class, 'walletSource']);
-Route::post('/wallets/topup', [WalletController::class, 'topup']);
-Route::put('/wallets/topup/confirm/{topup_id}', [WalletController::class, 'updateTopUpConfirmFlagByTopupId']);
-Route::get('/wallets/topup/{user_id}', [WalletController::class, 'showTopUpWallets']);
+// TopUp
+// Route::post('/wallets/topup', [WalletController::class, 'topup']);
+Route::post('/wallets/topup', [TopUpController::class, 'store']);
+Route::put('/wallets/topup/confirm/{topup_id}', [TopUpController::class, 'confirmTopUpFlagByTopupId']);
+Route::get('/wallets/topup/{user_id}', [TopUpController::class, 'showTopUpWallets']);
 
 // Result
+Route::get('/resultSignal', [BetController::class, 'resultSignal'])->name('resultSignal');
 // Route::get('/lottery/results/ID/{result_id}', [LotteryController::class, 'createResult']);
 Route::get('/lottery/results/{result_id?}', [LotteryController::class, 'listResults']);
 

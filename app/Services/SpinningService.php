@@ -30,56 +30,70 @@ class SpinningService
         $isReady = false;
         $currentSession = null;
         $result_id = null;
+        $foundSession = false;
 
 
         foreach ($sessions as $session) {
-            Log::info('Current time: ' . $now);
-            Log::info('Session time: ' . $session->time);
+            // Log::info('Current time: ' . $now);
+            // Log::info('Session time: ' . $session->time);
 
             $sessionStart = date('H:i:s', strtotime($session->time) - 30 * 60);
             $sessionEnd = $session->time;
             $currentSession = $session;
-            $result_id = 'RES' . date('Ymd') . '-000' . $currentSession->lottery_id;
 
             // Check if current time is within the 30-minute window before session time up to session time
-            if ($now >= $sessionStart && $now <= $sessionEnd) {
-                $isReady = false;
+            if ($now > $sessionStart && now()->format('H:i:00') <= $sessionEnd) {
+                // If current time is within the session window, set to the current session
+                $currentSession = $session;
+                $isReady = true;
+                $foundSession = true;
                 break;
             }
 
             if (!($now >= $sessionStart)) {
                 // If current time is before the session start, set to the current session
                 $currentSession = $session;
-                $isReady = true;
-                break;
-            }
-
-            if ($now > $sessions->last()->time) {
-                // If current time is after the last session, set to the first (morning) session of the next day
-                $currentSession = $sessions->first();
-                $isReady = true;
+                $isReady = false;
+                $foundSession = true;
                 break;
             }
         }
+        $sessionTime = date('H:i:00', strtotime($currentSession->time));
+        $currentTime = now()->format('H:i:00');
 
-        // Log::info('Lottery Session: ' . $currentSession);
+        Log::info('Current Time: ' . $currentTime);
+        Log::info('Session Time: ' . $sessionTime);
 
 
+        // Validation: If current time is after the last session, set to the first session of the next day
+        if (!$foundSession && $now > $sessions->last()->time) {
+            $currentSession = $sessions->first();
+            $isReady = false;
+            $result_id = 'RES' . date('Ymd', strtotime('+1 day')) . '-000' . $currentSession->lottery_id;
+            $sessionTime = date('H:i:00', strtotime($currentSession->time));
+            $currentTime = now()->format('H:i:00');
+            Log::info('Is Ready: ' . ($isReady ? 'true' : 'false'));
+            Log::info('Result ID: ' . $result_id);
 
-        if ($isReady) {
-            // Log::info('Betting is on process : ' .  date('Ymd') . ' - ' . $currentSession->lottery_session);
+            return 'Betting is open for next day session ' . date('Y-m-d', strtotime('+1 day')) . ' - ' . $currentSession->lottery_session . '(' . $currentSession->time . '). Make a bet now!';
+        }
 
-            $result = Result::orderBy('created_at', 'desc')->first();
-            if ($result) {
-                $lastsession = Lottery::find($result->lottery_id);
-                Log::info('Last winning # result for session ' .  $result->created_at->format('Y-m-d') . ' - ' .  $lastsession->lottery_session . '(' . $lastsession->time . ') : ' . $result->number);
-                // return response()->json(['message' => 'No results found'], 404);
-            }
+        $result_id = 'RES' . date('Ymd') . '-000' . $currentSession->lottery_id;
 
-            return 'Betting is on process for session ' . date('Y-m-d') . ' - ' . $currentSession->lottery_session . '(' . $currentSession->time . '). \n ' .
+        Log::info('Is Ready: ' . ($isReady ? 'true' : 'false'));
+        Log::info('Result ID: ' . $result_id);
+
+        if ($isReady && $currentTime !==  $sessionTime) {
+            // Log::info('Betting is close for session ' . date('Y-m-d') . ' - ' . $currentSession->lottery_session . '(' . $currentSession->time . '). \n ' .
+            //     'Please wait for the result.');
+            return 'Betting is close for session ' . date('Y-m-d') . ' - ' . $currentSession->lottery_session . '(' . $currentSession->time . '). ' .
                 'Please wait for the result.';
+        } else if ((!$isReady && $currentTime < $sessionTime) || $now > $sessions->last()->time) {
+            // Log::info('Betting is on process for session ' . date('Y-m-d') . ' - ' . $currentSession->lottery_session . '(' . $currentSession->time . '). \n ' .
+            //     'Please wait for the result.');
+            return 'Betting is open for session ' . date('Y-m-d') . ' - ' . $currentSession->lottery_session . '(' . $currentSession->time . '). ' .
+                'Make a bet now!';
         }
-
 
         // Check if result already exists
         $existing = Result::where('result_id', $result_id)->first();
@@ -163,47 +177,120 @@ class SpinningService
 
 
         /**
-         * Checks if the current time matches the session's scheduled time.
-         * If it does, it updates or creates a result with the winning number and total pot.
-         * It also calculates winnings for users who bet on the winning number.
+         * Bet Distribution:
+         * 70% of the total pot (bet amount) is awarded to the winning user(s).
+         * 10% is allocated to admin/operational expenses.
+         * 10% goes into the general fund (mother account).
+         * 10% is distributed as incentives to upline members.
          */
-        if ($now == $currentSession->time) {
 
+        $winningShare = $totalPot * 0.7;
+        $adminShare = $totalPot * 0.1;
+        $motherShare = $totalPot * 0.1;
+        $incentivesShare = $totalPot * 0.1;
 
-            $result = Result::updateOrCreate(
-                ['result_id' => $result_id],
-                [
-                    'lottery_id' => $currentSession->lottery_id,
-                    'number' => $winningNumber,
-                    'winning_points' => $totalPot,
-                ]
-            );
+        // Update or create the result with calculated shares
+        $result = Result::updateOrCreate(
+            ['result_id' => $result_id],
+            [
+                'lottery_id' => $currentSession->lottery_id,
+                'number' => $winningNumber,
+                'winning_points' => $winningShare,
+                'incentives_share' => $incentivesShare,
+                'mother_share' => $motherShare,
+                'admin_share' => $adminShare,
+                'other_share' => 0
+            ]
+        );
 
-
-            // Calculate winnings for users
-            $winners = $bets->where('number', $winningNumber);
-            foreach ($winners as $winner) {
-                $winner->user->increment('points', $winner->points * 7);
-                // Optionally, log or notify winner
-            }
-
-
-            // Log::info('Final Result Data:', [
-            //     'result' => $result,
-            //     'lottery_id' => $currentSession->lottery_id,
-            //     'winning_number' => $winningNumber,
-            //     'spin1' => $spin1,
-            //     'spin2' => $spin2,
-            //     'total_pot' => $totalPot,
-            //     'winners' => $winners->pluck('user_id'),
-            //     'mechanic' => $totalPot < 9000 ? 'Win Low' : 'Win High',
-            //     'bets' => $bets->pluck('number')->unique()->values(),
-            // ]);
-
-            return 'Final Result for Result ID ' . $result_id . '-' .  date('Y-m-d') . ' - ' . $currentSession->lottery_session . '( ' . $currentSession->time . '). ' .
-                ' with winning number ' . $winningNumber .
-                ' (Spin1: ' . $spin1 . ', Spin2: ' . $spin2 . ')';
+        // Calculate winnings for users
+        $winners = $bets->where('number', $winningNumber)->where('result_id', $result_id); //Users who bet on the winning number
+        if ($winners->isEmpty()) {
+            Log::info('No winners found for winning number: ' . $winningNumber);
+            // return 'No winners found for winning number: ' . $winningNumber;
         }
+        $totalWinningPoints = $winners->sum('points');
+        foreach ($winners as $winner) {
+            // Distribute 70% of the pot proportionally to winners
+            $userShare = $totalWinningPoints > 0 ? ($winner->points / $totalWinningPoints) * $winningShare : 0;
+
+            // Add winning points to user's wallet
+            if ($winner->user && method_exists($winner->user, 'wallet')) {
+                // If user has a wallet relation, create a wallet transaction of type 'WIN'
+                $winner->user->wallet()->updateOrCreate(
+                    ['type' => 'WIN', 'source' => 'WIN', 'description' => 'Winning points for result ' . $result_id],
+                    ['points' => $userShare]
+                );
+                $winner->user->wallet()->create([
+                    'wallet_id' => uniqid('WLT') . '-' . substr($winner->user->user_id, 3) . date('YmdHis'),
+                    'user_id' => $winner->user->user_id,
+                    'points' => $userShare,
+                    'withdrawableFlag' => true,
+                    'ref_id' => $result_id,
+                    'source' => 'WIN',
+                ]);
+            }
+            // elseif ($winner->user) {
+            //     // Fallback if no wallet relation, create a wallet transaction of type 'WIN'
+            //     $winner->user->wallet()->create([
+            //         'points' => $userShare,
+            //         'type' => 'WIN',
+            //         'source' => 'WIN',
+            //         'description' => 'Winning points for result ' . $result_id,
+            //     ]);
+            // }
+
+            // Distribute 10% incentives to upline if applicable
+            // if ($winner->user && method_exists($winner->user, 'upline') && $winner->user->upline) {
+            //     $uplineShare = $incentivesShare * ($winner->points / $totalWinningPoints);
+
+            //     // Add incentive points to upline's wallet
+            //     if (method_exists($winner->user->upline, 'wallet') && $winner->user->upline->wallet) {
+            //         $winner->user->upline->wallet->increment('points', $uplineShare);
+            //     } else {
+            //         $winner->user->upline->increment('points', $uplineShare);
+            //     }
+            // }
+        }
+
+
+        // $winners = $bets->where('number', $winningNumber)->where('result_id', $result_id);
+        // $totalWinningPoints = $winners->sum('points');
+        // foreach ($winners as $winner) {
+        //     // Distribute 70% of the pot proportionally to winners
+        //     $userShare = $totalWinningPoints > 0 ? ($winner->points / $totalWinningPoints) * $winningShare : 0;
+        //     $winner->user->increment('points', $userShare);
+
+        //     // Distribute 10% incentives to upline if applicable
+        //     if (method_exists($winner->user, 'upline') && $winner->user->upline) {
+        //         $uplineShare = $incentivesShare * ($winner->points / $totalWinningPoints);
+        //         $winner->user->upline->increment('points', $uplineShare);
+        //     }
+        // }
+
+        // Calculate winnings for users
+        // $winners = $bets->where('number', $winningNumber)->where('result_id', $result_id);
+        // foreach ($winners as $winner) {
+        //     $winner->user->increment('points', $winner->points * 7);
+        //     // Optionally, log or notify winner
+        // }
+
+
+        // Log::info('Final Result Data:', [
+        //     'result' => $result,
+        //     'lottery_id' => $currentSession->lottery_id,
+        //     'winning_number' => $winningNumber,
+        //     'spin1' => $spin1,
+        //     'spin2' => $spin2,
+        //     'total_pot' => $totalPot,
+        //     'winners' => $winners->pluck('user_id'),
+        //     'mechanic' => $totalPot < 9000 ? 'Win Low' : 'Win High',
+        //     'bets' => $bets->pluck('number')->unique()->values(),
+        // ]);
+
+        return 'Final Result for Result ID ' . $result_id . '-' .  date('Y-m-d') . ' - ' . $currentSession->lottery_session . '( ' . $currentSession->time . '). ' .
+            ' with winning number ' . $winningNumber .
+            ' (Spin1: ' . $spin1 . ', Spin2: ' . $spin2 . ')';
 
 
         // return response()->json([
@@ -229,9 +316,6 @@ class SpinningService
         //     'mechanic' => $totalPot < 9000 ? 'Win Low' : 'Win High',
         //     'bets' => $bets->pluck('number')->unique()->values(),
         // ]);
-
-        return 'Attemp Spin for ' . $result_id . ' with winning number ' . $winningNumber .
-            ' (Spin1: ' . $spin1 . ', Spin2: ' . $spin2 . ')';
 
         // Simulate a spinning result based on time
         // $timeNow = Carbon::now();

@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\TopUp;
+use App\Models\Wallet;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
 
 class TopUpController extends Controller
 {
@@ -33,30 +36,61 @@ class TopUpController extends Controller
      */
     public function store(Request $request)
     {
-        //Validate the request data
         if (!$request->has('user_id')) {
             return response()->json(['message' => 'User ID is required'], 400);
         }
         if (!$request->has('points')) {
             return response()->json(['message' => 'Points is required'], 400);
         }
+        if (!$request->has('gcash_ref_no')) {
+            return response()->json(['message' => 'GCASH Referrence No. is required'], 400);
+        }
         // Validate the request data
         try {
             $request->validate([
                 'user_id' => 'required|string|exists:users,user_id',
-                'points' => 'required|numeric',
+                'points' => 'required|numeric|min:1',
+                'withdrawableFlag' => 'boolean|nullable|default:1',
+                'confirmFlag' => 'boolean|nullable|default:1',
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
         }
-        // Create a new top-up record
-        $topup_id = now()->format('yMdHis').$request->input('user_id');
+
+        $topup_id = $request->has('topup_id') ? $request->input('topup_id') : uniqid('TOPUP') . date('YmdHis');
+
+        if (TopUp::where('gcash_ref_no', $request->input('gcash_ref_no'))->exists()) {
+            return response()->json(['message' => 'GCASH Reference No. already exists'], 409);
+        }
+
         $topup = TopUp::create([
+            'topup_id' => $topup_id,
             'user_id' => $request->input('user_id'),
             'points' => $request->input('points'),
+            'gcash_ref_no' => $request->input('gcash_ref_no'),
         ]);
 
-        
+        log::info('TopUp created', [
+            'topup_id' => $topup_id,
+            'user_id' => $request->input('user_id'),
+            'points' => $request->input('points'),
+            'gcash_ref_no' => $request->input('gcash_ref_no')
+        ]);
+
+        $wallet = Wallet::create([
+            'wallet_id' => uniqid('WLT') . '-' . substr($request->input('user_id'), 3) . date('YmdHis'),
+            'user_id' => $request->input('user_id'),
+            'points' => $request->input('points'),
+            'withdrawableFlag' => true,
+            'ref_id' => $topup_id,
+            'source' => 'TOP',
+        ]);
+
+        return response()->json([
+            'message' => 'Top up successful',
+            'GCASH Reference No.' => $request->input('gcash_ref_no'),
+            'wallet' => $wallet
+        ], 201);
     }
 
     /**
@@ -90,4 +124,60 @@ class TopUpController extends Controller
     {
         //
     }
+
+    
+    /**
+     * Update the confirmFlag of a TopUp record by topup_id.
+     */
+    public function confirmTopUpFlagByTopupId(Request $request, string $topup_id)
+    {
+        if (!$topup_id) {
+            return response()->json(['message' => 'TopUp ID is required'], 400);
+        }
+        if (!$request->has('confirmFlag')) {
+            return response()->json(['message' => 'confirmFlag is required'], 400);
+        }
+
+        $confirmFlag = (bool) $request->input('confirmFlag');
+
+        $topup = Wallet::where('ref_id', $topup_id)->first();
+
+        if (!$topup) {
+            return response()->json(['message' => 'TopUp not found'], 404);
+        }
+        if ($topup->confirmFlag) {
+            return response()->json(['message' => 'TopUp has already been confirmed'], 409);
+        }
+
+        $topup->confirmFlag = $confirmFlag;
+        $topup->save();
+
+        return response()->json([
+            'message' => 'TopUp confirmed successfully',
+            'topup' => $topup
+        ]);
+    }
+
+    
+    /**
+     * Show all wallets with source 'TOP' (TopUp wallets), or filter by a specific topup (ref_id).
+     */
+    public function showTopUpWallets(Request $request, $user_id)
+    {
+        $user_id = $request->has('user_id') ? $request->input('user_id') : $user_id;
+        if (!$user_id) {
+            return response()->json(['message' => 'User ID is required'], 400);
+        }
+
+        $wallets = Wallet::where('user_id', $user_id)
+            ->where('source', 'TOP')
+            ->get();
+
+        if ($wallets->isEmpty()) {
+            return response()->json(['message' => 'No TopUp wallets found'], 404);
+        }
+
+        return response()->json($wallets);
+    }
+
 }

@@ -43,7 +43,7 @@ class RunSpinningAlgorithm extends Command
         //
         $result = $this->spinningService->generateResult();
 
-        Log::info("Spin result: " . $result);
+        Log::info("STWAG Status: " . $result);
         
         // Optional: broadcast event or store to DB
         return Command::SUCCESS;
