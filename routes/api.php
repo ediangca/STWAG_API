@@ -91,7 +91,7 @@ Route::get('/wallets/topup/{user_id}', [TopUpController::class, 'showTopUpWallet
 Route::get('/results', [ResultController::class, 'index'])->name('results.index');
 Route::get('/resultSignal', [ResultController::class, 'resultSignal'])->name('resultSignal');
 // Route::get('/lottery/results/ID/{result_id}', [LotteryController::class, 'createResult']);
-Route::get('/results/{result_id?}', [ResultController::class, 'showRecentOrByID'])->name('results.showRecentOrByID');
+Route::get('/results/id/{result_id?}', [ResultController::class, 'showRecentOrByID'])->name('results.showRecentOrByID');
 
 Route::get('/test-mail', function () {
     Mail::raw('This is a test email from STWAG using Gmail SMTP.', function ($message) {
