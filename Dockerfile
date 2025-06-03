@@ -57,12 +57,12 @@ COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
 # Install PHP dependencies
-RUN composer install
-RUN npm install 
+# RUN composer install
+# RUN npm install 
 
-# RUN composer install --no-dev --optimize-autoloader \
-#  && chown -R www-data:www-data /var/www \
-#  && chmod -R 775 storage bootstrap/cache
+RUN composer install --no-dev --optimize-autoloader \
+ && chown -R www-data:www-data /var/www \
+ && chmod -R 775 storage bootstrap/cache
 
 # Expose the port your Laravel app will use
 EXPOSE 10000
