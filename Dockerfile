@@ -84,6 +84,12 @@ EXPOSE 42604
 # CMD ["php", "while", "do", "php", "artisan", "spin:run;", "sleep", "60;", "done"]
 # CMD ["sh", "-c", "while true; do php artisan spin:run; sleep 60; done"]
 
+# Copy the script to the root of the container
+COPY start.sh /start.sh
+
+# Make it executable
+RUN chmod +x /start.sh
+
 # Start the container using your custom start script
 CMD ["/start.sh"]
 
