@@ -72,6 +72,8 @@ class SpinningService
             $isReady = false;
             $result_id = 'RES' . date('Ymd', strtotime('+1 day')) . '-000' . $currentSession->lottery_id;
             $sessionTime = date('H:i:00', strtotime($currentSession->time));
+            
+            // $sessionTimeLastFiveMinutes = date('H:i:s', strtotime($session->time) - 5 * 60);
             $currentTime = now()->format('H:i:00');
             Log::info('Is Ready: ' . ($isReady ? 'true' : 'false'));
             Log::info('Result ID: ' . $result_id);
@@ -89,7 +91,7 @@ class SpinningService
             //     'Please wait for the result.');
             return 'Betting is close for session ' . date('Y-m-d') . ' - ' . $currentSession->lottery_session . '(' . $currentSession->time . '). ' .
                 'Please wait for the result.';
-        } else if ((!$isReady && $currentTime < $sessionTime) || $now > $sessions->last()->time) {
+        } else if ((!$isReady && $currentTime < $sessionTime) || $currentTime > $sessions->last()->time) { // If the session isn't ready and it's not time yet, or all sessions are over, skip or handle accordingly
             // Log::info('Betting is on process for session ' . date('Y-m-d') . ' - ' . $currentSession->lottery_session . '(' . $currentSession->time . '). \n ' .
             //     'Please wait for the result.');
             return 'Betting is open for session ' . date('Y-m-d') . ' - ' . $currentSession->lottery_session . '(' . $currentSession->time . '). ' .
