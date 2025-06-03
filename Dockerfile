@@ -75,7 +75,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
 RUN npm install
 
 # Expose the port your Laravel app will use
-EXPOSE 42604
+EXPOSE 8080
 
 # Start Laravel server
 # CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8080"]
