@@ -64,6 +64,13 @@ RUN composer install --no-dev --optimize-autoloader \
  && chown -R www-data:www-data /var/www \
  && chmod -R 775 storage bootstrap/cache
 
+ # Install Node.js and npm
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
+
+# Install frontend dependencies
+RUN npm install
+
 # Expose the port your Laravel app will use
 EXPOSE 10000
 
