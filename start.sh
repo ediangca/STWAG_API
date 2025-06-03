@@ -10,6 +10,6 @@ while true; do
 done
 
 # Start Laravel server in the background
-php artisan serve --host=0.0.0.0 --port=10000 &
+php artisan serve --host=0.0.0.0 --port=42604 &
 
 # while true; do php artisan spin:run; sleep 60; done
