@@ -60,11 +60,14 @@ RUN chmod +x /start.sh
 # RUN composer install
 # RUN npm install 
 
-RUN composer install --no-dev --optimize-autoloader \
- && chown -R www-data:www-data /var/www \
- && chmod -R 775 storage bootstrap/cache
+# RUN composer install --no-dev --optimize-autoloader \
+#  && chown -R www-data:www-data /var/www \
+#  && chmod -R 775 storage bootstrap/cache
 
- # Install Node.js and npm
+# Install PHP dependencies
+RUN composer install
+
+# Install Node.js and npm
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs
 
