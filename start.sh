@@ -1,5 +1,6 @@
 #!/bin/sh
 
+php artisan config:cache
 # Run migrations
 php artisan migrate --force
 
