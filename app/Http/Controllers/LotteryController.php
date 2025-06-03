@@ -301,26 +301,5 @@ class LotteryController extends Controller
     }
 
 
-    /**
-     * API endpoint for listing lottery results.
-     * Optional: pass result_id to get a specific result, or get the latest.
-     * Route: GET /lottery/results/{result_id?}
-     */
-    public function listResults(Request $request, $result_id = null)
-    {
-        if ($result_id !== null) {
-            $result = Result::where('result_id', $result_id)->first();
-            if (!$result) {
-                return response()->json(['message' => 'Result not found for '. $result_id], 404);
-            }
-            return response()->json($result);
-        } else {
-            $result = Result::orderBy('created_at', 'desc')->first();
-            if (!$result) {
-                return response()->json(['message' => 'No results found'], 404);
-            }
-            return response()->json($result);
-        }
-    }
 
 }

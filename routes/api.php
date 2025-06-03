@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BetController;
 use App\Http\Controllers\LotteryController;
+use App\Http\Controllers\ResultController;
 use App\Http\Controllers\TopUpController;
 use App\Http\Controllers\WalletController;
 use App\Models\TopUp;
@@ -87,9 +88,10 @@ Route::put('/wallets/topup/confirm/{topup_id}', [TopUpController::class, 'confir
 Route::get('/wallets/topup/{user_id}', [TopUpController::class, 'showTopUpWallets']);
 
 // Result
-Route::get('/resultSignal', [BetController::class, 'resultSignal'])->name('resultSignal');
+Route::get('/results', [ResultController::class, 'index'])->name('results.index');
+Route::get('/resultSignal', [ResultController::class, 'resultSignal'])->name('resultSignal');
 // Route::get('/lottery/results/ID/{result_id}', [LotteryController::class, 'createResult']);
-Route::get('/lottery/results/{result_id?}', [LotteryController::class, 'listResults']);
+Route::get('/lottery/results/{result_id?}', [ResultController::class, 'showRecentOrByID'])->name('results.showRecentOrByID');
 
 Route::get('/test-mail', function () {
     Mail::raw('This is a test email from STWAG using Gmail SMTP.', function ($message) {
