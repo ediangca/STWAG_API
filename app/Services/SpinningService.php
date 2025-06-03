@@ -19,7 +19,8 @@ class SpinningService
         $sessions = Lottery::orderBy('time')->get();
 
         if ($sessions->isEmpty()) {
-            return response()->json(['message' => 'No lottery sessions found'], 404);
+            // return response()->json(['message' => 'No lottery sessions found'], 404);
+            return 'No lottery sessions found. Please check the lottery schedule.';
         }
 
         // Simulate a spinning result based on a random number

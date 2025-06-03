@@ -273,7 +273,7 @@ class WalletController extends Controller
             ->whereNotIn('source', ['BET', 'WTH'])
             ->get();
 
-        $totalPoints = $wallets->sum('points');
+        $totalPoints = $wallets->where('confirmFlag', 1)->sum('points');
 
         if ($wallets->isEmpty()) {
             return response()->json(['message' => 'No wallets found for this user'], 404);
