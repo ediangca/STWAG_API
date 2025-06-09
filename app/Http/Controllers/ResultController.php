@@ -35,9 +35,9 @@ class ResultController extends Controller
                     return $bet->number == $result->winning_number;
                 });
                 if ($hasWinningBet) {
-                    $status = 'Bet found for winning number: ' . $result->winning_number;
+                    $status = 'Bet found for winning number: ' . $result->number;
                 }else{
-                    $status = 'Bet found, but no winning number matched: ' . $result->winning_number;
+                    $status = 'Bet found, but no winning number matched: ' . $result->number;
                 }
             }
 
