@@ -14,36 +14,38 @@ class ResultController extends Controller
 
     public function index()
     {
+        // Fetch all results ordered by result_id descending
         $results = Result::orderBy('result_id', 'desc')->get();
 
         if ($results->isEmpty()) {
             return response()->json(['message' => 'No results found'], 404);
         }
 
-        $resultWithStatus = [];
-        $betStatus  = [];
-        foreach ($results as $result) {
-            $bets = Bet::where('result_id', $result->result_id)->count();
+        // Use Laravel's collection methods for async-like processing
+        // (true async is not natively supported in PHP, but we can optimize)
+        $resultIds = $results->pluck('result_id');
+        $betsGrouped = Bet::whereIn('result_id', $resultIds)->get()->groupBy('result_id');
 
-            if ($bets == 0) {
-                // If no bets found for this result, set status accordingly
-                $betStatus[$result->result_id] = 'No bets found';
-            } else {
-                $bets = Bet::where('result_id', $result->result_id)->get();
-                foreach ($bets as $bet) {
-                    // Check if the bet number matches the winning number
-                    if ($bet->number == $result->winning_number) {
-                        $betStatus[$result->result_id] = 'Bet found for winning number: ' . $result->winning_number;
-                        break; // No need to check further bets for this result
-                    }
+        $resultWithStatus = $results->map(function ($result) use ($betsGrouped) {
+            $bets = $betsGrouped->get($result->result_id, collect());
+            $status = 'No bets found';
+
+            if ($bets->isNotEmpty()) {
+                $hasWinningBet = $bets->contains(function ($bet) use ($result) {
+                    return $bet->number == $result->winning_number;
+                });
+                if ($hasWinningBet) {
+                    $status = 'Bet found for winning number: ' . $result->winning_number;
                 }
             }
-            $resultWithStatus[] = [
+
+            return [
                 'result' => $result,
-                'status' => $betStatus[$result->result_id]
+                'status' => $status
             ];
-        }
-        return response()->json($resultWithStatus);
+        });
+
+        return response()->json($resultWithStatus->values());
     }
 
     /**
