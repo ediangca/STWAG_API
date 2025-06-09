@@ -20,7 +20,7 @@ class ResultController extends Controller
             return response()->json(['message' => 'No results found'], 404);
         }
 
-
+        $resultWithStatus = [];
         $betStatus  = [];
         foreach ($results as $result) {
             $bets = Bet::where('result_id', $results)->get();
@@ -35,12 +35,12 @@ class ResultController extends Controller
                     $betStatus[$result->result_id] = count($winners) . ' winners found for winning number: ' . $winningNumber;
                 }
             }
-            
+            $resultWithStatus[] = [
+                'result' => $result,
+                'betStatus' => $betStatus[$result->result_id]
+            ];
         }
-        return response()->json([
-            'results' => $results,
-            'betStatus' => $betStatus
-        ]);
+        return response()->json($resultWithStatus);
     }
 
     /**
