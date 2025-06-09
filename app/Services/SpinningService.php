@@ -83,7 +83,7 @@ class SpinningService
 
         $result_id = 'RES' . date('Ymd') . '-000' . $currentSession->lottery_id;
 
-        Log::info('Is Ready: ' . ($isReady ? 'true' : 'false'));
+        // Log::info('Is Ready: ' . ($isReady ? 'true' : 'false'));
         Log::info('Result ID: ' . $result_id);
 
         if ($isReady && $currentTime !==  $sessionTime) {
@@ -111,7 +111,6 @@ class SpinningService
 
         if ($bets->isEmpty()) {
             Log::info('No bets found for result ID: ' . $result_id);
-            // return response()->json(['message' => 'No bets found for this result'], 404);
         }
 
         // Calculate total pot
@@ -220,16 +219,17 @@ class SpinningService
             // Add winning points to user's wallet
             if ($winner->user && method_exists($winner->user, 'wallet')) {
                 // If user has a wallet relation, create a wallet transaction of type 'WIN'
-                $winner->user->wallet()->updateOrCreate(
-                    ['type' => 'WIN', 'source' => 'WIN', 'description' => 'Winning points for result ' . $result_id],
-                    ['points' => $userShare]
-                );
+                // $winner->user->wallet()->updateOrCreate(
+                //     ['type' => 'WIN', 'source' => 'WIN', 'description' => 'Winning points for result ' . $result_id],
+                //     ['points' => $userShare]
+                // );
                 $winner->user->wallet()->create([
-                    'wallet_id' => uniqid('WLT') . '-' . substr($winner->user->user_id, 3) . date('YmdHis'),
+                    'wallet_id' => uniqid('WLT') . '-' . substr($winner->user->user_id, 10) . date('YmdHis'),
                     'user_id' => $winner->user->user_id,
                     'points' => $userShare,
-                    'withdrawableFlag' => true,
                     'ref_id' => $result_id,
+                    'withdrawableFlag' => true,
+                    'confirmedFlag' => true,
                     'source' => 'WIN',
                 ]);
             }
@@ -295,40 +295,5 @@ class SpinningService
             ' with winning number ' . $winningNumber .
             ' (Spin1: ' . $spin1 . ', Spin2: ' . $spin2 . ')';
 
-
-        // return response()->json([
-        //     'result' => $result,
-        //     'lottery_id' => $currentSession->lottery_id,
-        //     'winning_number' => $winningNumber,
-        //     'spin1' => $spin1,
-        //     'spin2' => $spin2,
-        //     'total_pot' => $totalPot,
-        //     'winners' => $winners->pluck('user_id'),
-        //     'mechanic' => $totalPot < 9000 ? 'Win Low' : 'Win High',
-        //     'bets' => $bets->pluck('number')->unique()->values(),
-        // ]);
-
-        // Log::info('Result Data:', [
-        //     'result' => $result,
-        //     'lottery_id' => $currentSession->lottery_id,
-        //     'winning_number' => $winningNumber,
-        //     'spin1' => $spin1,
-        //     'spin2' => $spin2,
-        //     'total_pot' => $totalPot,
-        //     'winners' => $winners->pluck('user_id'),
-        //     'mechanic' => $totalPot < 9000 ? 'Win Low' : 'Win High',
-        //     'bets' => $bets->pluck('number')->unique()->values(),
-        // ]);
-
-        // Simulate a spinning result based on time
-        // $timeNow = Carbon::now();
-
-        // Sample time-based spin logic
-        // $seed = $timeNow->timestamp % 1000;
-        // $options = ['Gold', 'Silver', 'Bronze', 'Try Again'];
-        // $index = $seed % count($options);
-
-
-        // return $options[$index];
     }
 }

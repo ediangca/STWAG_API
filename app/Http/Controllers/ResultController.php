@@ -13,14 +13,44 @@ class ResultController extends Controller
 
     public function index()
     {
-        $result = Result::all();
+        $result = Result::orderBy('result_id', 'desc')->get();
         if ($result->isEmpty()) {
             return response()->json(['message' => 'No results found'], 404);
         }
 
         return response()->json($result);
     }
-    
+
+    /**
+     * Delete a result by its result_id.
+     * Route: DELETE /lottery/results/{result_id}
+     */
+    public function deleteById(Request $request, $result_id)
+    {
+        $deleted = Result::where('result_id', $result_id)->delete();
+
+        if ($deleted === 0) {
+            return response()->json(['message' => 'No result found for ' . $result_id], 404);
+        }
+
+        return response()->json(['message' => 'Deleted result with id ' . $result_id]);
+    }
+
+    /**
+     * Delete all results for a given date.
+     * Route: DELETE /lottery/results/by-date/{date}
+     */
+    public function deleteByDate(Request $request, $date)
+    {
+        $deleted = Result::whereDate('created_at', $date)->delete();
+
+        if ($deleted === 0) {
+            return response()->json(['message' => 'No results found for ' . $date], 404);
+        }
+
+        return response()->json(['message' => 'Deleted ' . $deleted . ' result(s) for ' . $date]);
+    }
+
     /**
      * API endpoint for listing lottery results.
      * Optional: pass result_id to get a specific result, or get the latest.
@@ -31,7 +61,7 @@ class ResultController extends Controller
         if ($result_id !== null) {
             $result = Result::where('result_id', $result_id)->first();
             if (!$result) {
-                return response()->json(['message' => 'Result not found for '. $result_id], 404);
+                return response()->json(['message' => 'Result not found for ' . $result_id], 404);
             }
             return response()->json($result);
         } else {
@@ -41,6 +71,35 @@ class ResultController extends Controller
             }
             return response()->json($result);
         }
+
+        if (!$result) {
+            return response()->json(['message' => 'Result not found'. ($result_id !== null? ' for '.$result_id: '').'.'], 404);
+        } else {
+            $session = Lottery::find($result->lottery_id);
+            if (!$session) {
+                return response()->json(['message' => 'Session not found for result ' . $result_id], 404);
+            }
+            return response()->json([
+                'session' => $session,
+                'result' => $result
+            ]);
+        }
+    }
+
+    /**
+     * Show all results for today or a given date.
+     * Route: GET /lottery/results/by-date/{date?}
+     */
+    public function showByDate(Request $request, $date = null)
+    {
+        $date = $date ?? now()->format('Y-m-d');
+        $results = Result::whereDate('created_at', $date)->get();
+
+        if ($results->isEmpty()) {
+            return response()->json(['message' => 'No results found for ' . $date], 404);
+        }
+
+        return response()->json($results);
     }
 
     public function resultSignal(Request $request)

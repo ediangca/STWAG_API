@@ -48,6 +48,7 @@ class CustomVerifyEmail extends Notification
 
         return (new MailMessage)
             ->subject('Verify Your Email Address')
+            ->from(config('mail.from.address'), 'STWAG')
             ->greeting('Hello ' . $notifiable->name . '!')
             ->line('Thank you for registering STWAG! Please verify your email to complete the registration process.')
             ->action('Verify Email', $verificationUrl)

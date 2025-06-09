@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Wallet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -106,7 +107,7 @@ class AuthController extends Controller
                 return response()->json(['message' => 'Reference Code not found.'], 404);
             }
         }
-        
+
         Log::info('Upline code exists', ['uplinecode' => $request->uplinecode]);
 
         $level = DB::selectOne('SELECT count(*) as noOfDownline from users where referencecode = ?', [$request->uplinecode])->noOfDownline;
@@ -175,10 +176,25 @@ class AuthController extends Controller
         }
 
         $user->markEmailAsVerified();
+        $user->save();
 
-        Log::info('Email verified successfully', ['user_id' => $user->id]);
+        $wallet = Wallet::create([
+            'wallet_id' => uniqid('WLT') . '-' . substr($user->user_id, 10) . date('YmdHis'),
+            'user_id' => $user->user_id,
+            'points' => 10,
+            'ref_id' => uniqid('BUN') . '-' . substr($user->user_id, 10) . date('YmdHis'),
+            'withdrawableFlag' => false,
+            'confirmFlag' => true,
+            'source' => 'BUN', // Bonus type
+        ]);
 
-        return response()->json(['message' => 'Email verified successfully. Enjoy and Thank you!']);
+        Log::info('Email verified successfully', ['user_id' => $user->id, 'email' => $user->email]);
+
+        // Redirect to the Ionic frontend after successful verification
+        // return redirect()->away(config('app.frontend_url') . '/email-verified?email=' . urlencode($user->email));
+
+        
+        return response()->json(['message' => 'Email verified successfully. Enjoy 10 points Bunos, Thank you!']);
     }
 
     public function resendVerificationEmail(Request $request)
@@ -207,8 +223,8 @@ class AuthController extends Controller
 
         try {
             $user->sendEmailVerificationNotification();
-            Log::info('Verification email sent', ['user_id' => $user->id]);
-            return response()->json(['message' => 'Verification email resent successfully']);
+            Log::info('Verification email sent to ', ['user_id' => $user->user_id , 'email' => $user->email]);
+            return response()->json(['message' => 'Verification email resent successfully to ' . $user->email], 200);
         } catch (\Exception $e) {
             Log::error('Error sending verification email', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'Failed to resend verification email. Please try again later.'], 500);

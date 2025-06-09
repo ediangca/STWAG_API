@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Bet;
 use App\Models\Lottery;
 use App\Models\Result;
+use App\Models\Wallet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -76,22 +77,6 @@ class BetController extends Controller
             }
         }
 
-        // try{
-        // $request->validate([
-        //     'result_id' => 'nullable|string', //RES<YEAR><MM><DD><SESSION>
-        //     'user_id' => 'required|string',
-        //     'number' => 'required|string',
-        //     'points' => 'nullable|numeric',
-        //     'Datetime' => 'required|date',
-        // ]);
-
-        // } catch (ValidationException $e) {
-        //     return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
-        // }
-
-        // $bet = Bet::create($request->all());
-        // return response()->json($bet, 201);
-
         return response()->json([
             'current_time' => $now,
             'session' => $currentSession,
@@ -122,8 +107,19 @@ class BetController extends Controller
         } catch (ValidationException $e) {
             return response()->json(['message' => 'Validation faileddasdasdasd', 'errors' => $e->errors()], 422);
         }
+        
+        $user_id = $request->user_id;
 
-        $user = User::where('user_id', $request->user_id)->first();
+        $allowedPoints = [1, 5, 10, 30, 50, 70, 100, 150, 200, 300, 500, 700, 1000];
+        foreach ($request->bets as $bet) {
+            if (!in_array($bet['points'], $allowedPoints)) {
+                return response()->json([
+                    'message' => "Invalid bet denomination: {$bet['points']}. Allowed denominations are: " . implode(', ', $allowedPoints)
+                ], 422);
+            }
+        }
+
+        $user = User::where('user_id', $user_id)->first();
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
         }
@@ -207,7 +203,7 @@ class BetController extends Controller
         // Place bets
         foreach ($request->bets as $bet) {
             if (Bet::where('result_id', $result_id)
-                ->where('user_id', $request->user_id)
+                ->where('user_id', $user_id)
                 ->where('number', $bet['number'])
                 ->exists()
             ) {
@@ -219,22 +215,114 @@ class BetController extends Controller
             }
             Bet::create([
                 'result_id' => $result_id,
-                'user_id' => $request->user_id,
+                'user_id' => $user_id,
                 'number' => $bet['number'],
                 'points' => $bet['points'],
                 // 'Datetime' => now(),
             ]);
         }
 
-        $bets = Bet::where('user_id', $request->user_id)->where('result_id', $result_id)->get();
+        $bets = Bet::where('user_id', $user_id)->where('result_id', $result_id)->get();
 
         if ($bets->isEmpty()) {
             return response()->json(['message' => 'No bets found'], 404);
         }
 
+        /*
+        // Cashback logic: If user places a bet or tops up five consecutive times, reward 1% or 5 points (whichever is higher)
+        // Count consecutive bets (or top-ups if you have a TopUp model) for this user
+        // Find the last bet where cashback was given (by checking Wallet with source 'CBK')
+       
+         $lastCashback = Wallet::where('user_id', $user_id)
+            ->where('source', 'CBK')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        // Get the timestamp to start counting from (after last cashback or from the beginning)
+        $startFrom = $lastCashback ? $lastCashback->created_at : null;
+
+        // Get the next 5 bets after the last cashback (or from the beginning if none)
+        $consecutiveBets = Bet::where('user_id', $user_id)
+            ->when($startFrom, function ($query, $startFrom) {
+            return $query->where('created_at', '>', $startFrom);
+            })
+            ->groupBy('result_id')
+            ->orderBy('created_at', 'asc')
+            ->take(5)
+            ->get();
+
+        // If there are 5 consecutive bets (could add more logic for top-ups if needed)
+        if ($consecutiveBets->count() == 5) {
+            // Calculate total points for these 5 bets
+            $totalPoints = $consecutiveBets->sum('points');
+            $cashback = max(round($totalPoints * 0.01), 5);
+
+            $wallet = Wallet::create([
+                'wallet_id' => uniqid('WLT') . '-' . substr($user->user_id, 10) . date('YmdHis'),
+                'user_id' => $user->user_id,
+                'points' => $cashback,
+                'ref_id' => uniqid('CBK') . '-' . substr($user->user_id, 10) . date('YmdHis'),
+                'withdrawableFlag' => false,
+                'confirmFlag' => true,
+                'source' => 'CBK', // Bonus type
+            ]);
+
+            $user->save();
+
+            // Optionally, log or return cashback info
+            Log::info("Cashback of {$cashback} points added to user {$user->user_id} wallet for 5 consecutive bets.");
+        }
+         */
+
+        // Count the number of unique result_ids the user has placed bets on
+        $betGroupCount = Bet::where('user_id', $user_id)
+            ->select('result_id')
+            ->distinct()
+            ->count();
+
+        $cashback = 0;
+        $consecutiveBets = collect();
+        if ($betGroupCount > 0 && $betGroupCount % 5 == 0) {
+            // Get the last 5 result_ids for this user
+            $lastFiveResultIds = Bet::where('user_id', $user_id)
+                ->select('result_id')
+                ->distinct()
+                ->orderBy('created_at', 'desc')
+                ->limit(5)
+                ->pluck('result_id');
+
+            // Sum all points for these 5 result_ids
+            $totalPoints = Bet::where('user_id', $user_id)
+                ->whereIn('result_id', $lastFiveResultIds)
+                ->sum('points');
+
+            $cashback = max(5, round($totalPoints * 0.01));
+
+            Wallet::create([
+                'wallet_id' => uniqid('WLT') . '-' . substr($user_id, 3) . date('YmdHis'),
+                'user_id' => $user_id,
+                'points' => $cashback,
+                'ref_id' => uniqid('CBK') . '-' . substr($user_id, 3) . date('YmdHis'),
+                'withdrawableFlag' => false,
+                'confirmFlag' => true,
+                'source' => 'CBK', // Bonus type
+            ]);
+
+            // For message
+            $consecutiveBets = Bet::where('user_id', $user_id)
+                ->whereIn('result_id', $lastFiveResultIds)
+                ->get();
+        }
+
+
+        $message = 'Bet has been successfully placed.';
+        if ($consecutiveBets->count() == 5) {
+            $message .= ' You have placed 5 consecutive bets. Cashback of ' . $cashback . ' points has been added to your wallet.';
+        }
+
         return response()->json([
             'bets' => $bets,
-            'message' => 'Bet has been successfully placed.'
+            'message' => $message,
         ], 201);
     }
 
