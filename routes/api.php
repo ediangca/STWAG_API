@@ -69,6 +69,7 @@ Route::post('/lottery', [LotteryController::class, 'store']);
 Route::get('/betReady', [BetController::class, 'betSignal'])->name('betReady');
 Route::post('/bets', [BetController::class, 'storeMultipleBets'])->name('bets.store');
 Route::get('/showBetsByResultId/{result_id}', [BetController::class, 'showBetsByResultId'])->name('bets.showByResultId');
+Route::get('/showBetsByUserID&ResultId/{result_id?}', [BetController::class, 'showBetByUserIDandResultID'])->name('bets.showBetByUserIDandResultID');
 Route::get('/bet-limit-exceeded/{result_id}/{number}', [BetController::class, 'isBetLimitExceeded'])->name('bets.isBetLimitExceeded');
 
 //Wallet Routes

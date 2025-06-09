@@ -107,7 +107,7 @@ class BetController extends Controller
         } catch (ValidationException $e) {
             return response()->json(['message' => 'Validation faileddasdasdasd', 'errors' => $e->errors()], 422);
         }
-        
+
         $user_id = $request->user_id;
 
         $allowedPoints = [1, 5, 10, 30, 50, 70, 100, 150, 200, 300, 500, 700, 1000];
@@ -338,6 +338,50 @@ class BetController extends Controller
         }
 
         return response()->json($bets);
+    }
+
+    /**
+     * Display all bets for a given user_id and optional result_id.
+     * If result_id is not provided, it returns the latest bet for the user.
+     */
+    public function showBetByUserIDandResultID(Request $request, $result_id = null)
+    {
+        if (!$request->has('user_id')) {
+            return response()->json(['message' => 'User ID is required'], 400);
+        }
+        Log::info('Request to show bets by user ID and result ID', [
+            'user_id' => $request->user_id,
+            'result_id' => $result_id
+        ]);
+
+        $user_id = $request->user_id;
+
+        if ($result_id !== null) {
+            $bets = Bet::where('user_id', $user_id)
+                ->where('result_id', $result_id)
+                ->get();
+        } else {
+            $bets = Bet::where('user_id', $user_id)
+                ->orderBy('created_at', 'desc')
+                ->limit(1)
+                ->get();
+
+            if ($bets->isEmpty()) {
+                return response()->json(['message' => 'No bets found for user ' . $user_id.' yet.'], 404);
+            }
+        }
+
+        $bet = $bets->first();
+
+
+
+        if (!$bet) {
+            return response()->json(['message' => 'No Bet found for ' . ($result_id !== null ? $result_id : $bets->result_id) . '.'], 404);
+        } else {
+            return response()->json([
+                'result' => $bets
+            ]);
+        }
     }
 
     /**
