@@ -60,16 +60,16 @@ class ResultController extends Controller
     {
         if ($result_id !== null) {
             $result = Result::where('result_id', $result_id)->first();
-            if (!$result) {
-                return response()->json(['message' => 'Result not found for ' . $result_id], 404);
-            }
-            return response()->json($result);
+            // if (!$result) {
+            //     return response()->json(['message' => 'Result not found for ' . $result_id], 404);
+            // }
+            // return response()->json($result);
         } else {
             $result = Result::orderBy('created_at', 'desc')->first();
-            if (!$result) {
-                return response()->json(['message' => 'No results found'], 404);
-            }
-            return response()->json($result);
+            // if (!$result) {
+            //     return response()->json(['message' => 'No results found'], 404);
+            // }
+            // // return response()->json($result);
         }
 
         if (!$result) {
