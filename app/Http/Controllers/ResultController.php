@@ -16,7 +16,7 @@ class ResultController extends Controller
      *
      * Retrieves all results ordered by descending result ID. For each result, it checks for associated bets:
      * - If no bets are found for a result, the status is "No bets found".
-     * - If bets are found and at least one bet matches the winning number, the status indicates a winning bet was found.
+     * - If bets are found and at least one bet matches the winning number, the status indicates a winning bet was found and returns number of winning.
      * - If bets are found but none match the winning number, the status indicates no winning bet was found.
      *
      */
@@ -37,11 +37,15 @@ class ResultController extends Controller
 
             if ($bets->isNotEmpty()) {
                 $hasWinningBet = $bets->contains(function ($bet) use ($result) {
-                    return $bet->number == $result->winning_number;
+                    return $bet->number == $result->number;
                 });
+
                 if ($hasWinningBet) {
-                    $status = 'Bet found for winning number: ' . $result->number;
-                }else{
+                    // Count the number of winning bets for the winning number
+                    $winningBetCount = $bets->where('number', $result->number)->count();
+                    $status = 'Bet found for winning number: ' . $result->number . ' (' . $winningBetCount . ' winning bet(s))';
+                    // $status = 'Bet found for winning number: ' . $result->number;
+                } else {
                     $status = 'Bet found, but no winning number matched: ' . $result->number;
                 }
             }
