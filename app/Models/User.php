@@ -135,7 +135,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->email;
     }
-    
+
     /**
      * Get the wallet relationship for the user.
      *
@@ -144,8 +144,8 @@ class User extends Authenticatable implements MustVerifyEmail
     // App\Models\User.php
     public function wallet()
     {
-        return $this->hasOne(Wallet::class);
-    } 
+        return $this->hasMany(Wallet::class, 'user_id', 'user_id');
+    }
     // App\Models\User.php
     public function upline()
     {

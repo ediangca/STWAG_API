@@ -6,6 +6,7 @@ namespace App\Services;
 use App\Models\Bet;
 use App\Models\Result;
 use App\Models\Lottery;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -72,7 +73,7 @@ class SpinningService
             $isReady = false;
             $result_id = 'RES' . date('Ymd', strtotime('+1 day')) . '-000' . $currentSession->lottery_id;
             $sessionTime = date('H:i:00', strtotime($currentSession->time));
-            
+
             // $sessionTimeLastFiveMinutes = date('H:i:s', strtotime($session->time) - 5 * 60);
             $currentTime = now()->format('H:i:00');
             Log::info('Is Ready: ' . ($isReady ? 'true' : 'false'));
@@ -211,7 +212,21 @@ class SpinningService
             Log::info('No winners found for winning number: ' . $winningNumber);
             // return 'No winners found for winning number: ' . $winningNumber;
         }
+
         $totalWinningPoints = $winners->sum('points');
+
+        Log::info('Final Result Data:', [
+            'result' => $result,
+            'lottery_id' => $currentSession->lottery_id,
+            'winning_number' => $winningNumber,
+            'spin1' => $spin1,
+            'spin2' => $spin2,
+            'total_pot' => $totalPot,
+            'winners' => $winners->pluck('user_id'),
+            'mechanic' => $totalPot < 9000 ? 'Win Low' : 'Win High',
+            'bets' => $bets->pluck('number')->unique()->values(),
+        ]);
+
         foreach ($winners as $winner) {
             // Distribute 70% of the pot proportionally to winners
             $userShare = $totalWinningPoints > 0 ? ($winner->points / $totalWinningPoints) * $winningShare : 0;
@@ -223,77 +238,112 @@ class SpinningService
                 //     ['type' => 'WIN', 'source' => 'WIN', 'description' => 'Winning points for result ' . $result_id],
                 //     ['points' => $userShare]
                 // );
+                // $winnerUser = $winner->user;
+                // Log::info(['winner->user', $winnerUser]);
+
                 $winner->user->wallet()->create([
                     'wallet_id' => uniqid('WLT') . '-' . substr($winner->user->user_id, 10) . date('YmdHis'),
                     'user_id' => $winner->user->user_id,
                     'points' => $userShare,
                     'ref_id' => $result_id,
                     'withdrawableFlag' => true,
-                    'confirmedFlag' => true,
+                    'confirmFlag' => true,
                     'source' => 'WIN',
                 ]);
+
+                // Distribute 10% incentives to upline if applicable
+                // Incentive Distribution Logic
+                // 3% reserved for original 13 founding members
+                // 7% distributed through downline/upline structure
+
+                $foundingMemberIds = User::where('type', 'member')->pluck('user_id')->toArray();
+
+                // Distribute 3% to founding members
+                $foundingShare = $incentivesShare * 0.3;
+                $perFounder = $foundingShare / count($foundingMemberIds);
+                foreach ($foundingMemberIds as $founderId) {
+                    $founder = User::find($founderId);
+                    if ($founder && method_exists($founder, 'wallet')) {
+                        $founder->wallet()->create([
+                            'wallet_id' => uniqid('WLT') . '-' . substr($founder->user_id, 10) . date('YmdHis'),
+                            'user_id' => $founder->user_id,
+                            'points' => $perFounder,
+                            'ref_id' => $result_id,
+                            'withdrawableFlag' => true,
+                            'confirmFlag' => true,
+                            'source' => 'INC',
+                        ]);
+                    }
+                }
+
+                // 7% for downline/upline structure
+                $remainingIncentive = $incentivesShare * 0.7;
+                $currentUser = $winner->user;
+                $level = 1;
+                $incentiveLeft = $remainingIncentive;
+                $directUplineFound = false;
+
+                while ($currentUser && $currentUser->upline && $incentiveLeft > 0) {
+                    $upline = $currentUser->upline;
+
+                    // If direct upline is a bettor in this result, give 7% to direct upline and stop
+                    $isDirectUplineBettor = $winners->contains('user_id', $upline->user_id);
+                    if ($level == 1 && $isDirectUplineBettor) {
+                        $uplineShare = $remainingIncentive;
+                        if (method_exists($upline, 'wallet')) {
+                            $upline->wallet()->create([
+                                'wallet_id' => uniqid('WLT') . '-' . substr($upline->user_id, 10) . date('YmdHis'),
+                                'user_id' => $upline->user_id,
+                                'points' => $uplineShare,
+                                'ref_id' => $result_id,
+                                'withdrawableFlag' => true,
+                                'confirmFlag' => true,
+                                'source' => 'INCENTIVE',
+                            ]);
+                        }
+                        break;
+                    }
+
+                    // If not direct, distribute 2% per level until next direct upline bettor
+                    $share = min(0.02, $incentiveLeft / $remainingIncentive); // 2% per level
+                    $uplineShare = $incentivesShare * $share;
+                    if ($uplineShare < 0.01 * $incentivesShare) {
+                        // If only 1% left, give 1% and stop
+                        $uplineShare = $incentivesShare * 0.01;
+                        if (method_exists($upline, 'wallet')) {
+                            $upline->wallet()->create([
+                                'wallet_id' => uniqid('WLT') . '-' . substr($upline->user_id, 10) . date('YmdHis'),
+                                'user_id' => $upline->user_id,
+                                'points' => $uplineShare,
+                                'ref_id' => $result_id,
+                                'withdrawableFlag' => true,
+                                'confirmFlag' => true,
+                                'source' => 'INC',
+                            ]);
+                        }
+                        break;
+                    }
+
+                    if (method_exists($upline, 'wallet')) {
+                        $upline->wallet()->create([
+                            'wallet_id' => uniqid('WLT') . '-' . substr($upline->user_id, 10) . date('YmdHis'),
+                            'user_id' => $upline->user_id,
+                            'points' => $uplineShare,
+                            'ref_id' => $result_id,
+                            'withdrawableFlag' => true,
+                            'confirmFlag' => true,
+                            'source' => 'INC',
+                        ]);
+                    }
+                    $incentiveLeft -= $uplineShare;
+                    $currentUser = $upline;
+                    $level++;
+                }
             }
-            // elseif ($winner->user) {
-            //     // Fallback if no wallet relation, create a wallet transaction of type 'WIN'
-            //     $winner->user->wallet()->create([
-            //         'points' => $userShare,
-            //         'type' => 'WIN',
-            //         'source' => 'WIN',
-            //         'description' => 'Winning points for result ' . $result_id,
-            //     ]);
-            // }
-
-            // Distribute 10% incentives to upline if applicable
-            // if ($winner->user && method_exists($winner->user, 'upline') && $winner->user->upline) {
-            //     $uplineShare = $incentivesShare * ($winner->points / $totalWinningPoints);
-
-            //     // Add incentive points to upline's wallet
-            //     if (method_exists($winner->user->upline, 'wallet') && $winner->user->upline->wallet) {
-            //         $winner->user->upline->wallet->increment('points', $uplineShare);
-            //     } else {
-            //         $winner->user->upline->increment('points', $uplineShare);
-            //     }
-            // }
         }
-
-
-        // $winners = $bets->where('number', $winningNumber)->where('result_id', $result_id);
-        // $totalWinningPoints = $winners->sum('points');
-        // foreach ($winners as $winner) {
-        //     // Distribute 70% of the pot proportionally to winners
-        //     $userShare = $totalWinningPoints > 0 ? ($winner->points / $totalWinningPoints) * $winningShare : 0;
-        //     $winner->user->increment('points', $userShare);
-
-        //     // Distribute 10% incentives to upline if applicable
-        //     if (method_exists($winner->user, 'upline') && $winner->user->upline) {
-        //         $uplineShare = $incentivesShare * ($winner->points / $totalWinningPoints);
-        //         $winner->user->upline->increment('points', $uplineShare);
-        //     }
-        // }
-
-        // Calculate winnings for users
-        // $winners = $bets->where('number', $winningNumber)->where('result_id', $result_id);
-        // foreach ($winners as $winner) {
-        //     $winner->user->increment('points', $winner->points * 7);
-        //     // Optionally, log or notify winner
-        // }
-
-
-        // Log::info('Final Result Data:', [
-        //     'result' => $result,
-        //     'lottery_id' => $currentSession->lottery_id,
-        //     'winning_number' => $winningNumber,
-        //     'spin1' => $spin1,
-        //     'spin2' => $spin2,
-        //     'total_pot' => $totalPot,
-        //     'winners' => $winners->pluck('user_id'),
-        //     'mechanic' => $totalPot < 9000 ? 'Win Low' : 'Win High',
-        //     'bets' => $bets->pluck('number')->unique()->values(),
-        // ]);
 
         return 'Final Result for Result ID ' . $result_id . '-' .  date('Y-m-d') . ' - ' . $currentSession->lottery_session . '( ' . $currentSession->time . '). ' .
             ' with winning number ' . $winningNumber .
             ' (Spin1: ' . $spin1 . ', Spin2: ' . $spin2 . ')';
-
     }
 }

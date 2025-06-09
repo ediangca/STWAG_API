@@ -321,8 +321,8 @@ class BetController extends Controller
         }
 
         return response()->json([
-            'bets' => $bets,
             'message' => $message,
+            'bets' => $bets
         ], 201);
     }
 

@@ -20,10 +20,10 @@ class Result extends Model
         'result_id',
         'lottery_id',
         'number',
-        // 'winning_points', 
-        // 'incentives_share',  
-        // 'mother_share',  
-        // 'admin_share',  
-        // 'other_share'  
+        'winning_points', 
+        'incentives_share',  
+        'mother_share',  
+        'admin_share',  
+        'other_share'  
     ];
 }
