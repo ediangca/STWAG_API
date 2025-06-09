@@ -10,19 +10,24 @@ use Illuminate\Support\Facades\Log;
 
 class ResultController extends Controller
 {
-    //
 
+    /**
+     * Display a listing of results with their associated bet status.
+     *
+     * Retrieves all results ordered by descending result ID. For each result, it checks for associated bets:
+     * - If no bets are found for a result, the status is "No bets found".
+     * - If bets are found and at least one bet matches the winning number, the status indicates a winning bet was found.
+     * - If bets are found but none match the winning number, the status indicates no winning bet was found.
+     *
+     */
     public function index()
     {
-        // Fetch all results ordered by result_id descending
         $results = Result::orderBy('result_id', 'desc')->get();
 
         if ($results->isEmpty()) {
             return response()->json(['message' => 'No results found'], 404);
         }
 
-        // Use Laravel's collection methods for async-like processing
-        // (true async is not natively supported in PHP, but we can optimize)
         $resultIds = $results->pluck('result_id');
         $betsGrouped = Bet::whereIn('result_id', $resultIds)->get()->groupBy('result_id');
 
