@@ -360,6 +360,7 @@ class BetController extends Controller
             $bets = Bet::where('user_id', $user_id)
                 ->where('result_id', $result_id)
                 ->get();
+                
         } else {
             $bets = Bet::where('user_id', $user_id)
                 ->orderBy('created_at', 'desc')
@@ -372,8 +373,6 @@ class BetController extends Controller
         }
 
         $bet = $bets->first();
-
-
 
         if (!$bet) {
             return response()->json(['message' => 'No Bet found for ' . ($result_id !== null ? $result_id : $bets->result_id) . '.'], 404);

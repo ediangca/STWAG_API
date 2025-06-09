@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bet;
 use App\Models\Lottery;
 use Illuminate\Http\Request;
 use App\Models\Result;
@@ -13,12 +14,33 @@ class ResultController extends Controller
 
     public function index()
     {
-        $result = Result::orderBy('result_id', 'desc')->get();
-        if ($result->isEmpty()) {
+        $results = Result::orderBy('result_id', 'desc')->get();
+
+        if ($results->isEmpty()) {
             return response()->json(['message' => 'No results found'], 404);
         }
 
-        return response()->json($result);
+
+        $betStatus  = [];
+        foreach ($results as $result) {
+            $bets = Bet::where('result_id', $results)->get();
+            if ($bets->isEmpty()) {
+                $betStatus[$result->result_id] = 'No bets found';
+            } else {
+                $winningNumber = $result->winning_number;
+                $winners = $bets->where('number', $winningNumber);
+                if ($winners->isEmpty()) {
+                    $betStatus[$result->result_id] = 'No winners for winning number: ' . $winningNumber;
+                } else {
+                    $betStatus[$result->result_id] = count($winners) . ' winners found for winning number: ' . $winningNumber;
+                }
+            }
+            
+        }
+        return response()->json([
+            'results' => $results,
+            'betStatus' => $betStatus
+        ]);
     }
 
     /**
@@ -73,8 +95,9 @@ class ResultController extends Controller
         }
 
         if (!$result) {
-            return response()->json(['message' => 'Result not found'. ($result_id !== null? ' for '.$result_id: '').'.'], 404);
+            return response()->json(['message' => 'Result not found' . ($result_id !== null ? ' for ' . $result_id : '') . '.'], 404);
         } else {
+
             $session = Lottery::find($result->lottery_id);
             if (!$session) {
                 return response()->json(['message' => 'Session not found for result ' . $result_id], 404);
