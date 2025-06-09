@@ -23,21 +23,24 @@ class ResultController extends Controller
         $resultWithStatus = [];
         $betStatus  = [];
         foreach ($results as $result) {
-            $bets = Bet::where('result_id', $results)->get();
-            if ($bets->isEmpty()) {
+            $bets = Bet::where('result_id', $result->result_id)->count();
+
+            if ($bets == 0) {
+                // If no bets found for this result, set status accordingly
                 $betStatus[$result->result_id] = 'No bets found';
             } else {
-                $winningNumber = $result->winning_number;
-                $winners = $bets->where('number', $winningNumber);
-                if ($winners->isEmpty()) {
-                    $betStatus[$result->result_id] = 'No winners for winning number: ' . $winningNumber;
-                } else {
-                    $betStatus[$result->result_id] = count($winners) . ' winners found for winning number: ' . $winningNumber;
+                $bets = Bet::where('result_id', $result->result_id)->get();
+                foreach ($bets as $bet) {
+                    // Check if the bet number matches the winning number
+                    if ($bet->number == $result->winning_number) {
+                        $betStatus[$result->result_id] = 'Bet found for winning number: ' . $result->winning_number;
+                        break; // No need to check further bets for this result
+                    }
                 }
             }
             $resultWithStatus[] = [
                 'result' => $result,
-                'betStatus' => $betStatus[$result->result_id]
+                'status' => $betStatus[$result->result_id]
             ];
         }
         return response()->json($resultWithStatus);
