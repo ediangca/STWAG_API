@@ -193,7 +193,7 @@ class ResultController extends Controller
 
         $user = User::find($user_id);
         if (!$user) {
-            return response()->json(['message' => 'User not found.' . $result_id], 404);
+            return response()->json(['message' => 'User not found.'], 404);
         }
 
         if ($result_id !== null) {
