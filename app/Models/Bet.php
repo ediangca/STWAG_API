@@ -12,7 +12,7 @@ class Bet extends Model
 
     protected $table = 'bets';
 
-    protected $primaryKey = 'bet_id'; 
+    protected $primaryKey = 'bet_id';
 
     protected $fillable = [
         'result_id',
@@ -23,7 +23,6 @@ class Bet extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
-    
 }

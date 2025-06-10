@@ -6,6 +6,8 @@ use App\Models\Bet;
 use App\Models\Lottery;
 use Illuminate\Http\Request;
 use App\Models\Result;
+use App\Models\User;
+use App\Models\Wallet;
 use Illuminate\Support\Facades\Log;
 
 class ResultController extends Controller
@@ -114,13 +116,51 @@ class ResultController extends Controller
             return response()->json(['message' => 'Result not found' . ($result_id !== null ? ' for ' . $result_id : '') . '.'], 404);
         } else {
 
+            $winningBets = Bet::where('result_id', $result->result_id)
+                ->where('number', $result->number)
+                ->with('user') // use the correct relationship name
+                ->get();
+                // Fetch wallet details where ref_id matches result_id and user_id is among the winners
+                $winnerUserIds = $winningBets->pluck('user_id')->unique()->toArray();
+                $wallets = Wallet::where('ref_id', $result->result_id)
+                    ->whereIn('user_id', $winnerUserIds)
+                    ->get();
+
+                // Attach wallet details to each winner
+                $winners = $winningBets->map(function ($bet) use ($wallets) {
+                    //FAQ: There's an intance that user will bet same number but may differ about time and the points bet, point of this, can we change this part to sum
+                    $wallet = $wallets->where('user_id', $bet->user_id)->first(); 
+                    return [
+                        'user_id' => $bet->user->user_id ?? null,
+                        'fullname' => ($bet->user->firstname.' '.$bet->user->lastname) ?? null,
+                        'bet_id' => $bet->bet_id,
+                        'bet_number' => $bet->number,
+                        'wallet' => $wallet ? [
+                            'wallet_id' => $wallet->wallet_id,
+                            'points' => $wallet->points,
+                            'ref_id' => $wallet->ref_id,
+                        ] : null,
+                    ];
+                });
+
+            // $winners = $winningBets->map(function ($bet) {
+            //     return [
+            //         'user_id' => $bet->user->user_id ?? null,
+            //         'fullname' => ($bet->user->firstname.' '.$bet->user->lastname) ?? null,
+            //         'bet_id' => $bet->bet_id,
+            //         'bet_number' => $bet->number,
+            //     ];
+            // });
+
             $session = Lottery::find($result->lottery_id);
             if (!$session) {
                 return response()->json(['message' => 'Session not found for result ' . $result_id], 404);
             }
+            
             return response()->json([
                 'session' => $session,
-                'result' => $result
+                'result' => $result,
+                'winners' => $winners->isEmpty() ? 'No winners found for this result.' : $winners
             ]);
         }
     }
