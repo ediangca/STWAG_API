@@ -36,6 +36,7 @@ class ResultController extends Controller
         $resultWithStatus = $results->map(function ($result) use ($betsGrouped) {
             $bets = $betsGrouped->get($result->result_id, collect());
             $status = 'No bets found';
+            $winners = [];
 
             if ($bets->isNotEmpty()) {
                 $hasWinningBet = $bets->contains(function ($bet) use ($result) {
@@ -47,6 +48,16 @@ class ResultController extends Controller
                     $winningBetCount = $bets->where('number', $result->number)->count();
                     $status = 'Bet found for winning number: ' . $result->number . ' (' . $winningBetCount . ' winning bet(s))';
                     // $status = 'Bet found for winning number: ' . $result->number;
+                    $winners = $bets->where('number', $result->number)
+                        ->map(function ($bet) {
+                            $user = $bet->user;
+                            return [
+                                'user_id' => $user->user_id ?? null,
+                                'fullname' => isset($user) ? ($user->firstname . ' ' . $user->lastname) : null,
+                                'bet_id' => $bet->bet_id,
+                                'bet_number' => $bet->number,
+                            ];
+                        })->values();
                 } else {
                     $status = 'Bet found, but no winning number matched: ' . $result->number;
                 }
@@ -54,7 +65,8 @@ class ResultController extends Controller
 
             return [
                 'result' => $result,
-                'status' => $status
+                'status' => $status,
+                'winners' => $winners
             ];
         });
 
@@ -96,7 +108,7 @@ class ResultController extends Controller
      * Optional: pass result_id to get a specific result, or get the latest.
      * Route: GET /lottery/results/{result_id?}
      */
-    public function showRecentOrByID(Request $request, $result_id = null)
+    public function showRecentOrByRID(Request $request, $result_id = null)
     {
         if ($result_id !== null) {
             $result = Result::where('result_id', $result_id)->first();
@@ -120,47 +132,143 @@ class ResultController extends Controller
                 ->where('number', $result->number)
                 ->with('user') // use the correct relationship name
                 ->get();
-                // Fetch wallet details where ref_id matches result_id and user_id is among the winners
-                $winnerUserIds = $winningBets->pluck('user_id')->unique()->toArray();
-                $wallets = Wallet::where('ref_id', $result->result_id)
-                    ->whereIn('user_id', $winnerUserIds)
-                    ->get();
+            // Fetch wallet details where ref_id matches result_id and user_id is among the winners
+            $winnerUserIds = $winningBets->pluck('user_id')->unique()->toArray();
+            $wallets = Wallet::where('ref_id', $result->result_id)
+                ->whereIn('user_id', $winnerUserIds)
+                ->get();
 
-                // Attach wallet details to each winner
-                $winners = $winningBets->map(function ($bet) use ($wallets) {
-                    //FAQ: There's an intance that user will bet same number but may differ about time and the points bet, point of this, can we change this part to sum
-                    $wallet = $wallets->where('user_id', $bet->user_id)->first(); 
-                    return [
-                        'user_id' => $bet->user->user_id ?? null,
-                        'fullname' => ($bet->user->firstname.' '.$bet->user->lastname) ?? null,
-                        'bet_id' => $bet->bet_id,
-                        'bet_number' => $bet->number,
-                        'wallet' => $wallet ? [
-                            'wallet_id' => $wallet->wallet_id,
-                            'points' => $wallet->points,
-                            'ref_id' => $wallet->ref_id,
-                        ] : null,
-                    ];
-                });
-
-            // $winners = $winningBets->map(function ($bet) {
-            //     return [
-            //         'user_id' => $bet->user->user_id ?? null,
-            //         'fullname' => ($bet->user->firstname.' '.$bet->user->lastname) ?? null,
-            //         'bet_id' => $bet->bet_id,
-            //         'bet_number' => $bet->number,
-            //     ];
-            // });
+            // Attach wallet details to each winner
+            $winners = $winningBets->map(function ($bet) use ($wallets) {
+                //FAQ: There's an intance that user will bet same number but may differ about time and the points bet, point of this, can we change this part to sum
+                $wallet = $wallets->where('user_id', $bet->user_id)->first();
+                return [
+                    'user_id' => $bet->user->user_id ?? null,
+                    'fullname' => ($bet->user->firstname . ' ' . $bet->user->lastname) ?? null,
+                    'bet_id' => $bet->bet_id,
+                    'bet_number' => $bet->number,
+                    'wallet' => $wallet ? [
+                        'wallet_id' => $wallet->wallet_id,
+                        'points' => $wallet->points,
+                        'ref_id' => $wallet->ref_id,
+                    ] : null,
+                ];
+            });
 
             $session = Lottery::find($result->lottery_id);
             if (!$session) {
                 return response()->json(['message' => 'Session not found for result ' . $result_id], 404);
             }
-            
+
             return response()->json([
                 'session' => $session,
                 'result' => $result,
                 'winners' => $winners->isEmpty() ? 'No winners found for this result.' : $winners
+            ]);
+        }
+    }
+
+    /**
+     * Show all results for a specific user, optionally filtered by result_id.
+     *
+     * This endpoint returns the result and winning bet details for a given user.
+     * - If result_id is provided, it fetches the result for that ID; otherwise, it fetches the latest result.
+     * - Checks if the user exists.
+     * - If the user has a winning bet (matching the result number), returns winner details and wallet info.
+     * - If not, returns a message indicating the user did not win.
+     *
+     * Route: GET /lottery/results/user/{user_id}/{result_id?}
+     *
+     * @param Request $request
+     * @param int $user_id
+     * @param int|null $result_id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showRecentOrByRIDandUID(Request $request, $user_id, $result_id = null)
+    {
+
+        if ($user_id == null && $user_id == '') {
+            return response()->json(['message' => 'User ID is required'], 400);
+        }
+
+        $user = User::find($user_id);
+        if (!$user) {
+            return response()->json(['message' => 'User not found.' . $result_id], 404);
+        }
+
+        if ($result_id !== null) {
+            $result = Result::where('result_id', $result_id)->first();
+        } else {
+            $result = Result::orderBy('created_at', 'desc')->first();
+        }
+
+        if (!$result) {
+            return response()->json(['message' => 'Result not found' . ($result_id !== null ? ' for ' . $result_id : '') . '.'], 404);
+        } else {
+
+            $session = Lottery::find($result->lottery_id);
+            if (!$session) {
+                return response()->json(['message' => 'Session not found for result ' . $result_id], 404);
+            }
+
+            $hasBet = Bet::where('result_id', $result->result_id)
+                ->where('user_id', $user_id)
+                ->exists();
+
+            if (!$hasBet) {
+                return response()->json([
+                    // 'message' => 'No bets found for this user in this result.',
+                    'message' => 'Patad patad pud bitch!',
+                    'status' => 0,
+                    'session' => $session,
+                    'result' => $result,
+                ]);
+            }
+
+            // Find winning bets for this result and this user
+            $winningBets = Bet::where('result_id', $result->result_id)
+                ->where('number', $result->number)
+                ->where('user_id', $user_id)
+                ->with('user')
+                ->get();
+
+            if ($winningBets->isEmpty()) {
+                return response()->json([
+                    'message' => 'Loser bitch!',
+                    'status' => 2,
+                    'session' => $session,
+                    'result' => $result,
+                ]);
+            }
+
+            // Fetch wallet details for this user and result
+            $wallets = Wallet::where('ref_id', $result->result_id)
+                ->where('user_id', $user_id)
+                ->get();
+
+            // Attach wallet details to each winner bet
+            $winners = $winningBets->map(function ($bet) use ($wallets) {
+                $wallet = $wallets->where('user_id', $bet->user_id)->first();
+                return [
+                    'user_id' => $bet->user->user_id ?? null,
+                    'fullname' => ($bet->user->firstname . ' ' . $bet->user->lastname) ?? null,
+                    'bet_id' => $bet->bet_id,
+                    'bet_number' => $bet->number,
+                    'wallet' => $wallet ? [
+                        'wallet_id' => $wallet->wallet_id,
+                        'points' => $wallet->points,
+                        'ref_id' => $wallet->ref_id,
+                    ] : null,
+                ];
+            });
+
+
+            return response()->json([
+                'message' => 'Conratulations you won bitch!',
+                'status' => 1,
+                'session' => $session,
+                'result' => $result,
+                'winners' => $winners
             ]);
         }
     }
