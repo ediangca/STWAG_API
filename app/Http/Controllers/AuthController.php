@@ -230,8 +230,8 @@ class AuthController extends Controller
                 try {
                     if (method_exists($upline, 'sendEmail')) {
                         $user->sendEmail($upline,
-                            'Email Verified Successfully',
-                            'Congratulations! Your email has been verified and your account is now active. Enjoy your 10 points bonus!'
+                            'Referral Bonus Earned!',
+                            'Congratulations! You have received a 5 points referral bonus because your downline (' . $user->firstname . ' ' . $user->lastname . ', ' . $user->email . ') has verified their email. Thank you for referring! Refer more friends to earn more bonuses!'
                         );
                     }
                     Log::info('Referral bonus notification sent to upline', ['upline_email' => $upline->email]);
