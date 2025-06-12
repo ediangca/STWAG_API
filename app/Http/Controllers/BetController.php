@@ -110,7 +110,7 @@ class BetController extends Controller
 
         $user_id = $request->user_id;
 
-        $allowedPoints = [1, 5, 15, 10, 30, 50, 70, 100, 150, 200, 300, 500, 700, 1000];
+        $allowedPoints = [1, 5, 15, 10, 20, 30, 50, 70, 100, 150, 200, 300, 500, 700, 1000];
         foreach ($request->bets as $bet) {
             if (!in_array($bet['points'], $allowedPoints)) {
                 return response()->json([
