@@ -250,8 +250,13 @@ class AuthController extends Controller
          * return redirect()->away('stwag://email-verified?email=' . urlencode($user->email));
          */
 
+        return view('emails.custom', [
+            'user' => $user,
+            'subject' => 'Email Verified Successfully',
+            'message' => 'Congratulations! Your email has been verified and your account is now active. Enjoy your 10 points bonus!'
+        ]);
 
-        return response()->json(['message' => 'Email verified successfully. Enjoy 10 points Bunos, Thank you!']);
+        // return response()->json(['message' => 'Email verified successfully. Enjoy 10 points Bunos, Thank you!']);
     }
 
     public function resendVerificationEmail(Request $request)
