@@ -31,10 +31,17 @@ class CustomMail extends Mailable
     {
         return $this->subject($this->customSubject)
             ->from(config('mail.from.address'), 'STWAG')
-            ->view('custom_user_mail.blade', [
-                'user' => $this->user,
-                'subject' => $this->customSubject,
-                'message' => $this->customSubject
-            ]);
+            ->html(
+            '<p>Dear ' . e($this->user->name) . ',</p>' .
+            '<p>Greetings!</p>' .
+            '<p><strong>Subject:</strong> ' . e($this->customSubject) . '</p>' .
+            '<p>' . nl2br(e($this->customMessage)) . '</p>' .
+            '<p>Best regards,<br>STWAG Team</p>');
+        
+            // ->view('custom_user_mail.blade', [
+            //     'user' => $this->user,
+            //     'subject' => $this->customSubject,
+            //     'message' => $this->customSubject
+            // ]);
     }
 }
