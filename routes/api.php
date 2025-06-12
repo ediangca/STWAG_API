@@ -31,8 +31,6 @@ Route::get('/ping', function () {
 });
 
 
-Route::get('/custom_user_mail/{user_id}', [AuthController::class, 'customUserMail'])->name('customEmail');
-
 Route::get('/mercaral', function () {
     return response()->json(['message' => 'pangit']);
 });
