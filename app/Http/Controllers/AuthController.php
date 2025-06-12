@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\UserVerifiedMail;
 use App\Models\User;
 use App\Models\Wallet;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -147,7 +148,7 @@ class AuthController extends Controller
             if (method_exists($user, 'sendEmailVerificationNotification')) {
                 $user->sendEmailVerificationNotification();
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error sending email verification', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'User registered but failed to send verification email.'], 201);
         }
@@ -189,13 +190,25 @@ class AuthController extends Controller
             'confirmFlag' => true,
             'source' => 'BUN', // Bonus type
         ]);
-        
+
         try {
-            $mail = new UserVerifiedMail($user);
-            $mail = $mail->build('Verified Email', 'Your email has been successfully verified. Welcome to our platform!');
-            Mail::to($user->email)->send($mail);
+            $user->notify(new \Illuminate\Auth\Notifications\VerifyEmail);
         } catch (\Exception $e) {
             Log::error('Failed to send verification success email', ['error' => $e->getMessage()]);
+        }
+
+        try {
+            // Send email notification if needed
+            if (method_exists($user, 'sendEmail')) {
+                $user->sendEmail(
+                    'Email Verified Successfully',
+                    'Congratulations! Your email has been verified and your account is now active. Enjoy your 10 points bonus!'
+                );
+            }
+            Log::info('Verification success email sent to user', ['user_id' => $user->user_id, 'email' => $user->email]);
+        } catch (Exception $e) {
+            Log::error('Error sending email verification', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'User registered but failed to send verification email.'], 201);
         }
 
         Log::info('Email verified successfully', ['user_id' => $user->id, 'email' => $user->email]);
@@ -215,14 +228,14 @@ class AuthController extends Controller
                 Log::info('Referral bonus added to upline', ['upline_user_id' => $upline->user_id, 'points' => 5]);
 
                 try {
-                    $uplineMail = new UserVerifiedMail($upline);
-                    $uplineMail->build(
-                        'Referral Bonus Received',
-                        'Congratulations! You have received a referral bonus because ' . $user->firstname . ' ' . $user->lastname . ' (' . $user->email . ') has verified their email.'
-                    );
-                    Mail::to($upline->email)->send($uplineMail);
+                    if (method_exists($upline, 'sendEmail')) {
+                        $user->sendEmail(
+                            'Email Verified Successfully',
+                            'Congratulations! Your email has been verified and your account is now active. Enjoy your 10 points bonus!'
+                        );
+                    }
                     Log::info('Referral bonus notification sent to upline', ['upline_email' => $upline->email]);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     Log::error('Failed to send referral bonus notification to upline', ['error' => $e->getMessage()]);
                 }
             }
@@ -234,7 +247,7 @@ class AuthController extends Controller
          * For Ionic mobile apps, use a custom URL scheme or deep link
          * Example: stwag://email-verified?email=...
          * return redirect()->away('stwag://email-verified?email=' . urlencode($user->email));
-        */
+         */
 
 
         return response()->json(['message' => 'Email verified successfully. Enjoy 10 points Bunos, Thank you!']);
