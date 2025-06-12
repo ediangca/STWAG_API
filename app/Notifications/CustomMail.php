@@ -3,8 +3,10 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Container\Attributes\Log;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log as FacadesLog;
 
 class CustomMail extends Mailable
 {
@@ -29,14 +31,20 @@ class CustomMail extends Mailable
      */
     public function build()
     {
+        FacadesLog::info('Sending custom mail', [
+            'user_id' => $this->user->user_id ?? null,
+            'email' => $this->user->email ?? null,
+            'subject' => $this->customSubject,
+            'message' => $this->customMessage,
+        ]);
+
         return $this->subject($this->customSubject)
             ->from(config('mail.from.address'), 'STWAG')
             ->html(
-            '<p>Dear ' . e($this->user->name) . ',</p>' .
-            '<p>Greetings!</p>' .
-            '<p><strong>Subject:</strong> ' . e($this->customSubject) . '</p>' .
+            '<p>Dear ' . e($this->user->firstname . ' ' . substr($this->user->lastname, 0, 1)) . '.,</p>' .
+            '<p>Greetings!</p>'.
             '<p>' . nl2br(e($this->customMessage)) . '</p>' .
-            '<p>Best regards,<br>STWAG Team</p>');
+            '<p>Best regards,<br><strong>STWAG Team</strong></p>');
         
             // ->view('custom_user_mail.blade', [
             //     'user' => $this->user,
