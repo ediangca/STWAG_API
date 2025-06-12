@@ -191,11 +191,11 @@ class AuthController extends Controller
             'source' => 'BUN', // Bonus type
         ]);
 
-        try {
-            $user->notify(new \Illuminate\Auth\Notifications\VerifyEmail);
-        } catch (\Exception $e) {
-            Log::error('Failed to send verification success email', ['error' => $e->getMessage()]);
-        }
+        // try {
+        //     $user->notify(new \Illuminate\Auth\Notifications\VerifyEmail);
+        // } catch (\Exception $e) {
+        //     Log::error('Failed to send verification success email', ['error' => $e->getMessage()]);
+        // }
 
         try {
             // Send email notification if needed
@@ -332,7 +332,7 @@ class AuthController extends Controller
 
     public function customUserMail($user_id)
     {
-       $user = User::where('user_id', $user_id)->first();
+        $user = User::where('user_id', $user_id)->first();
         return response()->make(
             '<!DOCTYPE html>
     <html lang="en">
