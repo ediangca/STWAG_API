@@ -203,7 +203,7 @@ class AuthController extends Controller
                 $user->sendEmail(
                     $user,
                     'Email Verified Successfully',
-                    'Congratulations! Your email has been verified and your account is now active. Enjoy your 10 points bonus!'
+                    'Congratulations! Your email has been verified and your account is now active. You can Login to STWAG APP, Enjoy your 10 points bonus!'
                 );
             }
             Log::info('Verification success email sent to user', ['user_id' => $user->user_id, 'email' => $user->email]);
@@ -314,7 +314,7 @@ class AuthController extends Controller
             Greetings, ' . htmlspecialchars($user->firstname . ' ' . $user->lastname) . '!
             </span>
             Congratulations! Your email has been verified and your account is now active.<br>
-            Enjoy your <strong>10 points</strong> bonus!
+            You can Login to STWAG APP, Enjoy your <strong>10 points</strong> bonus!
         </div>
         <div class="salutation">
             Best regards,<br>
