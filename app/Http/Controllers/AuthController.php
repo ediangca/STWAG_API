@@ -200,7 +200,7 @@ class AuthController extends Controller
         try {
             // Send email notification if needed
             if (method_exists($user, 'sendEmail')) {
-                $user->sendEmail(
+                $user->sendEmail($user,
                     'Email Verified Successfully',
                     'Congratulations! Your email has been verified and your account is now active. Enjoy your 10 points bonus!'
                 );
@@ -229,7 +229,7 @@ class AuthController extends Controller
 
                 try {
                     if (method_exists($upline, 'sendEmail')) {
-                        $user->sendEmail(
+                        $user->sendEmail($upline,
                             'Email Verified Successfully',
                             'Congratulations! Your email has been verified and your account is now active. Enjoy your 10 points bonus!'
                         );

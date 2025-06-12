@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -19,11 +20,14 @@ class CustomMail extends Notification
     /**
      * Create a new notification instance.
      */
+    
+    protected User $user;
     protected $subject;
     protected $message;
 
-    public function __construct($subject, $message)
+    public function __construct(User $user, $subject, $message)
     {
+        $this->user = $user;
         $this->subject = $subject;
         $this->message = $message;
     }
@@ -53,7 +57,7 @@ class CustomMail extends Notification
         return (new MailMessage)
             ->subject($this->subject)
             ->from(config('mail.from.address'), 'STWAG')
-            ->greeting('Hello ' . $notifiable->name . '!')
+            ->greeting('Hello ' . ($this->user->firstname.' '.strtoupper(substr($this->user->lastname, 0, 1))) . '.!')
             ->line($this->message)
             ->salutation('Regards, Your STWAG App Team');
     }

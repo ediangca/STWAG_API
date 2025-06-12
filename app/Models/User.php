@@ -128,11 +128,11 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->notify(new CustomVerifyEmail);
     }
 
-    public function sendEmail($subject, $message)
+    public function sendEmail(User $user, $subject, $message)
     {
         // $this->notify(new \Illuminate\Auth\Notifications\VerifyEmail);
 
-        $this->notify(new CustomMail($subject, $message));
+        $this->notify(new CustomMail($user, $subject, $message));
     }
 
     /**
