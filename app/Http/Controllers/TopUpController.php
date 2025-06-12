@@ -82,7 +82,7 @@ class TopUpController extends Controller
         ]);
 
         $wallet = Wallet::create([
-            'wallet_id' => uniqid('WLT') . '-' . substr($request->input('user_id'), 3) . date('YmdHis'),
+            'wallet_id' => uniqid('WLT') . '-' . substr($request->input('user_id'), 5) . date('YmdHis'),
             'user_id' => $user_id,
             'points' => $points,
             'withdrawableFlag' => true,
@@ -116,10 +116,10 @@ class TopUpController extends Controller
             $topupBonus = max(5, round($totalTopUpPoints * 0.01));
 
             Wallet::create([
-                'wallet_id' => uniqid('WLT') . '-' . substr($user_id, 3) . date('YmdHis'),
+                'wallet_id' => uniqid('WLT') . '-' . substr($user_id, 5) . date('YmdHis'),
                 'user_id' => $user_id,
                 'points' => $topupBonus,
-                'ref_id' => uniqid('TUPBONUS') . '-' . substr($user_id, 3) . date('YmdHis'),
+                'ref_id' => uniqid('TUPBONUS') . '-' . substr($user_id, 5) . date('YmdHis'),
                 'withdrawableFlag' => false,
                 'confirmFlag' => true,
                 'source' => 'BUN', // Bonus type

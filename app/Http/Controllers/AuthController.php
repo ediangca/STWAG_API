@@ -179,10 +179,10 @@ class AuthController extends Controller
         $user->save();
 
         $wallet = Wallet::create([
-            'wallet_id' => uniqid('WLT') . '-' . substr($user->user_id, 10) . date('YmdHis'),
+            'wallet_id' => uniqid('WLT') . '-' . substr($user->user_id, 5) . date('YmdHis'),
             'user_id' => $user->user_id,
             'points' => 10,
-            'ref_id' => uniqid('BUN') . '-' . substr($user->user_id, 10) . date('YmdHis'),
+            'ref_id' => uniqid('BUN') . '-' . substr($user->user_id, 5) . date('YmdHis'),
             'withdrawableFlag' => false,
             'confirmFlag' => true,
             'source' => 'BUN', // Bonus type
@@ -194,10 +194,10 @@ class AuthController extends Controller
             $upline = User::where('referencecode', $user->uplinecode)->first();
             if ($upline) {
                 Wallet::create([
-                    'wallet_id' => uniqid('WLT') . '-' . substr($upline->user_id, 10) . date('YmdHis'),
+                    'wallet_id' => uniqid('WLT') . '-' . substr($upline->user_id, 5) . date('YmdHis'),
                     'user_id' => $upline->user_id,
                     'points' => 5,
-                    'ref_id' => uniqid('REF') . '-' . substr($user->user_id, 10) . date('YmdHis'),
+                    'ref_id' => uniqid('REF') . '-' . substr($user->user_id, 5) . date('YmdHis'),
                     'withdrawableFlag' => false,
                     'confirmFlag' => true,
                     'source' => 'REF', // Referral bonus
