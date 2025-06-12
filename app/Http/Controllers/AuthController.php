@@ -212,7 +212,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'User registered but failed to send verification email.'], 201);
         }
 
-        Log::info('Email verified successfully', ['user_id' => $user->id, 'email' => $user->email]);
+        Log::info('Email verified successfully', ['user_id' => $user->id, 'email' => $user->email,  'uplinecode' => $user->uplinecode]);
 
         $upline = User::where('referencecode', $user->uplinecode)->first();
         if ($upline) {
