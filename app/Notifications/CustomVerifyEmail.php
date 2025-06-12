@@ -51,7 +51,7 @@ class CustomVerifyEmail extends Notification
             ->from(config('mail.from.address'), 'STWAG')
             ->greeting('Hello ' . $notifiable->name . '!')
             ->line('Thank you for registering STWAG! Please verify your email to complete the registration process.')
-            // ->action('Verify Email', $verificationUrl)
+            ->action('Verify Email', $verificationUrl)
             ->line('If you did not create an account, no further action is required.')
             ->salutation('Regards, Your STWAG App Team');
     }
