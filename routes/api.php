@@ -35,6 +35,7 @@ Route::get('/mercaral', function () {
     return response()->json(['message' => 'pangit']);
 });
 
+Route::get('/custom_user_mail/{user_id}', [AuthController::class, 'customUserMail'])->name('customEmail');
 
 Route::post('/register', [AuthController::class, 'register']);
 
