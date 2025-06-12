@@ -320,10 +320,14 @@ class BetController extends Controller
             'result_id' => $result_id
         ]);
 
+        $date = $request->has('date') ? $request->date : now()->format('Y-d-m');
+        $time = $request->has('time') ? $request->time : now()->format('H:i:s');
+
         if ($result_id !== null && preg_match('/-000(\d+)$/', $result_id, $matches)) {
             $lottery_id = $matches[1];
             $session = Lottery::where('lottery_id', $lottery_id)->first();
             if ($session) {
+                $time = $session->time;
                 Log::info('Session found for result_id', ['result_id' => $result_id, 'session' => $session]);
             } else {
                 Log::warning('No session found for result_id', ['result_id' => $result_id]);
@@ -344,6 +348,7 @@ class BetController extends Controller
 
             if ($bets->isEmpty()) {
                 return response()->json([
+                'date' => $date,
                     'session' => $session,
                     'status' => 0,
                     'message' => 'No bets found for user ' . $user_id . ' yet.'
@@ -355,12 +360,14 @@ class BetController extends Controller
 
         if (!$bet) {
             return response()->json([
+                'date' => $date,
                 'session' => $session,
                 'status' => 0,
                 'message' => 'No Bet found for ' . ($result_id !== null ? $result_id : $bets->result_id) . '.'
             ], 404);
         } else {
             return response()->json([
+                'date' => $date,
                 'session' => $session,
                 'result' => $bets
             ]);
