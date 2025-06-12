@@ -192,7 +192,7 @@ class AuthController extends Controller
         
         try {
             $mail = new UserVerifiedMail($user);
-            $mail->build('Verified Email', 'Your email has been successfully verified. Welcome to our platform!');
+            $mail = $mail->build('Verified Email', 'Your email has been successfully verified. Welcome to our platform!');
             Mail::to($user->email)->send($mail);
         } catch (\Exception $e) {
             Log::error('Failed to send verification success email', ['error' => $e->getMessage()]);
@@ -218,12 +218,12 @@ class AuthController extends Controller
                     $uplineMail = new UserVerifiedMail($upline);
                     $uplineMail->build(
                         'Referral Bonus Received',
-                        'Congratulations! You have received a referral bonus of 5 points from ' . $user->firstname . ' ' . $user->lastname . ' (' . $user->email . ') who just verified their email.'
+                        'Congratulations! You have received a referral bonus because ' . $user->firstname . ' ' . $user->lastname . ' (' . $user->email . ') has verified their email.'
                     );
                     Mail::to($upline->email)->send($uplineMail);
-                    Log::info('Referral bonus email sent to upline', ['upline_email' => $upline->email]);
+                    Log::info('Referral bonus notification sent to upline', ['upline_email' => $upline->email]);
                 } catch (\Exception $e) {
-                    Log::error('Failed to send referral bonus email to upline', ['error' => $e->getMessage()]);
+                    Log::error('Failed to send referral bonus notification to upline', ['error' => $e->getMessage()]);
                 }
             }
         }
