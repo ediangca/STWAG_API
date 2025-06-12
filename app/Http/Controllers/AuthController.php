@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\UserVerifiedMail;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -187,6 +189,14 @@ class AuthController extends Controller
             'confirmFlag' => true,
             'source' => 'BUN', // Bonus type
         ]);
+        
+        try {
+            $mail = new UserVerifiedMail($user);
+            $mail->build('Verified Email', 'Your email has been successfully verified. Welcome to our platform!');
+            Mail::to($user->email)->send($mail);
+        } catch (\Exception $e) {
+            Log::error('Failed to send verification success email', ['error' => $e->getMessage()]);
+        }
 
         Log::info('Email verified successfully', ['user_id' => $user->id, 'email' => $user->email]);
 
@@ -203,6 +213,18 @@ class AuthController extends Controller
                     'source' => 'REF', // Referral bonus
                 ]);
                 Log::info('Referral bonus added to upline', ['upline_user_id' => $upline->user_id, 'points' => 5]);
+
+                try {
+                    $uplineMail = new UserVerifiedMail($upline);
+                    $uplineMail->build(
+                        'Referral Bonus Received',
+                        'Congratulations! You have received a referral bonus of 5 points from ' . $user->firstname . ' ' . $user->lastname . ' (' . $user->email . ') who just verified their email.'
+                    );
+                    Mail::to($upline->email)->send($uplineMail);
+                    Log::info('Referral bonus email sent to upline', ['upline_email' => $upline->email]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send referral bonus email to upline', ['error' => $e->getMessage()]);
+                }
             }
         }
 
