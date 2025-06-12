@@ -360,7 +360,6 @@ class BetController extends Controller
             $bets = Bet::where('user_id', $user_id)
                 ->where('result_id', $result_id)
                 ->get();
-                
         } else {
             $bets = Bet::where('user_id', $user_id)
                 ->orderBy('created_at', 'desc')
@@ -368,14 +367,20 @@ class BetController extends Controller
                 ->get();
 
             if ($bets->isEmpty()) {
-                return response()->json(['message' => 'No bets found for user ' . $user_id.' yet.'], 404);
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'No bets found for user ' . $user_id . ' yet.'
+                ], 404);
             }
         }
 
         $bet = $bets->first();
 
         if (!$bet) {
-            return response()->json(['message' => 'No Bet found for ' . ($result_id !== null ? $result_id : $bets->result_id) . '.'], 404);
+            return response()->json([
+                'status' => 0,
+                'message' => 'No Bet found for ' . ($result_id !== null ? $result_id : $bets->result_id) . '.'
+            ], 404);
         } else {
             return response()->json([
                 'result' => $bets

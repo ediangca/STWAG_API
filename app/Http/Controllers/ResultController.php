@@ -273,6 +273,65 @@ class ResultController extends Controller
         }
     }
 
+    
+    public function showByUID(Request $request, $user_id)
+    {
+
+        if ($user_id == null && $user_id == '') {
+            return response()->json(['message' => 'User ID is required'], 400);
+        }
+
+        $user = User::find($user_id);
+        if (!$user) {
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+
+        $results = Result::orderBy('result_id', 'desc')->get();
+
+        if ($results->isEmpty()) {
+            return response()->json(['message' => 'No results found'], 404);
+        }
+
+        $resultsWithStatus = $results->map(function ($result) use ($user_id) {
+            $session = Lottery::find($result->lottery_id);
+
+            // Get all bets by this user for this result
+            $userBets = Bet::where('result_id', $result->result_id)
+                ->where('user_id', $user_id)
+                ->get();
+
+            $hasBet = $userBets->isNotEmpty();
+
+            // Check if any of the user's bets is a winner
+            $isWinner = $userBets->contains(function ($bet) use ($result) {
+                return $bet->number == $result->number;
+            });
+
+            $status = 0;
+            if ($hasBet) {
+                $status = $isWinner ? 1 : 2;
+            }
+
+            return [
+                'session' => $session,
+                'result' => $result,
+                'has_bet' => $hasBet,
+                'status' => $status,
+                'bets' => $userBets->map(function ($bet) {
+                    return [
+                        'bet_id' => $bet->bet_id,
+                        'number' => $bet->number,
+                        'points' => $bet->points,
+                    ];
+                })->values(),
+            ];
+        });
+
+        return response()->json($resultsWithStatus->values());
+        
+    }
+
+
     /**
      * Show all results for today or a given date.
      * Route: GET /lottery/results/by-date/{date?}

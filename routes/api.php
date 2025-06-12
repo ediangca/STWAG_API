@@ -93,6 +93,7 @@ Route::get('/results', [ResultController::class, 'index'])->name('results.index'
 Route::get('/resultSignal', [ResultController::class, 'resultSignal'])->name('resultSignal');
 Route::get('/results/id/{result_id?}', [ResultController::class, 'showRecentOrByRID'])->name('results.showRecentOrByRID');
 Route::get('/results/userid/{user_id}/{result_id?}', [ResultController::class, 'showRecentOrByRIDandUID'])->name('results.showRecentOrByRIDandUID');
+Route::get('/results/all/{user_id}', [ResultController::class, 'showByUID'])->name('results.showByUID');
 Route::get('/results/date/{date?}', [ResultController::class, 'showByDate'])->name('results.showByDate');
 Route::delete('/results/id/{result_id}', [ResultController::class, 'deleteById'])->name('results.deleteById');
 Route::delete('/results/date/{date}', [ResultController::class, 'deleteByDate'])->name('results.deleteByDate');
