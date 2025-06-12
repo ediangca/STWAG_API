@@ -229,8 +229,9 @@ class BetController extends Controller
                 'ref_id' => uniqid('BET') . '-' . substr($user_id, 3) . date('YmdHis') . '-' . $noOfBet,
                 'withdrawableFlag' => false,
                 'confirmFlag' => true,
-                'source' => 'BET', // Bet deduction
+                'source' => 'BET',
             ]);
+            
             $noOfBet++;
         }
 
@@ -251,9 +252,8 @@ class BetController extends Controller
         if ($betGroupCount > 0 && $betGroupCount % 5 == 0) {
             // Get the last 5 result_ids for this user
             $lastFiveResultIds = Bet::where('user_id', $user_id)
-                ->select('result_id')
-                ->distinct()
                 ->orderBy('created_at', 'desc')
+                ->groupBy('result_id')
                 ->limit(5)
                 ->pluck('result_id');
 

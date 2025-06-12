@@ -122,7 +122,7 @@ class TopUpController extends Controller
                 'ref_id' => uniqid('TUPBONUS') . '-' . substr($user_id, 3) . date('YmdHis'),
                 'withdrawableFlag' => false,
                 'confirmFlag' => true,
-                'source' => 'TUPBONUS', // Bonus type
+                'source' => 'BUN', // Bonus type
             ]);
 
             // For message
