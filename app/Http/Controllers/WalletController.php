@@ -270,7 +270,7 @@ class WalletController extends Controller
         }
 
         $wallets = Wallet::where('user_id', $userId)
-            ->whereNotIn('source', ['BET', 'WTH'])
+            // ->whereNotIn('source', ['BET', 'WTH'])
             ->get();
 
         $totalPoints = $wallets->where('confirmFlag', 1)->sum('points');
