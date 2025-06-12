@@ -223,7 +223,7 @@ class AuthController extends Controller
                 'ref_id' => uniqid('REF') . '-' . substr($user->user_id, 4) . date('YmdHis'),
                 'withdrawableFlag' => false,
                 'confirmFlag' => true,
-                'source' => 'REF', // Referral bonus
+                'source' => 'BUN', // Referral bonus
             ]);
             Log::info('Referral bonus added to upline', ['upline_user_id' => $upline->user_id, 'points' => 5]);
 
