@@ -315,7 +315,6 @@ class ResultController extends Controller
             return [
                 'session' => $session,
                 'result' => $result,
-                'has_bet' => $hasBet,
                 'status' => $status,
                 'bets' => $userBets->map(function ($bet) {
                     return [

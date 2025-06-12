@@ -192,19 +192,6 @@ class SpinningService
         $motherShare = $totalPot * 0.1;
         $incentivesShare = $totalPot * 0.1;
 
-        // Update or create the result with calculated shares
-        $result = Result::updateOrCreate(
-            ['result_id' => $result_id],
-            [
-                'lottery_id' => $currentSession->lottery_id,
-                'number' => $winningNumber,
-                'winning_points' => $winningShare,
-                'incentives_share' => $incentivesShare,
-                'mother_share' => $motherShare,
-                'admin_share' => $adminShare,
-                'other_share' => 0
-            ]
-        );
 
         // Calculate winnings for users
         $winners = $bets->where('number', $winningNumber)->where('result_id', $result_id); //Users who bet on the winning number
@@ -215,17 +202,6 @@ class SpinningService
 
         $totalWinningPoints = $winners->sum('points');
 
-        Log::info('Final Result Data:', [
-            'result' => $result,
-            'lottery_id' => $currentSession->lottery_id,
-            'winning_number' => $winningNumber,
-            'spin1' => $spin1,
-            'spin2' => $spin2,
-            'total_pot' => $totalPot,
-            'winners' => $winners->pluck('user_id'),
-            'mechanic' => $totalPot < 9000 ? 'Win Low' : 'Win High',
-            'bets' => $bets->pluck('number')->unique()->values(),
-        ]);
 
         foreach ($winners as $winner) {
             // Distribute 70% of the pot proportionally to winners
@@ -341,6 +317,33 @@ class SpinningService
                 }
             }
         }
+
+        // Update or create the result with calculated shares
+        $result = Result::updateOrCreate(
+            ['result_id' => $result_id],
+            [
+                'lottery_id' => $currentSession->lottery_id,
+                'number' => $winningNumber,
+                'winning_points' => $winningShare, //- $totalWinningPoints
+                'incentives_share' => $incentivesShare,
+                'mother_share' => $motherShare,
+                'admin_share' => $adminShare,
+                'other_share' => 0
+            ]
+        );
+
+
+        Log::info('Final Result Data:', [
+            'result' => $result,
+            'lottery_id' => $currentSession->lottery_id,
+            'winning_number' => $winningNumber,
+            'spin1' => $spin1,
+            'spin2' => $spin2,
+            'total_pot' => $totalPot,
+            'winners' => $winners->pluck('user_id'),
+            'mechanic' => $totalPot < 9000 ? 'Win Low' : 'Win High',
+            'bets' => $bets->pluck('number')->unique()->values(),
+        ]);
 
         return 'Final Result for Result ID ' . $result_id . '-' .  date('Y-m-d') . ' - ' . $currentSession->lottery_session . '( ' . $currentSession->time . '). ' .
             ' with winning number ' . $winningNumber .
