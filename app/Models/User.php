@@ -132,7 +132,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function sendEmail($recipient, $subject, $message)
     {
-        Mail::to($recipient->email)->send(new CustomMail($recipient, $subject, $message));
+        Mail::to($recipient->email)->sendNow(new CustomMail($recipient, $subject, $message));
     }
 
     /**
