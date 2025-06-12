@@ -444,10 +444,14 @@ class BetController extends Controller
                 $currentSession = $sessions->first();
             }
         }
+        
+        Log::info('Generated result_id: ' . 'RES' . date('Ymd') . '-000' . $currentSession->lottery_id);
+        $result_id = 'RES' . date('Ymd') . '-000' . $currentSession->lottery_id;
 
         return response()->json([
             'current_date' => $date,
             'current_time' => $time,
+            'result_id' => $result_id,
             'isReady' => $isReady,
             'message' => ($isReady ? 'Bet is Ready for ' . $currentSession->lottery_session . ' session ' : 'Draw has been started and processing') . '!',
             'session' => $currentSession
