@@ -191,7 +191,9 @@ class AuthController extends Controller
         Log::info('Email verified successfully', ['user_id' => $user->id, 'email' => $user->email]);
 
         // Redirect to the Ionic frontend after successful verification
-        // return redirect()->away(config('app.frontend_url') . '/email-verified?email=' . urlencode($user->email));
+        // For Ionic mobile apps, use a custom URL scheme or deep link
+        // Example: stwag://email-verified?email=...
+        return redirect()->away('stwag://email-verified?email=' . urlencode($user->email));
 
         
         return response()->json(['message' => 'Email verified successfully. Enjoy 10 points Bunos, Thank you!']);
