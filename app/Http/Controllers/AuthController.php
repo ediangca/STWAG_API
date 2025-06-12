@@ -190,12 +190,31 @@ class AuthController extends Controller
 
         Log::info('Email verified successfully', ['user_id' => $user->id, 'email' => $user->email]);
 
-        // Redirect to the Ionic frontend after successful verification
-        // For Ionic mobile apps, use a custom URL scheme or deep link
-        // Example: stwag://email-verified?email=...
-        return redirect()->away('stwag://email-verified?email=' . urlencode($user->email));
+        if ($user->uplinecode && !in_array($user->uplinecode, ['root', 'admin', 'member'])) {
+            $upline = User::where('referencecode', $user->uplinecode)->first();
+            if ($upline) {
+                Wallet::create([
+                    'wallet_id' => uniqid('WLT') . '-' . substr($upline->user_id, 10) . date('YmdHis'),
+                    'user_id' => $upline->user_id,
+                    'points' => 5,
+                    'ref_id' => uniqid('REF') . '-' . substr($user->user_id, 10) . date('YmdHis'),
+                    'withdrawableFlag' => false,
+                    'confirmFlag' => true,
+                    'source' => 'REF', // Referral bonus
+                ]);
+                Log::info('Referral bonus added to upline', ['upline_user_id' => $upline->user_id, 'points' => 5]);
+            }
+        }
 
-        
+        /**
+         * TODO:
+         * Redirect to the Ionic frontend after successful verification
+         * For Ionic mobile apps, use a custom URL scheme or deep link
+         * Example: stwag://email-verified?email=...
+         * return redirect()->away('stwag://email-verified?email=' . urlencode($user->email));
+        */
+
+
         return response()->json(['message' => 'Email verified successfully. Enjoy 10 points Bunos, Thank you!']);
     }
 
@@ -225,7 +244,7 @@ class AuthController extends Controller
 
         try {
             $user->sendEmailVerificationNotification();
-            Log::info('Verification email sent to ', ['user_id' => $user->user_id , 'email' => $user->email]);
+            Log::info('Verification email sent to ', ['user_id' => $user->user_id, 'email' => $user->email]);
             return response()->json(['message' => 'Verification email resent successfully to ' . $user->email], 200);
         } catch (\Exception $e) {
             Log::error('Error sending verification email', ['error' => $e->getMessage()]);

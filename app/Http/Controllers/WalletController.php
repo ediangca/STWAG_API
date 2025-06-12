@@ -271,6 +271,7 @@ class WalletController extends Controller
 
         $wallets = Wallet::where('user_id', $userId)
             // ->whereNotIn('source', ['BET', 'WTH'])
+            ->orderBy('created_at', 'desc')
             ->get();
 
         $totalPoints = $wallets->where('confirmFlag', 1)->sum('points');

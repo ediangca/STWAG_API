@@ -203,25 +203,26 @@ class BetController extends Controller
         $noOfBet = 1;
         // Place bets
         foreach ($request->bets as $bet) {
-            if (Bet::where('result_id', $result_id)
+            $existingBet = Bet::where('result_id', $result_id)
                 ->where('user_id', $user_id)
                 ->where('number', $bet['number'])
-                ->exists()
-            ) {
-                return response()->json([
-                    'session' => $currentSession->lottery_session,
-                    'time' => date('h:i A', strtotime($currentSession->time)),
-                    'message' => "You have already placed a bet for number {$bet['number']}."
-                ], 409);
-            }
-            Bet::create([
-                'result_id' => $result_id,
-                'user_id' => $user_id,
-                'number' => $bet['number'],
-                'points' => $bet['points'],
-                // 'Datetime' => now(),
-            ]);
+                ->first();
 
+            if ($existingBet) {
+                // Update the existing bet by adding points
+                $existingBet->points += $bet['points'];
+                $existingBet->save();
+
+            } else {
+                Bet::create([
+                    'result_id' => $result_id,
+                    'user_id' => $user_id,
+                    'number' => $bet['number'],
+                    'points' => $bet['points'],
+                    // 'Datetime' => now(),
+                ]);
+            }
+            
             Wallet::create([
                 'wallet_id' => uniqid('WLT') . '-' . substr($user_id, 3) . date('YmdHis'),
                 'user_id' => $user_id,
@@ -348,7 +349,7 @@ class BetController extends Controller
 
             if ($bets->isEmpty()) {
                 return response()->json([
-                'date' => $date,
+                    'date' => $date,
                     'session' => $session,
                     'status' => 0,
                     'message' => 'No bets found for user ' . $user_id . ' yet.'
