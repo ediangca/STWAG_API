@@ -257,6 +257,13 @@ class AuthController extends Controller
         // return response()->json(['message' => 'Email verified successfully. Enjoy 10 points Bunos, Thank you!']);
     }
 
+    public function customUserMail($user_id)
+    {
+        $user = User::find($user_id); // or any user you want to pass
+        return view('custom_user_mail')->with('user', $user)
+            ->with('customMessage', 'Congratulations! Your email has been verified and your account is now active. Enjoy your 10 points bonus!');
+    }
+
     public function resendVerificationEmail(Request $request)
     {
         Log::info('Resend verification email request received', $request->all());
