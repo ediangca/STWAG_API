@@ -200,7 +200,8 @@ class AuthController extends Controller
         try {
             // Send email notification if needed
             if (method_exists($user, 'sendEmail')) {
-                $user->sendEmail($user,
+                $user->sendEmail(
+                    $user,
                     'Email Verified Successfully',
                     'Congratulations! Your email has been verified and your account is now active. Enjoy your 10 points bonus!'
                 );
@@ -213,33 +214,33 @@ class AuthController extends Controller
 
         Log::info('Email verified successfully', ['user_id' => $user->id, 'email' => $user->email]);
 
-        if ($user->uplinecode && !in_array($user->uplinecode, ['root', 'admin', 'member'])) {
-            $upline = User::where('referencecode', $user->uplinecode)->first();
-            if ($upline) {
-                Wallet::create([
-                    'wallet_id' => uniqid('WLT') . '-' . substr($upline->user_id, 5) . date('YmdHis'),
-                    'user_id' => $upline->user_id,
-                    'points' => 5,
-                    'ref_id' => uniqid('REF') . '-' . substr($user->user_id, 5) . date('YmdHis'),
-                    'withdrawableFlag' => false,
-                    'confirmFlag' => true,
-                    'source' => 'REF', // Referral bonus
-                ]);
-                Log::info('Referral bonus added to upline', ['upline_user_id' => $upline->user_id, 'points' => 5]);
+        $upline = User::where('referencecode', $user->uplinecode)->first();
+        if ($upline) {
+            Wallet::create([
+                'wallet_id' => uniqid('WLT') . '-' . substr($upline->user_id, 5) . date('YmdHis'),
+                'user_id' => $upline->user_id,
+                'points' => 5,
+                'ref_id' => uniqid('REF') . '-' . substr($user->user_id, 5) . date('YmdHis'),
+                'withdrawableFlag' => false,
+                'confirmFlag' => true,
+                'source' => 'REF', // Referral bonus
+            ]);
+            Log::info('Referral bonus added to upline', ['upline_user_id' => $upline->user_id, 'points' => 5]);
 
-                try {
-                    if (method_exists($upline, 'sendEmail')) {
-                        $user->sendEmail($upline,
-                            'Referral Bonus Earned!',
-                            'Congratulations! You have received a 5 points referral bonus because your downline (' . $user->firstname . ' ' . $user->lastname . ', ' . $user->email . ') has verified their email. Thank you for referring! Refer more friends to earn more bonuses!'
-                        );
-                    }
-                    Log::info('Referral bonus notification sent to upline', ['upline_email' => $upline->email]);
-                } catch (Exception $e) {
-                    Log::error('Failed to send referral bonus notification to upline', ['error' => $e->getMessage()]);
+            try {
+                if (method_exists($upline, 'sendEmail')) {
+                    $user->sendEmail(
+                        $upline,
+                        'Referral Bonus Earned!',
+                        'Congratulations! You have received a 5 points referral bonus because your downline (' . $user->firstname . ' ' . $user->lastname . ', ' . $user->email . ') has verified their email. Thank you for referring! Refer more friends to earn more bonuses!'
+                    );
                 }
+                Log::info('Referral bonus notification sent to upline', ['upline_email' => $upline->email]);
+            } catch (Exception $e) {
+                Log::error('Failed to send referral bonus notification to upline', ['error' => $e->getMessage()]);
             }
         }
+
 
         /**
          * TODO:
