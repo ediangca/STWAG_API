@@ -12,7 +12,7 @@ use Illuminate\Auth\Notifications\VerifyEmail as BaseVerifyEmail;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\URL;
 
-class CustomVerifyEmail extends Notification
+class CustomMail extends Notification
 {
     use Queueable;
 

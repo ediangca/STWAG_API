@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Notifications\CustomMail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -130,7 +132,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         // $this->notify(new \Illuminate\Auth\Notifications\VerifyEmail);
 
-        $this->notify(new CustomVerifyEmail($subject, $message));
+        $this->notify(new CustomMail($subject, $message));
     }
 
     /**
