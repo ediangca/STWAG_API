@@ -59,7 +59,7 @@ class WalletController extends Controller
                 'user_id' => 'required|string|exists:users,user_id',
                 'points' => 'required|numeric',
                 'ref_id' => 'required|string',
-                'source' => 'required|string|in:BUN,TOP,INC,CBK,WIN,WTH,BET',
+                'source' => 'required|string|in:BUN,TOP,INC,CBK,WIN,REF,WTH,BET',
                 'withdrawableFlag' => 'boolean|nullable|default:0',
                 'confirmedFlag' => 'boolean|nullable|default:1',
             ]);

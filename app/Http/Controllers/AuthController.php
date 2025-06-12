@@ -217,10 +217,10 @@ class AuthController extends Controller
         $upline = User::where('referencecode', $user->uplinecode)->first();
         if ($upline) {
             Wallet::create([
-                'wallet_id' => uniqid('WLT') . '-' . substr($upline->user_id, 5) . date('YmdHis'),
+                'wallet_id' => uniqid('WLT') . '-' . substr($upline->user_id, 4) . date('YmdHis'),
                 'user_id' => $upline->user_id,
                 'points' => 5,
-                'ref_id' => uniqid('REF') . '-' . substr($user->user_id, 5) . date('YmdHis'),
+                'ref_id' => uniqid('REF') . '-' . substr($user->user_id, 4) . date('YmdHis'),
                 'withdrawableFlag' => false,
                 'confirmFlag' => true,
                 'source' => 'REF', // Referral bonus
