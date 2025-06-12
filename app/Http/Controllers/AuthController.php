@@ -136,7 +136,7 @@ class AuthController extends Controller
             'type' => $request->type,
             'referencecode' => $referencecode, //generated
             // 'referencecode' => $request->referencecode,
-            'uplinecode' => in_array($request->type, ["root", "admin", "member"]) ? $request->type : $request->referencecode,
+            'uplinecode' => in_array($request->type, ["root", "admin", "member"]) ? $request->type : $request->uplinecode,
             'avatar' => $request->avatar,
             'level' => $level,
             'uuid' => $request->uuid,
