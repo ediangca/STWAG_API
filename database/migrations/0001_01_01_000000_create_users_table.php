@@ -71,7 +71,7 @@ return new class extends Migration
             $table->double('points');
             $table->string('ref_id', 45)->nullable(); //result_id, bet_id, etc.
             // $table->string('source', 45); //Source of points (Bunos, TopUp, Incentives, Cashback (Unwithdrawable), Bet (Negative), Winning, Withdraw (negative)
-            $table->enum('source', ['BUN', 'TOP', 'INC', 'CBK', 'BET', 'REF', 'WIN', 'WTH'])->default('BET');
+            $table->enum('source', ['BUN', 'REF', 'TOP', 'INC', 'CBK', 'BET', 'WIN', 'WTH'])->default('BET');
             $table->boolean('withdrawableFlag')->default(0); // 0 = not confirmed, 1 = confirmed
             $table->boolean('confirmFlag')->default(0); // 0 = not confirmed, 1 = confirmed
             $table->timestamps();
