@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Custom User Mail</title>
+    <title>STWAG</title>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;

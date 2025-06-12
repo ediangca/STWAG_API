@@ -31,8 +31,10 @@ class CustomMail extends Mailable
     {
         return $this->subject($this->customSubject)
             ->from(config('mail.from.address'), 'STWAG')
-            ->greeting('Hello ' . substr($this->user->firstname, 0, 1) . '. ' . $this->user->lastname . '!')
-            ->line($this->customMessage)
-            ->salutation('Regards, Your STWAG App Team');
+            ->view('custom_user_mail.blade', [
+                'user' => $this->user,
+                'subject' => $this->customSubject,
+                'message' => $this->customSubject
+            ]);
     }
 }
