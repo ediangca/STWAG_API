@@ -346,20 +346,11 @@ class BetController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->limit(1)
                 ->get();
-            // if ($bets->isEmpty()) {
-            //     return response()->json([
-            //         'date' => $date,
-            //         'session' => $session,
-            //         'status' => $status,
-            //         'message' => 'No bets found for user ' . $user_id . ' yet.'
-            //     ], 404);
-            // }
         }
 
-        // $bet = $bets->first();
+        $result = Result::where('result_id', $result_id)->first();
 
         if ($bets->count() > 0) {
-            $result = Result::where('result_id', $result_id)->first();
             if ($result) {
                 $winningNumber = $result->number;
                 $userBet = Bet::where('user_id', $user_id)
@@ -374,14 +365,18 @@ class BetController extends Controller
                 'date' => $date,
                 'session' => $session,
                 'status' => $status,
-                'result' => $bets
+                'message' => $status == 1 ? 'Congratulations! You have won this session.' : 'Sorry, you did not win this session.',
+                'result' => $result,
+                'bets' => $bets
             ], 201);
         } else {
             return response()->json([
                 'date' => $date,
                 'session' => $session,
                 'status' => $status,
-                'message' => 'No Bet found for ' . ($result_id !== null ? $result_id : $bets->result_id) . '.'
+                'message' => 'No Bet found for ' . ($result_id !== null ? $result_id : $bets->result_id) . '.',
+                'result' => $result,
+                'bets' => $bets
             ], 404);
         }
     }
