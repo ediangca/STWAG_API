@@ -359,22 +359,26 @@ class BetController extends Controller
                     ->first();
 
                 $status = $userBet ? 1 : 2;
+            } else {
+                $status = -1;
             }
 
             return response()->json([
                 'date' => $date,
                 'session' => $session,
                 'status' => $status,
-                'message' => $status == 1 ? 'Congratulations! You have won this session.' : 'Sorry, you did not win this session.',
+                'message' => $status == 1 ? 'Congratulations! You have won this session.' : ($status == 2 ? 'Sorry, you did not win this session.' : 'No result yet, Session is on going.'),
                 'result' => $result,
                 'bets' => $bets
             ], 201);
+
         } else {
+            
             return response()->json([
                 'date' => $date,
                 'session' => $session,
                 'status' => $status,
-                'message' => 'No Bet found for ' . ($result_id !== null ? $result_id : $bets->result_id) . '.',
+                'message' => 'No Bet found for ' . ($result_id !== null ? $result_id : $bets->result_id) . '. ' . ($status < 0 ?? 'And result yet, Session is on going.'),
                 'result' => $result,
                 'bets' => $bets
             ], 404);
