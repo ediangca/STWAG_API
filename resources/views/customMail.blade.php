@@ -9,6 +9,7 @@
         :root {
             --primary-color: #49b5b2;
         }
+
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
             background: #f4f6fb;
@@ -52,6 +53,22 @@
             color: #444;
             margin-bottom: 32px;
             line-height: 1.7;
+        }
+
+        .action {
+            text-align: center;
+        }
+
+        .action a {
+            display: inline-block;
+            padding: 12px 28px;
+            background: #007bff;
+            color: #fff !important;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            margin: 24px auto;
+            transition: background 0.2s;
         }
 
         .footer {
@@ -113,6 +130,14 @@
                     {{ $customMessage }}
                 @else
                     Thank you for being a valued member of our community.
+                @endif
+                
+                @if (isset($customAction))
+                    <div class="action" style="text-align: center;">
+                        <a href="{{ $customURL }}" class="btn" target="_blank">
+                            {{ $customAction ?? 'Click Here!' }}
+                        </a>
+                    </div>
                 @endif
             </div>
         </div>
