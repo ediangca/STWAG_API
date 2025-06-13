@@ -121,7 +121,7 @@
             @endif
             <div>
                 Hello, <strong>
-                    {{ $user ? $user->firstname . '. ' . substr($user->lastname, 0, 1) : 'STWAG User' }}</strong>!
+                    {{ $user ? $user->firstname . ' ' . substr($user->lastname, 0, 1).'.' : 'STWAG User' }}</strong>!
             </div>
             <div style="margin-top: 18px;">
                 @if (isset($customMessage))
