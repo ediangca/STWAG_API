@@ -6,6 +6,9 @@
     <link rel="icon" type="image/png" href="{{ asset('img/stwag-logo.png') }}">
     <title>STWAG</title>
     <style>
+        :root {
+            --primary-color: #49b5b2;
+        }
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
             background: #f4f6fb;
@@ -32,7 +35,7 @@
         .header h2 {
             margin: 0;
             font-size: 28px;
-            color: #49b5b2;
+            color: var(--primary-color);
             letter-spacing: 1px;
         }
 
@@ -54,6 +57,11 @@
         .footer {
             margin-top: 32px;
             font-size: 16px;
+        }
+
+        .footer span {
+            font-weight: bold;
+            color: var(--primary-color);
         }
 
         .copyright {
@@ -109,7 +117,7 @@
             </div>
         </div>
         <div class="footer">
-            Regards, <br><strong>Your STWAG App Team</strong>
+            Regards, <br><span>Your STWAG App Team</span>
         </div>
         <div class="copyright">
             &copy; {{ date('Y') }} STWAG. All rights reserved.

@@ -232,7 +232,9 @@ class AuthController extends Controller
                     $user->sendEmail(
                         $upline,
                         'Referral Bonus Earned!',
-                        'Congratulations! You have received a 5 points referral bonus because your downline (' . $user->firstname . ' ' . $user->lastname . ', ' . $user->email . ') has verified their email. Thank you for referring! Refer more friends to earn more bonuses!'
+                        'Congratulations! You have received a 5 points referral bonus 
+                        because your downline (' . $user->firstname . ' ' . $user->lastname . ', ' . $user->email . ') 
+                        has verified their email. Thank you for referring! Refer more friends to earn more bonuses!'
                     );
                 }
                 Log::info('Referral bonus notification sent to upline', ['upline_email' => $upline->email]);
@@ -250,99 +252,22 @@ class AuthController extends Controller
          * return redirect()->away('stwag://email-verified?email=' . urlencode($user->email));
          */
 
-        // Return the custom view after successful verification
-        /*
-        return response()->make(
-            '<!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>STWAG</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-        body {
-            font-family: "Segoe UI", Arial, sans-serif;
-            background: #f7f7f7;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 480px;
-            margin: 48px auto;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(44, 62, 80, 0.08);
-            padding: 40px 32px 32px 32px;
-        }
-        h1 {
-            color: #2e7d32;
-            margin-top: 0;
-            font-size: 2.2em;
-            letter-spacing: 2px;
-            text-align: center;
-        }
-        .message {
-            margin: 32px 0 24px 0;
-            font-size: 1.15em;
-            color: #222;
-            line-height: 1.7;
-            text-align: center;
-        }
-        .salutation {
-            margin-top: 36px;
-            color: #555;
-            font-size: 1.05em;
-            text-align: right;
-        }
-        .greeting {
-            font-weight: 500;
-            color: #1565c0;
-            margin-bottom: 12px;
-            display: block;
-        }
-        @media (max-width: 600px) {
-            .container {
-            padding: 20px 8px 16px 8px;
-            }
-        }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-        <h1>STWAG</h1>
-        <div class="message">
-            <span class="greeting">
-            Greetings, ' . htmlspecialchars($user->firstname . ' ' . $user->lastname) . '!
-            </span>
-            Congratulations! Your email has been verified and your account is now active.<br>
-            You can Login to STWAG APP, Enjoy your <strong>10 points</strong> bonus!
-        </div>
-        <div class="salutation">
-            Best regards,<br>
-            <strong>STWAG TEAM</strong>
-        </div>
-        </div>
-    </body>
-    </html>',
-            200,
-            ['Content-Type' => 'text/html']
-        );
-        */
-
+        // Return the JSON after successful verification
         // return response()->json(['message' => 'Email verified successfully. Enjoy 10 points Bunos, Thank you!']);
-        
+
+        // Return the VIEW after successful verification
         return view('customMail')->with('user', $user)
-        ->with('customSubject', 'Email Verification Successful')
-        ->with('customMessage', 'Greetings! Your email address has been successfully verified. <br>
-        Your account is now active and you have received a <strong>10 points</strong>  bonus. You can Login to STWAG APP, Thank you for joining STWAG.');
+            ->with('customSubject', 'Email Verification Successful')
+            ->with('customMessage', 'Greetings! Your email address has been successfully verified.
+        Your account is now active and you have received a 10 points  bonus. You can Login to STWAG APP, Thank you for joining STWAG.');
     }
 
     public function customUserMail($user_id)
     {
         $user = User::where('user_id', $user_id)->first();
         return view('customMail')->with('user', $user)
-        ->with('customSubject', 'Subject Testing')
-        ->with('customMessage', 'Congratulations! Custom Mail view testing!');
+            ->with('customSubject', 'Subject Testing')
+            ->with('customMessage', 'Congratulations! Custom Mail view testing!');
         /*
         return response()->make(
             '<!DOCTYPE html>
@@ -426,7 +351,6 @@ class AuthController extends Controller
             ['Content-Type' => 'text/html']
         );
         */
-
     }
 
     public function resendVerificationEmail(Request $request)
