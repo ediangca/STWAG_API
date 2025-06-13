@@ -224,10 +224,10 @@ class BetController extends Controller
             }
 
             Wallet::create([
-                'wallet_id' => uniqid('WLT') . '-' . substr($user_id, 5) . date('YmdHis'),
+                'wallet_id' => uniqid('WLT') . '-' . substr($user_id, 10) . date('YmdHis'),
                 'user_id' => $user_id,
                 'points' => -abs($bet['points']),
-                'ref_id' => uniqid('BET') . '-' . substr($user_id, 5) . date('YmdHis') . '-' . $noOfBet,
+                'ref_id' => uniqid('BET') . '-' . substr($user_id, 10) . date('YmdHis') . '-' . $noOfBet,
                 'withdrawableFlag' => false,
                 'confirmFlag' => true,
                 'source' => 'BET',
@@ -266,10 +266,10 @@ class BetController extends Controller
             $cashback = max(5, round($totalPoints * 0.01));
 
             Wallet::create([
-                'wallet_id' => uniqid('WLT') . '-' . substr($user_id, 5) . date('YmdHis'),
+                'wallet_id' => uniqid('WLT') . '-' . substr($user_id, 10) . date('YmdHis'),
                 'user_id' => $user_id,
                 'points' => $cashback,
-                'ref_id' => uniqid('CBK') . '-' . substr($user_id, 5) . date('YmdHis'),
+                'ref_id' => uniqid('CBK') . '-' . substr($user_id, 10) . date('YmdHis'),
                 'withdrawableFlag' => false,
                 'confirmFlag' => true,
                 'source' => 'CBK', // Bonus type

@@ -244,7 +244,7 @@ class WalletController extends Controller
         ]);
 
         $wallet = Wallet::create([
-            'wallet_id' => uniqid('WLT') . '-' . substr($request->input('user_id'), 5) . date('YmdHis'),
+            'wallet_id' => uniqid('WLT') . '-' . substr($request->input('user_id'), 10) . date('YmdHis'),
             'user_id' => $request->input('user_id'),
             'points' => $request->input('points'),
             'withdrawableFlag' => true,

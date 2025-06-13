@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
+        web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
         health: '/up',
     )
@@ -33,6 +34,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // Global middleware or route groups can go here
         $middleware->append(\App\Http\Middleware\AuthMiddleware::class);
 
+        $middleware->group('web', [
+            EnsureFrontendRequestsAreStateful::class,
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        ]);
         $middleware->group('api', [
             EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,

@@ -251,6 +251,7 @@ class AuthController extends Controller
          */
 
         // Return the custom view after successful verification
+        /*
         return response()->make(
             '<!DOCTYPE html>
     <html lang="en">
@@ -326,13 +327,23 @@ class AuthController extends Controller
             200,
             ['Content-Type' => 'text/html']
         );
+        */
 
         // return response()->json(['message' => 'Email verified successfully. Enjoy 10 points Bunos, Thank you!']);
+        
+        return view('customMail')->with('user', $user)
+        ->with('customSubject', 'Email Verification Successful')
+        ->with('customMessage', 'Greetings! Your email address has been successfully verified. <br>
+        Your account is now active and you have received a <strong>10 points</strong>  bonus. You can Login to STWAG APP, Thank you for joining STWAG.');
     }
 
     public function customUserMail($user_id)
     {
         $user = User::where('user_id', $user_id)->first();
+        return view('customMail')->with('user', $user)
+        ->with('customSubject', 'Subject Testing')
+        ->with('customMessage', 'Congratulations! Custom Mail view testing!');
+        /*
         return response()->make(
             '<!DOCTYPE html>
     <html lang="en">
@@ -414,6 +425,8 @@ class AuthController extends Controller
             200,
             ['Content-Type' => 'text/html']
         );
+        */
+
     }
 
     public function resendVerificationEmail(Request $request)
