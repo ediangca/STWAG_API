@@ -170,12 +170,19 @@ class AuthController extends Controller
         }
 
         if ($user->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Email already verified'], 200);
+            // return response()->json(['message' => 'Email already verified'], 200);
+            return view('customMail')->with('user', $user)
+                ->with('customSubject', 'Email Already Verified')
+                ->with('customMessage', 'Your email address has already been verified. You can now log in STWAG APP and enjoy!.');
         }
 
         // Correct hash check
         if (!hash_equals(sha1($user->getEmailForVerification()), $hash)) {
-            return response()->json(['message' => 'Invalid verification link'], 400);
+            // return response()->json(['message' => 'Invalid verification link'], 400);
+            return view('customMail')
+                ->with('user', $user)
+                ->with('customSubject', 'Invalid Verification Link')
+                ->with('customMessage', 'The verification link is invalid or has expired. Please request a new verification email.');
         }
 
         $user->markEmailAsVerified();
