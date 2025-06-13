@@ -6,10 +6,6 @@
     <link rel="icon" type="image/png" href="{{ asset('img/stwag-logo.png') }}">
     <title>STWAG</title>
     <style>
-        :root {
-            --primary-color: #49b5b2;
-        }
-
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
             background: #f4f6fb;
@@ -36,7 +32,7 @@
         .header h2 {
             margin: 0;
             font-size: 28px;
-            color: var(--primary-color);
+            color: #49b5b2;
             letter-spacing: 1px;
         }
 
@@ -62,7 +58,7 @@
         .action a {
             display: inline-block;
             padding: 12px 28px;
-            background: #007bff;
+            background: #49b5b2;
             color: #fff !important;
             border-radius: 5px;
             text-decoration: none;
@@ -93,7 +89,7 @@
         .btn {
             display: inline-block;
             padding: 12px 28px;
-            background: #007bff;
+            background: #49b5b2;
             color: #fff !important;
             border-radius: 5px;
             text-decoration: none;
@@ -103,7 +99,7 @@
         }
 
         .btn:hover {
-            background: #0056b3;
+            background: #2a7270;
         }
     </style>
 </head>
