@@ -212,7 +212,6 @@ class BetController extends Controller
                 // Update the existing bet by adding points
                 $existingBet->points += $bet['points'];
                 $existingBet->save();
-
             } else {
                 Bet::create([
                     'result_id' => $result_id,
@@ -335,6 +334,7 @@ class BetController extends Controller
             }
         }
 
+        $status = 0;
         $user_id = $request->user_id;
 
         if ($result_id !== null) {
@@ -346,32 +346,43 @@ class BetController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->limit(1)
                 ->get();
-
-            if ($bets->isEmpty()) {
-                return response()->json([
-                    'date' => $date,
-                    'session' => $session,
-                    'status' => 0,
-                    'message' => 'No bets found for user ' . $user_id . ' yet.'
-                ], 404);
-            }
+            // if ($bets->isEmpty()) {
+            //     return response()->json([
+            //         'date' => $date,
+            //         'session' => $session,
+            //         'status' => $status,
+            //         'message' => 'No bets found for user ' . $user_id . ' yet.'
+            //     ], 404);
+            // }
         }
 
-        $bet = $bets->first();
+        // $bet = $bets->first();
 
-        if (!$bet) {
+        if ($bets->count() > 0) {
+            $result = Result::where('result_id', $result_id)->first();
+            if ($result) {
+                $winningNumber = $result->number;
+                $userBet = Bet::where('user_id', $user_id)
+                    ->where('result_id', $result_id)
+                    ->where('number', $winningNumber)
+                    ->first();
+
+                $status = $userBet ? 1 : 0;
+            }
+
             return response()->json([
                 'date' => $date,
                 'session' => $session,
-                'status' => 0,
-                'message' => 'No Bet found for ' . ($result_id !== null ? $result_id : $bets->result_id) . '.'
-            ], 404);
+                'status' => $status,
+                'result' => $bets
+            ], 201);
         } else {
             return response()->json([
                 'date' => $date,
                 'session' => $session,
-                'result' => $bets
-            ]);
+                'status' => $status,
+                'message' => 'No Bet found for ' . ($result_id !== null ? $result_id : $bets->result_id) . '.'
+            ], 404);
         }
     }
 
