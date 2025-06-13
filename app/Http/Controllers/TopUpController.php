@@ -16,7 +16,6 @@ class TopUpController extends Controller
      */
     public function index()
     {
-        //
         $topups = TopUp::all();
         if ($topups->isEmpty()) {
             return response()->json(['message' => 'No top-ups found'], 404);
