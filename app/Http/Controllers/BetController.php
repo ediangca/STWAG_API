@@ -367,7 +367,7 @@ class BetController extends Controller
                     ->where('number', $winningNumber)
                     ->first();
 
-                $status = $userBet ? 1 : 0;
+                $status = $userBet ? 1 : 2;
             }
 
             return response()->json([
