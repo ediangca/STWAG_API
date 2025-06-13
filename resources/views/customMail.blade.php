@@ -74,7 +74,7 @@
 
         .footer span {
             font-weight: bold;
-            color: var(--primary-color);
+            color: #49b5b2;
         }
 
         .copyright {
