@@ -38,10 +38,12 @@
 
         .subject {
             font-size: 20px;
-            font-weight: 600;
+            font-weight: bold;
             color: #222;
             margin-bottom: 18px;
             text-align: center;
+            font-style: italic;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
         }
 
         .body-content {

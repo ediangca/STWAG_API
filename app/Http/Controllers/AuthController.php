@@ -216,7 +216,7 @@ class AuthController extends Controller
             Log::info('Verification success email sent to user', ['user_id' => $user->user_id, 'email' => $user->email]);
         } catch (Exception $e) {
             Log::error('Error sending email verification', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'User registered but failed to send verification email.'], 201);
+            // return response()->json(['message' => 'User registered but failed to send verification email.'], 201);
         }
 
         Log::info('Email verified successfully', ['user_id' => $user->id, 'email' => $user->email,  'uplinecode' => $user->uplinecode]);
@@ -275,133 +275,6 @@ class AuthController extends Controller
         return view('customMail')->with('user', $user)
             ->with('customSubject', 'Subject Testing')
             ->with('customMessage', 'Congratulations! Custom Mail view testing!');
-        /*
-        return response()->make(
-            '<!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Email Verified</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-        body {
-            font-family: "Segoe UI", Arial, sans-serif;
-            background: #f7f7f7;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 480px;
-            margin: 48px auto;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(44, 62, 80, 0.08);
-            padding: 40px 32px 32px 32px;
-        }
-        h1 {
-            color: #2e7d32;
-            margin-top: 0;
-            font-size: 2.2em;
-            letter-spacing: 2px;
-            text-align: center;
-        }
-        .message {
-            margin: 32px 0 24px 0;
-            font-size: 1.15em;
-            color: #222;
-            line-height: 1.7;
-            text-align: center;
-        }
-        .user-info {
-            margin-top: 24px;
-            color: #555;
-            font-size: 1.05em;
-            text-align: center;
-        }
-        .salutation {
-            margin-top: 36px;
-            color: #555;
-            font-size: 1.05em;
-            text-align: right;
-        }
-        .greeting {
-            font-weight: 500;
-            color: #1565c0;
-            margin-bottom: 12px;
-            display: block;
-        }
-        @media (max-width: 600px) {
-            .container {
-            padding: 20px 8px 16px 8px;
-            }
-        }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-        <h1>Congratulations!</h1>
-        <div class="message">
-            <span class="greeting">
-            Greetings, ' . htmlspecialchars($user->firstname . ' ' . $user->lastname) . '!
-            </span>
-            Your email has been verified and your account is now active.<br>
-            Enjoy your <strong>10 points</strong> bonus!
-        </div>
-        <div class="salutation">
-            Best regards,<br>
-            <strong>STWAG TEAM</strong>
-        </div>
-        </div>
-    </body>
-    </html>',
-            200,
-            ['Content-Type' => 'text/html']
-        );
-        */
-    }
-
-    public function resendVerificationEmail(Request $request)
-    {
-        Log::info('Resend verification email request received', $request->all());
-
-        try {
-            $request->validate([
-                'email' => 'required|email'
-            ]);
-            Log::info('Validation passed');
-        } catch (ValidationException $e) {
-            Log::error('Validation failed', ['errors' => $e->errors()]);
-            return response()->json(['errors' => $e->errors()], 422);
-        }
-
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
-
-        if ($user->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Email is already verified'], 200);
-        }
-
-        try {
-            $user->sendEmailVerificationNotification();
-            Log::info('Verification email sent to ', ['user_id' => $user->user_id, 'email' => $user->email]);
-            return response()->json(['message' => 'Verification email resent successfully to ' . $user->email], 200);
-        } catch (\Exception $e) {
-            Log::error('Error sending verification email', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Failed to resend verification email. Please try again later.'], 500);
-        }
-    }
-
-
-    private function generateReferenceCode(): string
-    {
-        $prefix = 'REF';
-        $date = date('YHmMds'); // Current date in YYYYMMDD format
-        $randomString = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6)); // Random alphanumeric string
-        // return "{$prefix}-{$date}-{$randomString}";
-        return "{$randomString}";
     }
 
     public function login(Request $request)
@@ -461,11 +334,68 @@ class AuthController extends Controller
         //     'token' => $token
         // ]);
 
+        try {
+            // Send email notification if needed
+            if (method_exists($user, 'sendEmail')) {
+                $user->sendEmail(
+                    $user,
+                    'Login Notification',
+                    'You have successfully logged in to your STWAG account. If this was not you, please contact support immediately.');
+            }
+            Log::info('Login notification email sent', ['user_id' => $user->user_id, 'email' => $user->email]);
+        } catch (Exception $e) {
+            Log::error('Error sending login notification email', ['error' => $e->getMessage()]);
+        }
+
         return response()->json([
             'user' => $user,
             'token' => $user->createToken('API Token')->plainTextToken,
             'message' => 'Login successful'
         ]);
+    }
+
+    public function resendVerificationEmail(Request $request)
+    {
+        Log::info('Resend verification email request received', $request->all());
+
+        try {
+            $request->validate([
+                'email' => 'required|email'
+            ]);
+            Log::info('Validation passed');
+        } catch (ValidationException $e) {
+            Log::error('Validation failed', ['errors' => $e->errors()]);
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Email is already verified'], 200);
+        }
+
+        try {
+            $user->sendEmailVerificationNotification();
+            Log::info('Verification email sent to ', ['user_id' => $user->user_id, 'email' => $user->email]);
+            return response()->json(['message' => 'Verification email resent successfully to ' . $user->email], 200);
+        } catch (\Exception $e) {
+            Log::error('Error sending verification email', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Failed to resend verification email. Please try again later.'], 500);
+        }
+    }
+
+
+    private function generateReferenceCode(): string
+    {
+        $prefix = 'REF';
+        $date = date('YHmMds'); // Current date in YYYYMMDD format
+        $randomString = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6)); // Random alphanumeric string
+        // return "{$prefix}-{$date}-{$randomString}";
+        return "{$randomString}";
     }
 
     public function logout(Request $request)
