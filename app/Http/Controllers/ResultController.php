@@ -345,7 +345,6 @@ class ResultController extends Controller
 
     public function showByUID(Request $request, $user_id)
     {
-
         if ($user_id == null && $user_id == '') {
             return response()->json(['message' => 'User ID is required'], 400);
         }
@@ -356,6 +355,78 @@ class ResultController extends Controller
         }
 
         $results = Result::orderBy('result_id', 'desc')->get();
+
+        if ($results->isEmpty()) {
+            return response()->json(['message' => 'No results found'], 404);
+        }
+
+        $resultsWithStatus = $results->map(function ($result) use ($user_id) {
+            $session = Lottery::find($result->lottery_id);
+
+            // Get all bets by this user for this result
+            $userBets = Bet::where('result_id', $result->result_id)
+                ->where('user_id', $user_id)
+                ->get();
+
+            $hasBet = $userBets->isNotEmpty();
+
+            // Check if any of the user's bets is a winner
+            $isWinner = $userBets->contains(function ($bet) use ($result) {
+                return $bet->number == $result->number;
+            });
+
+            $status = 0;
+            if ($hasBet) {
+                $status = $isWinner ? 1 : 2;
+            }
+
+            return [
+                'session' => $session,
+                'result' => $result,
+                'status' => $status,
+                'bets' => $userBets->map(function ($bet) {
+                    return [
+                        'bet_id' => $bet->bet_id,
+                        'number' => $bet->number,
+                        'points' => $bet->points,
+                    ];
+                })->values(),
+            ];
+        });
+
+        return response()->json($resultsWithStatus->values());
+    }
+
+    public function showByUIDPagination(Request $request, $user_id)
+    {
+
+        if ($user_id == null && $user_id == '') {
+            return response()->json(['message' => 'User ID is required'], 400);
+        }
+        
+        // Get 'from' and 'to' query parameters with default values
+        $from = $request->query('from', 0);
+        $to = $request->query('to', 10);
+
+        // Validate parameters to ensure they are integers and non-negative
+        if (!is_numeric($from) || !is_numeric($to) || $from < 0 || $to <= $from) {
+            return response()->json(['message' => 'Invalid "from" or "to" parameters'], 400);
+        }
+
+        // Calculate the number of records to take
+        $take = $to - $from;
+
+        $user = User::find($user_id);
+        if (!$user) {
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+
+        
+        // Get the sliced results
+        $results = Result::orderBy('result_id', 'desc')
+            ->skip($from)
+            ->take($take)
+            ->get();
 
         if ($results->isEmpty()) {
             return response()->json(['message' => 'No results found'], 404);
