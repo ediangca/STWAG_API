@@ -91,6 +91,7 @@ Route::get('/wallets/topup/{user_id}', [TopUpController::class, 'showTopUpWallet
 
 // Result
 Route::get('/results', [ResultController::class, 'index'])->name('results.index');
+Route::get('/results/pagination', [ResultController::class, 'indexPagination'])->name('results.indexPagination');
 Route::get('/resultSignal', [ResultController::class, 'resultSignal'])->name('resultSignal');
 Route::get('/results/id/{result_id?}', [ResultController::class, 'showRecentOrByRID'])->name('results.showRecentOrByRID');
 Route::get('/results/userid/{user_id}/{result_id?}', [ResultController::class, 'showRecentOrByRIDandUID'])->name('results.showRecentOrByRIDandUID');
@@ -102,7 +103,7 @@ Route::delete('/results/date/{date}', [ResultController::class, 'deleteByDate'])
 Route::get('/test-mail', function () {
     Mail::raw('This is a test email from STWAG using Gmail SMTP.', function ($message) {
         $message->to('ediangca22@gmail.com')
-                ->subject('Test Email from STWAG');
+            ->subject('Test Email from STWAG');
     });
 
     return 'Test email sent!';
@@ -110,7 +111,7 @@ Route::get('/test-mail', function () {
 
 
 // Authentication
- 
+
 // Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -129,16 +130,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::controller(AuthController::class)->group(function () {
 
-    
+
     // Route::get('/users', 'index');
 
-//     Route::post('/register', 'register');
-//     Route::post('/login', 'login');
-//     Route::get('/users', 'getAllUsers');
-//     Route::get('/users/{id}', 'getUserById');
+    //     Route::post('/register', 'register');
+    //     Route::post('/login', 'login');
+    //     Route::get('/users', 'getAllUsers');
+    //     Route::get('/users/{id}', 'getUserById');
 
-//     Route::get('/users/{id}/downline/', 'getDownlines');
-//     Route::get('/users/{id}/upline/', 'getUpline');
-    
+    //     Route::get('/users/{id}/downline/', 'getDownlines');
+    //     Route::get('/users/{id}/upline/', 'getUpline');
+
 });
-

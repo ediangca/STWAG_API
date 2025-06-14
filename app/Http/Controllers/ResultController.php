@@ -73,6 +73,75 @@ class ResultController extends Controller
         return response()->json($resultWithStatus->values());
     }
 
+    public function indexPagination(Request $request)
+    {
+        // Get 'from' and 'to' query parameters with default values
+        $from = $request->query('from', 0);
+        $to = $request->query('to', 10);
+
+        // Validate parameters to ensure they are integers and non-negative
+        if (!is_numeric($from) || !is_numeric($to) || $from < 0 || $to <= $from) {
+            return response()->json(['message' => 'Invalid "from" or "to" parameters'], 400);
+        }
+
+        // Calculate the number of records to take
+        $take = $to - $from;
+
+        // Get the sliced results
+        $results = Result::orderBy('result_id', 'desc')
+            ->skip($from)
+            ->take($take)
+            ->get();
+
+        if ($results->isEmpty()) {
+            return response()->json(['message' => 'No results found'], 404);
+        }
+
+        $resultIds = $results->pluck('result_id');
+        $betsGrouped = Bet::whereIn('result_id', $resultIds)
+            ->get()
+            ->groupBy('result_id');
+
+        $resultWithStatus = $results->map(function ($result) use ($betsGrouped) {
+            $bets = $betsGrouped->get($result->result_id, collect());
+            $status = 'No bets found';
+            $winners = [];
+
+            if ($bets->isNotEmpty()) {
+                $hasWinningBet = $bets->contains(function ($bet) use ($result) {
+                    return $bet->number == $result->number;
+                });
+
+                if ($hasWinningBet) {
+                    $winningBetCount = $bets->where('number', $result->number)->count();
+                    $status = 'Bet found for winning number: ' . $result->number . ' (' . $winningBetCount . ' winning bet(s))';
+
+                    $winners = $bets->where('number', $result->number)
+                        ->map(function ($bet) {
+                            $user = $bet->user;
+                            return [
+                                'user_id' => $user->user_id ?? null,
+                                'fullname' => isset($user) ? ($user->firstname . ' ' . $user->lastname) : null,
+                                'bet_id' => $bet->bet_id,
+                                'bet_number' => $bet->number,
+                            ];
+                        })->values();
+                } else {
+                    $status = 'Bet found, but no winning number matched: ' . $result->number;
+                }
+            }
+
+            return [
+                'result' => $result,
+                'status' => $status,
+                'winners' => $winners
+            ];
+        });
+
+        return response()->json($resultWithStatus->values());
+    }
+
+
     /**
      * Delete a result by its result_id.
      * Route: DELETE /lottery/results/{result_id}
@@ -273,7 +342,7 @@ class ResultController extends Controller
         }
     }
 
-    
+
     public function showByUID(Request $request, $user_id)
     {
 
@@ -327,7 +396,6 @@ class ResultController extends Controller
         });
 
         return response()->json($resultsWithStatus->values());
-        
     }
 
 
