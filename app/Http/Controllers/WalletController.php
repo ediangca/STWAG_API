@@ -188,7 +188,7 @@ class WalletController extends Controller
                 $type = 'WITHDRAW';
                 break;
             default:
-                return response()->json(['message' => 'Invalid source type ' . $type ], 400);
+                return response()->json(['message' => 'Invalid source type ' . $type], 400);
         }
 
         if ($wallets->isEmpty()) {
@@ -279,6 +279,16 @@ class WalletController extends Controller
         if ($wallets->isEmpty()) {
             return response()->json(['message' => 'No wallets found for this user'], 404);
         }
+
+        // Modify wallet data to include Topup details if source == 'TOP'
+        $wallets = $wallets->map(function ($wallet) {
+            if ($wallet->source === 'TOP') {
+                $topup = TopUp::where('topup_id', $wallet->ref_id)->get();
+                $wallet->topup_details = $topup;
+            }
+            return $wallet;
+        });
+
         return response()->json(
             [
                 'total_points' => $totalPoints,

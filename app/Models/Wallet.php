@@ -41,4 +41,9 @@ class Wallet extends Model
     //     'withdrawableFlag' => 'boolean',
     //     'confirmedFlag' => 'boolean',
     // ];
+
+    public function topup()
+    {
+        return $this->belongsTo(Topup::class, 'ref_id', 'topup_id');
+    }
 }
