@@ -213,6 +213,7 @@ class ResultController extends Controller
                 $wallet = $wallets->where('user_id', $bet->user_id)->first();
                 return [
                     'user_id' => $bet->user->user_id ?? null,
+                    'avatat' => $bet->user->avatar ?? 0,
                     'fullname' => ($bet->user->firstname . ' ' . $bet->user->lastname) ?? null,
                     'bet_id' => $bet->bet_id,
                     'bet_number' => $bet->number,
@@ -421,7 +422,7 @@ class ResultController extends Controller
             return response()->json(['message' => 'User not found.'], 404);
         }
 
-        
+
         // Get the sliced results
         $results = Result::orderBy('result_id', 'desc')
             ->skip($from)
