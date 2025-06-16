@@ -443,16 +443,16 @@ class ResultController extends Controller
             return response()->json(['message' => 'No results found'], 404);
         }
         // Modify Result data to include Session details'
-        $results = $results->map(function ($result) {
-            $session = Lottery::where('lottery_id', $result->lottery_id)->get();
-            if (!$session->isEmpty()) {
-                $result->session_details = $session;
-            }
-            return $result;
-        });
+        // $results = $results->map(function ($result) {
+        //     $session = Lottery::where('lottery_id', $result->lottery_id)->get();
+        //     if (!$session->isEmpty()) {
+        //         $result->session_details = $session;
+        //     }
+        //     return $result;
+        // });
 
         $resultsWithStatus = $results->map(function ($result) use ($user_id) {
-            // $session = Lottery::find($result->lottery_id);
+            $session = Lottery::find($result->lottery_id);
 
             // Get all bets by this user for this result
             $userBets = Bet::where('result_id', $result->result_id)
@@ -472,7 +472,7 @@ class ResultController extends Controller
             }
 
             return [
-                // 'session' => $session,
+                'session' => $session,
                 'result' => $result,
                 'status' => $status,
                 'bets' => $userBets->map(function ($bet) {
