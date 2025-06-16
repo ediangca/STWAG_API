@@ -260,7 +260,7 @@ class WalletController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the wallet by User.
      */
     public function show(Request $request, string $user_id)
     {
@@ -281,11 +281,10 @@ class WalletController extends Controller
         $totalTOP = $wallets->where('confirmFlag', 1)->whereIn('source', ['TOP'])->sum('points');
         $totalINC = $wallets->where('confirmFlag', 1)->whereIn('source', ['INC'])->sum('points');
         $totalCBK = $wallets->where('confirmFlag', 1)->whereIn('source', ['CBK'])->sum('points');
-        $totalBET = $wallets->where('confirmFlag', 1)->whereIn('source', ['WTH'])->sum('points');
-        $totalWIN = $wallets->where('confirmFlag', 1)->whereIn('source', ['WTH'])->sum('points');
+        $totalBET = $wallets->where('confirmFlag', 1)->whereIn('source', ['BET'])->sum('points');
+        $totalWIN = $wallets->where('confirmFlag', 1)->whereIn('source', ['WIN'])->sum('points');
         $totalWTH = $wallets->where('confirmFlag', 1)->whereIn('source', ['WTH'])->sum('points');
         $totalUnwithdrawable = $wallets->where('confirmFlag', 1)->whereIn('source', ['CBK', 'BUN', 'REF',])->sum('points');
-
 
         if ($wallets->isEmpty()) {
             return response()->json(['message' => 'No wallets found for this user'], 404);
