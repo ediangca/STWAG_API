@@ -8,7 +8,9 @@ use App\Http\Controllers\LotteryController;
 use App\Http\Controllers\ResultController;
 use App\Http\Controllers\TopUpController;
 use App\Http\Controllers\WalletController;
+use App\Http\Controllers\WithdrawController;
 use App\Models\TopUp;
+use App\Models\Withdraw;
 use Illuminate\Support\Facades\Mail;
 
 Route::get('/', function () {
@@ -88,7 +90,7 @@ Route::get('/wallets/withdrawable/{user_id}', [WalletController::class, 'withdra
 // Route::post('/wallets/topup', [WalletController::class, 'topup']);
 Route::get('/wallets/topup/all', [TopUpController::class, 'index']);
 Route::post('/wallets/topup', [TopUpController::class, 'store']);
-Route::put('/wallets/topup/confirm/{topup_id}', [TopUpController::class, 'confirmTopUpFlagByTopupId']);
+Route::put('/wallets/topup/confirm/{topup_id}', [TopUpController::class, 'confirmTopUpFlagByTopupID']);
 Route::get('/wallets/topup/{user_id}', [TopUpController::class, 'showTopUpWallets']);
 
 // Result
@@ -102,6 +104,12 @@ Route::get('/results/all/pagination/{user_id}', [ResultController::class, 'showB
 Route::get('/results/date/{date?}', [ResultController::class, 'showByDate'])->name('results.showByDate');
 Route::delete('/results/id/{result_id}', [ResultController::class, 'deleteById'])->name('results.deleteById');
 Route::delete('/results/date/{date}', [ResultController::class, 'deleteByDate'])->name('results.deleteByDate');
+
+// Withdraw
+Route::get('/wallets/withdraw/all', [WithdrawController::class, 'index']);
+Route::post('/wallets/withdraw', [WithdrawController::class, 'store']);
+Route::put('/wallets/withdraw/confirm/{topup_id}', [WithdrawController::class, 'confirmWithdrawFlagByWithdrawID']);
+Route::get('/wallets/withdraw/{user_id}', [WithdrawController::class, 'showWithdrawWallets']);
 
 Route::get('/test-mail', function () {
     Mail::raw('This is a test email from STWAG using Gmail SMTP.', function ($message) {

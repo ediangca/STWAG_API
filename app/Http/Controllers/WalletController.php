@@ -264,12 +264,12 @@ class WalletController extends Controller
      */
     public function show(Request $request, string $user_id)
     {
-        $userId = $request->has('user_id') ? $request->input('user_id') : $user_id;
-        if (!$userId) {
+        $user_id = $request->has('user_id') ? $request->input('user_id') : $user_id;
+        if (!$user_id) {
             return response()->json(['message' => 'User ID is required'], 400);
         }
 
-        $wallets = Wallet::where('user_id', $userId)
+        $wallets = Wallet::where('user_id', $user_id)
             // ->whereNotIn('source', ['BET', 'WTH'])
             ->orderBy('created_at', 'desc')
             ->get();

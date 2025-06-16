@@ -31,7 +31,7 @@ class TopUpController extends Controller
             }
             $user = User::where('user_id', $topup->user_id)->get();
             if (!$user->isEmpty()) {
-                // $topup->wallets_details = $wallet ?: null;
+                // $topup->user_details = $user ?: null;
                 $topup->avatar = $user[0]->avatar;
                 $topup->fullname = $user[0]->firstname.' '.$user[0]->lastname;
             }
@@ -77,7 +77,7 @@ class TopUpController extends Controller
             return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
         }
 
-        $topup_id = $request->has('topup_id') ? $request->input('topup_id') : uniqid('TOPUP') . date('YmdHis');
+        $topup_id = $request->has('topup_id') ? $request->input('topup_id') : uniqid('TOP') . date('YmdHis');
         $user_id = $request->input('user_id');
         $points = $request->input('points');
         $gcash_ref_no = $request->input('gcash_ref_no');
@@ -200,7 +200,7 @@ class TopUpController extends Controller
     /**
      * Update the confirmFlag of a TopUp record by topup_id.
      */
-    public function confirmTopUpFlagByTopupId(Request $request, string $topup_id)
+    public function confirmTopUpFlagByTopupID(Request $request, string $topup_id)
     {
         if (!$topup_id) {
             return response()->json(['message' => 'TopUp ID is required'], 400);
