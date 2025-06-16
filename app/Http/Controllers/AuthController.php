@@ -53,6 +53,7 @@ class AuthController extends Controller
             !$request->has('lastname') ||
             !$request->has('birthdate') ||
             !$request->has('email') ||
+            !$request->has('contactno') ||
             !$request->has('password') ||
             !$request->has('type') ||
             !$request->has('uplinecode') ||
@@ -74,6 +75,7 @@ class AuthController extends Controller
                 'lastname' => 'required|string|max:255',
                 'birthdate' => 'required|date',
                 'email' => 'required|string|email|max:255|unique:users',
+                'contactno' => 'required|string|email|max:11|unique:users',
                 'password' => 'required|string|min:6',
                 'type' => 'required|string|max:255|nullable', //default user
                 // 'referencecode' => 'required|string|max:255', //generated
@@ -132,6 +134,7 @@ class AuthController extends Controller
             'lastname' => $request->lastname,
             'birthdate' => $request->birthdate,
             'email' => $request->email,
+            'contactno' => $request->email,
             'password' => bcrypt($request->password),
             'type' => $request->type,
             'referencecode' => $referencecode, //generated
@@ -544,9 +547,9 @@ class AuthController extends Controller
         ]);
     }
 
-    public function updateUserById(Request $request, $id)
+    public function updateUserById(Request $request, $user_id)
     {
-        $user = User::find($id);
+        $user = User::find($user_id);
 
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
@@ -556,6 +559,7 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'User updated successfully']);
     }
+
     public function updateUserPasswordById(Request $request, $id)
     {
         $request->validate([

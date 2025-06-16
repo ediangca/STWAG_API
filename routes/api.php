@@ -50,6 +50,8 @@ Route::post('/auth', [AuthController::class, 'login']);
 
 Route::get('/users', [AuthController::class, 'index']);
 Route::get('/users/{user_id}', [AuthController::class, 'userInfo']);
+Route::put('/users/{user_id}', [AuthController::class, 'updateUserById'])->name('users.update');
+Route::delete('/users/{user_id}', [AuthController::class, 'deleteUserById'])->name('users.delete');
 // Route::get('/users/{id}', [AuthController::class, 'getUserById']);
 
 // Route::get('/users/{id}/downline', [AuthController::class, 'getDownlines']);
