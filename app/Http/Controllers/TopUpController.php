@@ -16,10 +16,21 @@ class TopUpController extends Controller
      */
     public function index()
     {
+        Log::info('Function: ' . 'TopupIndex');
         $topups = TopUp::orderBy('created_at', 'desc')->get();;
         if ($topups->isEmpty()) {
             return response()->json(['message' => 'No top-ups found'], 404);
         }
+        // Modify Topup data to include Wallet details'
+        $topups = $topups->map(function ($topup) {
+            $wallet = Wallet::where('ref_id', $topup->topup_id)->get();
+            if (!$wallet->isEmpty()) {
+                // $topup->wallets_details = $wallet ?: null;
+                $topup->confirmFlag = $wallet[0]->confirmFlag;
+            }
+            return $topup;
+        });
+
         return response()->json($topups);
     }
 

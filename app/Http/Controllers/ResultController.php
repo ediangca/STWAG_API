@@ -75,6 +75,8 @@ class ResultController extends Controller
 
     public function indexPagination(Request $request)
     {
+
+        Log::info('Function: ' . 'ResultIndexPagination');
         // Get 'from' and 'to' query parameters with default values
         $from = $request->query('from', 0);
         $to = $request->query('to', 10);
@@ -96,6 +98,14 @@ class ResultController extends Controller
         if ($results->isEmpty()) {
             return response()->json(['message' => 'No results found'], 404);
         }
+        // Modify Result data to include Session details'
+        $results = $results->map(function ($result) {
+            $session = Lottery::where('lottery_id', $result->lottery_id)->get();
+            if (!$session->isEmpty()) {
+                $result->session_details = $session;
+            }
+            return $result;
+        });
 
         $resultIds = $results->pluck('result_id');
         $betsGrouped = Bet::whereIn('result_id', $resultIds)
@@ -130,6 +140,7 @@ class ResultController extends Controller
                     $status = 'Bet found, but no winning number matched: ' . $result->number;
                 }
             }
+
 
             return [
                 'result' => $result,
@@ -422,7 +433,6 @@ class ResultController extends Controller
             return response()->json(['message' => 'User not found.'], 404);
         }
 
-
         // Get the sliced results
         $results = Result::orderBy('result_id', 'desc')
             ->skip($from)
@@ -432,9 +442,17 @@ class ResultController extends Controller
         if ($results->isEmpty()) {
             return response()->json(['message' => 'No results found'], 404);
         }
+        // Modify Result data to include Session details'
+        $results = $results->map(function ($result) {
+            $session = Lottery::where('lottery_id', $result->lottery_id)->get();
+            if (!$session->isEmpty()) {
+                $result->session_details = $session;
+            }
+            return $result;
+        });
 
         $resultsWithStatus = $results->map(function ($result) use ($user_id) {
-            $session = Lottery::find($result->lottery_id);
+            // $session = Lottery::find($result->lottery_id);
 
             // Get all bets by this user for this result
             $userBets = Bet::where('result_id', $result->result_id)
@@ -454,7 +472,7 @@ class ResultController extends Controller
             }
 
             return [
-                'session' => $session,
+                // 'session' => $session,
                 'result' => $result,
                 'status' => $status,
                 'bets' => $userBets->map(function ($bet) {
