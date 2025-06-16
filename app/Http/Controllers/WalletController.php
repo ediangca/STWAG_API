@@ -276,6 +276,17 @@ class WalletController extends Controller
 
         $totalPoints = $wallets->where('confirmFlag', 1)->sum('points');
 
+        $totalBUNN = $wallets->where('confirmFlag', 1)->whereIn('source', ['BUN'])->sum('points');
+        $totalREF = $wallets->where('confirmFlag', 1)->whereIn('source', ['REF'])->sum('points');
+        $totalTOP = $wallets->where('confirmFlag', 1)->whereIn('source', ['TOP'])->sum('points');
+        $totalINC = $wallets->where('confirmFlag', 1)->whereIn('source', ['INC'])->sum('points');
+        $totalCBK = $wallets->where('confirmFlag', 1)->whereIn('source', ['CBK'])->sum('points');
+        $totalBET = $wallets->where('confirmFlag', 1)->whereIn('source', ['WTH'])->sum('points');
+        $totalWIN = $wallets->where('confirmFlag', 1)->whereIn('source', ['WTH'])->sum('points');
+        $totalWTH = $wallets->where('confirmFlag', 1)->whereIn('source', ['WTH'])->sum('points');
+        $totalUnwithdrawable = $wallets->where('confirmFlag', 1)->whereIn('source', ['CBK', 'BUN', 'REF',])->sum('points');
+
+
         if ($wallets->isEmpty()) {
             return response()->json(['message' => 'No wallets found for this user'], 404);
         }
@@ -291,8 +302,17 @@ class WalletController extends Controller
 
         return response()->json(
             [
+                'total_bunos' => $totalBUNN,
+                'total_referral' => $totalREF,
+                'total_topup' => $totalTOP,
+                'total_incentives' => $totalINC,
+                'total_cashback' => $totalCBK,
+                'total_bet' => $totalBET,
+                'total_winning' => $totalWIN,
+                'total_withdraw' => $totalWTH,
                 'total_points' => $totalPoints,
-                'total_withdrawable' => 0,
+                'totalUnwithdrawable' => $totalUnwithdrawable,
+                'total_withdrawable' => ($totalPoints -  $totalUnwithdrawable),
                 'wallets' => $wallets
             ],
             200

@@ -99,6 +99,14 @@ return new class extends Migration
             $table->string('gcash_ref_no', 255);
             $table->timestamps();
         });
+
+        Schema::create('withdraws', function (Blueprint $table) {
+            $table->string('withdraw_id')->primary();
+            $table->string('user_id')->index();
+            $table->double('points');
+            $table->string('contactno', 11);
+            $table->timestamps();
+        });
     }
 
     /**
@@ -113,5 +121,7 @@ return new class extends Migration
         Schema::dropIfExists('device');
         Schema::dropIfExists('wallets');
         Schema::dropIfExists('wallet_item');
+        Schema::dropIfExists('topups');
+        Schema::dropIfExists('withdraws');
     }
 };
