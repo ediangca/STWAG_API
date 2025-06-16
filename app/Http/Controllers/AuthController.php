@@ -224,7 +224,7 @@ class AuthController extends Controller
 
         Log::info('Email verified successfully', ['user_id' => $user->id, 'email' => $user->email,  'uplinecode' => $user->uplinecode]);
 
-        $upline = User::where('referencecode', $user->uplinecode)->first();
+        $upline = User::where('referencecode', $user->uplinecode)->get();
         if ($upline) {
             Wallet::create([
                 'wallet_id' => uniqid('WLT') . '-' . substr($upline->user_id, 4) . date('YmdHis'),
@@ -233,11 +233,12 @@ class AuthController extends Controller
                 'ref_id' => uniqid('REF') . '-' . substr($user->user_id, 4) . date('YmdHis'),
                 'withdrawableFlag' => false,
                 'confirmFlag' => true,
-                'source' => 'BUN', // Referral bonus
+                'source' => 'REF', 
             ]);
-            Log::info('Referral bonus added to upline', ['upline_user_id' => $upline->user_id, 'points' => 5]);
 
+            Log::info('Referral bonus added to upline', ['upline_user_id' => $upline->user_id, 'points' => 5]);
             try {
+
                 if (method_exists($upline, 'sendEmail')) {
                     $user->sendEmail(
                         $upline,
@@ -343,7 +344,8 @@ class AuthController extends Controller
                 $user->sendEmail(
                     $user,
                     'Login Notification',
-                    'You have successfully logged in to your STWAG account. If this was not you, please contact support immediately.');
+                    'You have successfully logged in to your STWAG account. If this was not you, please contact support immediately.'
+                );
             }
             Log::info('Login notification email sent', ['user_id' => $user->user_id, 'email' => $user->email]);
         } catch (Exception $e) {
