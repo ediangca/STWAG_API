@@ -292,6 +292,7 @@ class WalletController extends Controller
         return response()->json(
             [
                 'total_points' => $totalPoints,
+                'total_withdrawable' => 0,
                 'wallets' => $wallets
             ],
             200

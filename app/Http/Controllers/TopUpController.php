@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\TopUp;
+use App\Models\User;
 use App\Models\Wallet;
 use GuzzleHttp\Psr7\Message;
 use Illuminate\Validation\ValidationException;
@@ -28,8 +29,16 @@ class TopUpController extends Controller
                 // $topup->wallets_details = $wallet ?: null;
                 $topup->confirmFlag = $wallet[0]->confirmFlag;
             }
+            $user = User::where('user_id', $topup->user_id)->get();
+            if (!$user->isEmpty()) {
+                // $topup->wallets_details = $wallet ?: null;
+                $topup->avatar = $user[0]->avatar;
+                $topup->fullname = $user[0]->firstname.' '.$user[0]->lastname;
+            }
+
             return $topup;
         });
+        
 
         return response()->json($topups);
     }
