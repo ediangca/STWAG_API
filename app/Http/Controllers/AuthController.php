@@ -546,8 +546,8 @@ class AuthController extends Controller
 
         return view('resetPassword', compact('token', 'email'))
         ->with('user', $user)
-        ->with('customSubject', "Reset Password")
-        ->with('customMessage', "Please Double check you credential. Thanks!");
+        ->with('customSubject', "Reset Your Password")
+        ->with('customMessage', "To secure your account, please set a new password below. Kindly verify your credentials before submitting. Thank you for your attention.");
         
     }
     /**

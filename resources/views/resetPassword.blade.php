@@ -1,38 +1,11 @@
 <!DOCTYPE html>
-<html>
-
-<head>
-    <title>Reset Password</title>
-</head>
-
-<body>
-    <h2>Reset Your Password</h2>
-
-    <form method="POST" action="{{ route('password.update') }}">
-        @csrf
-
-        <input type="hidden" name="token" value="{{ $token }}">
-        <input type="hidden" name="email" value="{{ $email }}">
-
-        <label>New Password:</label>
-        <input type="password" name="password" required><br>
-
-        <label>Confirm Password:</label>
-        <input type="password" name="password_confirmation" required><br>
-
-        <button type="submit">Reset Password</button>
-    </form>
-</body>
-
-</html>
-
-
-<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="{{ asset('img/stwag-logo.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <title>STWAG</title>
     <style>
         body {
@@ -143,30 +116,12 @@
             <em>(Spin to Win and Gain)</em>
         </div>
         <div class="body-content">
-            @if (isset($customSubject))
-                <div class="subject">
-                    {{ $customSubject }}
-                </div>
-            @endif
+
             <div>
                 Hello, <strong>
                     {{ $user ? $user->firstname . ' ' . substr($user->lastname, 0, 1) . '.' : 'STWAG User' }}</strong>!
             </div>
             <div style="margin-top: 18px;">
-                <form method="POST" action="{{ route('password.update') }}">
-                    @csrf
-
-                    <input type="hidden" name="token" value="{{ $token }}">
-                    <input type="hidden" name="email" value="{{ $email }}">
-
-                    <label>New Password:</label>
-                    <input type="password" name="password" required><br>
-
-                    <label>Confirm Password:</label>
-                    <input type="password" name="password_confirmation" required><br>
-
-                    <button type="submit">Reset Password</button>
-                </form>
 
                 @if (isset($customMessage))
                     {{ $customMessage }}
@@ -174,10 +129,40 @@
                     Thank you for being a valued member of our community.
                 @endif
                 
+                <form method="POST" action="{{ route('password.update') }}"
+                    class="w-100 mx-auto mt-5 p-4 border rounded shadow-sm" style="max-width: 400px;">
+                    @csrf
+
+                    <input type="hidden" name="token" value="{{ $token }}">
+                    <input type="hidden" name="email" value="{{ $email }}">
+
+                    @if (isset($customSubject))
+                        <div class="subject">
+                            {{ $customSubject }}
+                        </div>
+                    @endif
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">New Password</label>
+                        <input type="password" name="password" id="password" class="form-control" required
+                            placeholder="Enter new password">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password_confirmation" class="form-label">Confirm Password</label>
+                        <input type="password" name="password_confirmation" id="password_confirmation"
+                            class="form-control" required placeholder="Confirm new password">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Reset Password</button>
+
+
+                </form>
+
             </div>
         </div>
         <div class="footer">
-            Regards, <br><span>Your STWAG App Team</span>
+            {{-- Regards, <br><span>Your STWAG App Team</span> --}}
         </div>
         <div class="copyright">
             &copy; {{ date('Y') }} STWAG. All rights reserved.
