@@ -190,7 +190,19 @@ class WithdrawController extends Controller
         if ($withdraw->confirmFlag) {
             return response()->json(['message' => 'Withdraw has already been confirmed'], 409);
         }
+        
+        $wallets = Wallet::where('user_id', $withdraw->user_id)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
+        $totalPoints = $wallets->where('confirmFlag', 1)->sum('points');
+        $totalUnwithdrawable = $wallets->where('confirmFlag', 1)->whereIn('source', ['CBK', 'BUN', 'REF',])->sum('points');
+        $totalWithdrawable = $totalPoints -  $totalUnwithdrawable;
+
+        if($wallets->points > $totalWithdrawable){
+            return response()->json(['message' => ($totalWithdrawable == 0 ? 'Nothing': 'Insuficient points').' to withdraw.'], 403);
+        }
+        
         $withdraw->confirmFlag = $confirmFlag;
         $withdraw->save();
 

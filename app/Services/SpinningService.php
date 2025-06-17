@@ -209,13 +209,6 @@ class SpinningService
 
             // Add winning points to user's wallet
             if ($winner->user && method_exists($winner->user, 'wallet')) {
-                // If user has a wallet relation, create a wallet transaction of type 'WIN'
-                // $winner->user->wallet()->updateOrCreate(
-                //     ['type' => 'WIN', 'source' => 'WIN', 'description' => 'Winning points for result ' . $result_id],
-                //     ['points' => $userShare]
-                // );
-                // $winnerUser = $winner->user;
-                // Log::info(['winner->user', $winnerUser]);
 
                 $winner->user->wallet()->create([
                     'wallet_id' => uniqid('WLT') . '-' . substr($winner->user->user_id, 10) . date('YmdHis'),
@@ -230,34 +223,43 @@ class SpinningService
                 // Distribute 10% incentives to upline if applicable
                 // Incentive Distribution Logic
                 // 3% reserved for original 13 founding members
-                // 7% distributed through downline/upline structure
-
-                $foundingMemberIds = User::where('type', 'member')->pluck('user_id')->toArray();
-
-                // Distribute 3% to founding members
                 $foundingShare = $incentivesShare * 0.3;
-                $perFounder = $foundingShare / count($foundingMemberIds);
-                foreach ($foundingMemberIds as $founderId) {
-                    $founder = User::find($founderId);
-                    if ($founder && method_exists($founder, 'wallet')) {
-                        $founder->wallet()->create([
-                            'wallet_id' => uniqid('WLT') . '-' . substr($founder->user_id, 10) . date('YmdHis'),
-                            'user_id' => $founder->user_id,
-                            'points' => $perFounder,
-                            'ref_id' => $result_id,
-                            'withdrawableFlag' => true,
-                            'confirmFlag' => true,
-                            'source' => 'INC',
-                        ]);
+
+                // Find the root founder by traversing upline
+                $currentUser = $winner->user;
+                $rootFounder = null;
+                while ($currentUser && $currentUser->uplinecode) {
+
+                    $upline = User::where('code', $currentUser->uplinecode)
+                        ->where('type', 'member')
+                        ->first();
+
+                    if (!$upline) {
+                        break; // No further upline found
                     }
+
+                    $rootFounder = $upline; // Keep updating until topmost upline is found
+                    $currentUser = $upline; // Move to the next level
                 }
 
-                // 7% for downline/upline structure
+                // Give the 3% founding share to the root founder if exists
+                if ($rootFounder && method_exists($rootFounder, 'wallet')) {
+                    $rootFounder->wallet()->create([
+                        'wallet_id' => uniqid('WLT') . '-' . substr($rootFounder->user_id, 10) . date('YmdHis'),
+                        'user_id' => $rootFounder->user_id,
+                        'points' => $foundingShare,
+                        'ref_id' => $result_id,
+                        'withdrawableFlag' => true,
+                        'confirmFlag' => true,
+                        'source' => 'INC',
+                    ]);
+                }
+                
+                // 7% distributed through downline/upline structure
                 $remainingIncentive = $incentivesShare * 0.7;
                 $currentUser = $winner->user;
                 $level = 1;
                 $incentiveLeft = $remainingIncentive;
-                $directUplineFound = false;
 
                 while ($currentUser && $currentUser->upline && $incentiveLeft > 0) {
                     $upline = $currentUser->upline;
@@ -274,7 +276,7 @@ class SpinningService
                                 'ref_id' => $result_id,
                                 'withdrawableFlag' => true,
                                 'confirmFlag' => true,
-                                'source' => 'INCENTIVE',
+                                'source' => 'INC',
                             ]);
                         }
                         break;
