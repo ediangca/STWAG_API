@@ -539,7 +539,16 @@ class AuthController extends Controller
         $token = $request->query('token');
         $email = $request->query('email');
 
-        return view('resetPassword', compact('token', 'email'));
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            return response()->json(['message' => 'User email not found']);
+        }
+
+        return view('resetPassword', compact('token', 'email'))
+        ->with('user', $user)
+        ->with('customSubject', "Reset Password")
+        ->with('customMessage', "Please Double check you credential. Thanks!");
+        
     }
     /**
      * Handle password reset

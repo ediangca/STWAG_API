@@ -145,7 +145,7 @@
         <div class="body-content">
             @if (isset($customSubject))
                 <div class="subject">
-                    rES
+                    {{ $customSubject }}
                 </div>
             @endif
             <div>
@@ -167,6 +167,13 @@
 
                     <button type="submit">Reset Password</button>
                 </form>
+
+                @if (isset($customMessage))
+                    {{ $customMessage }}
+                @else
+                    Thank you for being a valued member of our community.
+                @endif
+                
             </div>
         </div>
         <div class="footer">
