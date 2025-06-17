@@ -177,8 +177,6 @@ class SpinningService
         $spin1 = $digits[0];
         $spin2 = $digits[1];
 
-
-
         /**
          * Bet Distribution:
          * 70% of the total pot (bet amount) is awarded to the winning user(s).
@@ -201,7 +199,6 @@ class SpinningService
         }
 
         $totalWinningPoints = $winners->sum('points');
-
 
         foreach ($winners as $winner) {
             // Distribute 70% of the pot proportionally to winners
@@ -253,16 +250,22 @@ class SpinningService
                         'confirmFlag' => true,
                         'source' => 'INC',
                     ]);
+                    Log::info("Incentive Distribution: Founding Share to Upline, User ID: {$rootFounder->user_id}, Points: {$foundingShare}");
                 }
-                
+
                 // 7% distributed through downline/upline structure
                 $remainingIncentive = $incentivesShare * 0.7;
                 $currentUser = $winner->user;
                 $level = 1;
                 $incentiveLeft = $remainingIncentive;
 
-                while ($currentUser && $currentUser->upline && $incentiveLeft > 0) {
-                    $upline = $currentUser->upline;
+                while ($currentUser && $currentUser->uplinecode && $incentiveLeft > 0) {
+
+                    $upline = User::where('code', $currentUser->uplinecode)->first();
+
+                    if (!$upline) {
+                        break; // No further upline found
+                    }
 
                     // If direct upline is a bettor in this result, give 7% to direct upline and stop
                     $isDirectUplineBettor = $winners->contains('user_id', $upline->user_id);
@@ -278,6 +281,7 @@ class SpinningService
                                 'confirmFlag' => true,
                                 'source' => 'INC',
                             ]);
+                            Log::info("Incentive Distribution: Direct Upline Level $level, User ID: {$upline->user_id}, Points: {$uplineShare}");
                         }
                         break;
                     }
@@ -298,6 +302,7 @@ class SpinningService
                                 'confirmFlag' => true,
                                 'source' => 'INC',
                             ]);
+                            Log::info("Incentive Distribution: Level $level, User ID: {$upline->user_id}, Final 1% Points: {$uplineShare}");
                         }
                         break;
                     }
@@ -312,6 +317,7 @@ class SpinningService
                             'confirmFlag' => true,
                             'source' => 'INC',
                         ]);
+                        Log::info("Incentive Distribution: Level $level, User ID: {$upline->user_id}, Points: {$uplineShare}");
                     }
                     $incentiveLeft -= $uplineShare;
                     $currentUser = $upline;
