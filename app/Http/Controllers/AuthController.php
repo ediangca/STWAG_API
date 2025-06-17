@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Services\UserVerifiedMail;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Notifications\PasswordResetMail;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -135,7 +138,7 @@ class AuthController extends Controller
             'birthdate' => $request->birthdate,
             'email' => $request->email,
             'contactno' => $request->email,
-            'password' => bcrypt($request->password),
+            'password' => Hash::make($request->password),
             'type' => $request->type,
             'referencecode' => $referencecode, //generated
             // 'referencecode' => $request->referencecode,
@@ -233,7 +236,7 @@ class AuthController extends Controller
                 'ref_id' => uniqid('REF') . '-' . substr($user->user_id, 4) . date('YmdHis'),
                 'withdrawableFlag' => false,
                 'confirmFlag' => true,
-                'source' => 'REF', 
+                'source' => 'REF',
             ]);
 
             Log::info('Referral bonus added to upline', ['upline_user_id' => $upline->user_id, 'points' => 5]);
@@ -413,7 +416,7 @@ class AuthController extends Controller
             $request->user()->currentAccessToken()->delete();
 
             return response()->json(['message' => 'Logged out successfully']);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Log the exception for debugging
             Log::error('Logout failed', ['error' => $e->getMessage()]);
 
@@ -475,6 +478,135 @@ class AuthController extends Controller
         return response()->json(['message' => 'User updated successfully']);
     }
 
+    public function forgotPassword(Request $request)
+    {
+        if (!$request->has('email')) {
+            return response()->json(['message' => 'Email is required'], 400);
+        }
+
+        try {
+            // Validate the request
+            $request->validate([
+                'email' => 'required|email',
+            ]);
+            Log::error('Forgot Password', ['email' => $request->email]);
+        } catch (ValidationException $e) {
+            Log::error('Validation failed', ['errors' => $e->errors()]);
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Email not found!'], 404);
+        }
+        Log::error('Requesting User to Reset password', ['user' => $user]);
+
+        // Generate token and store in password_reset_tokens
+        $token = Str::random(64);
+
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $request->email],
+            [
+                'token' => $token,
+                'created_at' => now()
+            ]
+        );
+
+        // Send password reset email
+        try {
+            // Send email notification if needed
+            if (method_exists($user, 'sendResetPasswordMail')) {
+                $user->sendResetPasswordMail(
+                    $user,
+                    $token
+                );
+                return response()->json([
+                    'message' => 'Password reset link sent to your email'
+                ], 200);
+            }
+        } catch (Exception $e) {
+            Log::error('Logout failed', ['error' => $e->getMessage()]);
+            return response()->json([
+                'message' => 'Unable to send reset link. Please try again.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function showResetForm(Request $request)
+    {
+        $token = $request->query('token');
+        $email = $request->query('email');
+
+        return view('resetPassword', compact('token', 'email'));
+    }
+    /**
+     * Handle password reset
+     */
+    public function resetPassword1(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'token' => 'required|string',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        // Verify token
+        $passwordReset = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->where('token', $request->token)
+            ->first();
+
+        if (!$passwordReset) {
+            return response()->json([
+                'message' => 'Invalid token or email'
+            ], 400);
+        }
+
+        // Check if token is expired (e.g., 1 hour)
+        if (now()->diffInMinutes($passwordReset->created_at) > 60) {
+            return response()->json([
+                'message' => 'Token has expired'
+            ], 400);
+        }
+
+        // Update user password
+        User::where('email', $request->email)
+            ->update(['password' => Hash::make($request->password)]);
+
+        // Delete used token
+        DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->delete();
+
+        return response()->json([
+            'message' => 'Password successfully reset'
+        ], 200);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->password = Hash::make($password);
+                $user->save();
+            }
+        );
+
+        return $status == Password::PASSWORD_RESET
+            ? redirect('/login')->with('status', __($status))
+            : back()->withErrors(['email' => [__($status)]]);
+    }
+
     public function updatePassword(Request $request)
     {
         $request->validate([
@@ -488,7 +620,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Current password is incorrect'], 401);
         }
 
-        $user->password = bcrypt($request->new_password);
+        $user->password = Hash::make($request->new_password);
         $user->save();
 
         return response()->json(['message' => 'Password updated successfully']);
@@ -579,7 +711,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Current password is incorrect'], 401);
         }
 
-        $user->password = bcrypt($request->new_password);
+        $user->password = Hash::make($request->new_password);
         $user->save();
 
         return response()->json(['message' => 'Password updated successfully']);

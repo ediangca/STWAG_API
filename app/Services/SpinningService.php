@@ -227,7 +227,7 @@ class SpinningService
                 $rootFounder = null;
                 while ($currentUser && $currentUser->uplinecode) {
 
-                    $upline = User::where('code', $currentUser->uplinecode)
+                    $upline = User::where('referencecode', $currentUser->uplinecode)
                         ->where('type', 'member')
                         ->first();
 
@@ -261,7 +261,7 @@ class SpinningService
 
                 while ($currentUser && $currentUser->uplinecode && $incentiveLeft > 0) {
 
-                    $upline = User::where('code', $currentUser->uplinecode)->first();
+                    $upline = User::where('referencecode', $currentUser->uplinecode)->first();
 
                     if (!$upline) {
                         break; // No further upline found

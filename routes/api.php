@@ -45,15 +45,26 @@ Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])
 Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
     ->middleware(['signed'])
     ->name('verification.verify');
-Route::post('/auth', [AuthController::class, 'login']);
+
+Route::prefix('auth')->group(function () {
+    Route::post('/', [AuthController::class, 'login']);
+    Route::post('/forgotPassword', [AuthController::class, 'forgotPassword']);
+    Route::post('/resetPassword', [AuthController::class, 'resetPassword']);
+    // Route::get('/reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
+});
+
+// In routes/web.php
+Route::get('/auth/reset-password', [AuthController::class, 'showResetForm'])->name('password.reset');
+Route::post('/auth/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
 
 // Route::put('/users/avatar/{id}', [AuthController::class, 'updateAvatarById']);
-
 Route::get('/users', [AuthController::class, 'index']);
 Route::get('/users/{user_id}', [AuthController::class, 'userInfo']);
 Route::put('/users/{user_id}', [AuthController::class, 'updateUserById'])->name('users.update');
 Route::delete('/users/{user_id}', [AuthController::class, 'deleteUserById'])->name('users.delete');
+
+
 // Route::get('/users/{id}', [AuthController::class, 'getUserById']);
 
 // Route::get('/users/{id}/downline', [AuthController::class, 'getDownlines']);

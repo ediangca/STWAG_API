@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Notifications\CustomVerifyEmail;
+use App\Notifications\PasswordResetMail;
 use Illuminate\Support\Facades\Mail;
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -134,6 +135,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendEmail($recipient, $subject, $message)
     {
         Mail::to($recipient->email)->send(new CustomMail($recipient, $subject, $message));
+    }
+
+    public function sendResetPasswordMail($recipient, $token)
+    {
+        Mail::to($recipient->email)->send(new PasswordResetMail($recipient, $token));
     }
 
     /**
