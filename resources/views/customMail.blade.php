@@ -14,11 +14,10 @@
     <title>STWAG</title>
     <style>
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
             background: #f4f6fb;
             margin: 0;
             padding: 0;
-            
+
             font-family: "Montserrat", sans-serif;
             font-optical-sizing: auto;
             font-weight: <weight>;
@@ -55,7 +54,6 @@
             margin-bottom: 18px;
             text-align: center;
             font-style: italic;
-            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
         }
 
         .body-content {
