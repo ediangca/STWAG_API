@@ -579,17 +579,12 @@ class AuthController extends Controller
             ->first();
 
         if (!$passwordReset) {
-            return view('customMail')
-                ->with('customSubject', 'Invalid Reset Token')
-                ->with('customMessage', 'The reset token is invalid or has expired. Please request a new password reset link.');
+            return response()->json(['message' => 'Invalid or expired token'], 400);
         }
 
         // Check if token is expired (e.g., 1 hour)
         if (now()->diffInMinutes($passwordReset->created_at) > 60) {
-            return view('customMail')
-                ->with('customSubject', 'Token Expired')
-                ->with('customMessage', 'The reset token has expired. Please request a new password reset link.');
-            // return response()->json(['message' => 'Token has expired'], 400);
+            return response()->json(['message' => 'Token has expired'], 400);
         }
 
         // Update user password
@@ -618,9 +613,10 @@ class AuthController extends Controller
             Log::error('Error sending password reset email', ['error' => $e->getMessage()]);
         }
 
-        return view('customMail')
-            ->with('customSubject', 'Password Reset Successful')
-            ->with('customMessage', 'Your password has been successfully reset. You can now log in with your new password.');
+        return response()->json([
+            'message' => 'Password reset successful. You can now log in with your new password.',
+            'user' => $user
+        ], 200);
     }
 
     public function resetPassword1(Request $request)

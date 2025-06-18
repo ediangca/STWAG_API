@@ -173,6 +173,11 @@
 
                     <button type="submit" class="btn btn-primary w-100">Reset Password</button>
                 </form>
+                
+                <!-- Success Message (hidden by default) -->
+                <div id="successMessage" class="alert alert-success mt-3" style="display: none;">
+                    Your password has been successfully reset! You can now log in with your new credentials.
+                </div>
 
             </div>
         </div>
