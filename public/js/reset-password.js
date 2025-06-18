@@ -1,3 +1,4 @@
+var appUrl = 'https://stwagapi-production.up.railway.app';
 
 // Toggle Password Visibility with FontAwesome icons
 document.querySelectorAll('.toggle-password').forEach(span => {
@@ -35,7 +36,7 @@ document.getElementById('resetPasswordForm').addEventListener('submit', function
         document.getElementById('password-match-error').style.display = 'none';
     }
 
-    fetch('https://stwagapi-production.up.railway.app/api/auth/reset-password', { // Adjust the route if needed
+    fetch(`{${this.apiUrl}/api/auth/reset-password`, { // Adjust the route if needed
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
