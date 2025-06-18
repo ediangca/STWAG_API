@@ -18,6 +18,7 @@ document.querySelectorAll('.toggle-password').forEach(span => {
     });
 });
 
+alert('Please check your email for the password reset link. If you did not receive an email, please check your spam folder or contact support.');
 // Handle form submission
 const form = document.getElementById('resetPasswordForm');
 const successMessage = document.getElementById('successMessage');
