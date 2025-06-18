@@ -131,9 +131,8 @@
                     Thank you for being a valued member of our community.
                 @endif
 
-                <form method="POST" action="{{ route('password.update') }}"
-                    class="w-100 mx-auto mt-5 p-4 border rounded shadow-sm needs-validation" style="max-width: 400px;"
-                    novalidate>
+                <form id="resetPasswordForm" class="w-100 mx-auto mt-5 p-4 border rounded shadow-sm"
+                    style="max-width: 400px;">
                     @csrf
 
                     <input type="hidden" name="token" value="{{ $token }}">
@@ -174,7 +173,7 @@
                     <button type="submit" class="btn btn-primary w-100">Reset Password</button>
                 </form>
                 <script>
-                    // Toggle Password Visibility using FontAwesome icons
+                    // Toggle Password Visibility with FontAwesome icons
                     document.querySelectorAll('.toggle-password').forEach(span => {
                         span.addEventListener('click', function() {
                             const targetInput = document.querySelector(this.getAttribute('data-target'));
@@ -192,27 +191,62 @@
                         });
                     });
 
-                    // Validate Password Match on Submit
-                    const form = document.querySelector('form');
-                    form.addEventListener('submit', function(event) {
-                        const password = document.getElementById('password');
-                        const confirmPassword = document.getElementById('password_confirmation');
-                        const errorDiv = document.getElementById('password-match-error');
+                    // Handle form submission
+                    document.getElementById('resetPasswordForm').addEventListener('submit', function(event) {
+                        event.preventDefault();
 
-                        // Reset custom error message
-                        confirmPassword.classList.remove('is-invalid');
-                        errorDiv.style.display = 'none';
+                        const token = document.getElementById('token').value;
+                        const email = document.getElementById('email').value;
+                        const password = document.getElementById('password').value;
+                        const passwordConfirmation = document.getElementById('password_confirmation').value;
 
-                        if (password.value !== confirmPassword.value) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            confirmPassword.classList.add('is-invalid');
+                        // Basic check if passwords match
+                        if (password !== passwordConfirmation) {
+                            const errorDiv = document.getElementById('password-match-error');
                             errorDiv.style.display = 'block';
+                            return;
                         } else {
-                            form.classList.add('was-validated');
+                            document.getElementById('password-match-error').style.display = 'none';
                         }
+
+                        fetch('https://stwagapi-production.up.railway.app/api/auth/reset-password', { // Adjust the route if needed
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}' // not needed if API routes are exempt from CSRF
+                                },
+                                body: JSON.stringify({
+                                    email: email,
+                                    token: token,
+                                    password: password,
+                                    password_confirmation: passwordConfirmation
+                                })
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    return response.json().then(data => {
+                                        throw data;
+                                    });
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                alert('Password reset successful! You can now log in.');
+                                window.location.href = '/login'; // redirect to login page
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                if (error.errors) {
+                                    let messages = Object.values(error.errors).flat().join('\n');
+                                    alert('Validation Error:\n' + messages);
+                                } else {
+                                    alert('An unexpected error occurred. Please try again.');
+                                }
+                            });
                     });
                 </script>
+
 
 
             </div>
