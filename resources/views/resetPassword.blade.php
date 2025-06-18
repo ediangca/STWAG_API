@@ -136,8 +136,8 @@
                     style="max-width: 400px;">
                     @csrf
 
-                    <input type="hidden" name="token" value="{{ $token }}">
-                    <input type="hidden" name="email" value="{{ $email }}">
+                    <input type="hidden" id="token" name="token" value="{{ $token }}">
+                    <input type="hidden" id="email" name="email" value="{{ $email }}">
 
                     @if (isset($customSubject))
                         <div class="subject text-center fw-bold mb-3">
@@ -171,7 +171,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100">Reset Password</button>
+                    <button id="submit" type="submit" class="btn btn-primary w-100">Reset Password</button>
                 </form>
                 <script>
                     var appUrl = 'https://stwagapi-production.up.railway.app';
@@ -195,7 +195,8 @@
                     });
 
                     alert(
-                        'Please check your email for the password reset link. If you did not receive an email, please check your spam folder or contact support.');
+                        'Please check your email for the password reset link. If you did not receive an email, please check your spam folder or contact support.'
+                        );
                     // Handle form submission
                     const form = document.getElementById('resetPasswordForm');
                     const successMessage = document.getElementById('successMessage');
@@ -222,7 +223,7 @@
                             document.getElementById('password-match-error').style.display = 'none';
                         }
 
-                        fetch(`${this.apiUrl}/api/auth/reset-password`, {
+                        fetch(`${apiUrl}/api/auth/reset-password`, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -247,7 +248,7 @@
                                 form.style.display = 'none'; // Hide the form
                                 successMessage.style.display = 'block'; // Show the success message
                                 successMessage.innerText = data.message ||
-                                'Password reset successful!'; // Show backend message
+                                    'Password reset successful!'; // Show backend message
                             })
                             .catch(error => {
                                 console.error('Error:', error);
