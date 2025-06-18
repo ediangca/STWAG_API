@@ -34,12 +34,12 @@ class WithdrawController extends Controller
             if (!$user->isEmpty()) {
                 // $withdraw->user_details = $user ?: null;
                 $withdraw->avatar = $user[0]->avatar;
-                $withdraw->fullname = $user[0]->firstname.' '.$user[0]->lastname;
+                $withdraw->fullname = $user[0]->firstname . ' ' . $user[0]->lastname;
             }
 
             return $withdraw;
         });
-        
+
 
         return response()->json($withdraws);
     }
@@ -78,7 +78,7 @@ class WithdrawController extends Controller
         } catch (ValidationException $e) {
             return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
         }
-        
+
         $user_id = $request->input('user_id');
 
         $wallets = Wallet::where('user_id', $user_id)
@@ -94,8 +94,8 @@ class WithdrawController extends Controller
         $points = $request->input('points');
         $contactno = $request->input('contactno');
 
-        if($points > $totalWithdrawable){
-            return response()->json(['message' => ($totalWithdrawable == 0 ? 'Nothing': 'Insuficient points').' to withdraw.'], 403);
+        if ($points > $totalWithdrawable) {
+            return response()->json(['message' => ($totalWithdrawable == 0 ? 'Nothing' : 'Insuficient points') . ' to withdraw.'], 403);
         }
 
         $withdraw = Withdraw::create([
@@ -190,19 +190,30 @@ class WithdrawController extends Controller
         if ($withdraw->confirmFlag) {
             return response()->json(['message' => 'Withdraw has already been confirmed'], 409);
         }
-        
-        $wallets = Wallet::where('user_id', $withdraw->user_id)
-            ->orderBy('created_at', 'desc')
-            ->get();
 
-        $totalPoints = $wallets->where('confirmFlag', 1)->sum('points');
-        $totalUnwithdrawable = $wallets->where('confirmFlag', 1)->whereIn('source', ['CBK', 'BUN', 'REF',])->sum('points');
-        $totalWithdrawable = $totalPoints -  $totalUnwithdrawable;
+        $wallets = Wallet::where('user_id', $withdraw->user_id)->where('confirmFlag', 1)->get();
 
-        if($wallets->points > $totalWithdrawable){
-            return response()->json(['message' => ($totalWithdrawable == 0 ? 'Nothing': 'Insuficient points').' to withdraw.'], 403);
+        Log::info('Wallets', [
+            'wallets' => $wallets
+        ]);
+
+        $totalPoints = 0;
+        $totalUnwithdrawable = 0;
+        $totalWithdrawable = 0;
+
+        if ($wallets->isEmpty()) {
+            return response()->json(['message' => 'No wallets found for this user'], 404);
+        } else {
+            $totalPoints = $wallets->sum('points');
+            $totalUnwithdrawable = $wallets->whereIn('source', ['CBK', 'BUN', 'REF'])->sum('points');
+            $totalWithdrawable = $totalPoints -  $totalUnwithdrawable;
         }
-        
+
+        // Check if the points for this withdraw exceed the total withdrawable points
+        if ($withdraw->points > $totalWithdrawable) {
+            return response()->json(['message' => ($totalWithdrawable == 0 ? 'Nothing' : 'Insuficient points') . ' to withdraw.'], 403);
+        }
+
         $withdraw->confirmFlag = $confirmFlag;
         $withdraw->save();
 
