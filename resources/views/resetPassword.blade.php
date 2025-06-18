@@ -206,106 +206,108 @@
 
 
                     form.addEventListener('submit', function(event) {
-                                event.preventDefault(); // prevent normal form submit
+                        event.preventDefault(); // prevent normal form submit
 
-                                // const email = "{{ $email }}";
-                                // const token = "{{ $token }}";
+                        // const email = "{{ $email }}";
+                        // const token = "{{ $token }}";
 
-                                const token = document.getElementById('token').value;
-                                const email = document.getElementById('email').value;
-                                const password = document.getElementById('password').value;
-                                const passwordConfirmation = document.getElementById('password_confirmation').value;
+                        const token = document.getElementById('token').value;
+                        const email = document.getElementById('email').value;
+                        const password = document.getElementById('password').value;
+                        const passwordConfirmation = document.getElementById('password_confirmation').value;
 
-                                // Basic check if passwords match
-                                if (password !== passwordConfirmation) {
-                                    const errorDiv = document.getElementById('password-match-error');
-                                    errorDiv.style.display = 'block';
-                                    return;
-                                } else {
-                                    document.getElementById('password-match-error').style.display = 'none';
-                                }
+                        // Basic check if passwords match
+                        if (password !== passwordConfirmation) {
+                            const errorDiv = document.getElementById('password-match-error');
+                            errorDiv.style.display = 'block';
+                            return;
+                        } else {
+                            document.getElementById('password-match-error').style.display = 'none';
+                        }
 
-                                alert(
-                                    'Please wait while we process your request. This may take a few seconds.'
-                                );
+                        alert(
+                            'Please wait while we process your request. This may take a few seconds.'
+                        );
 
-                                // Prepare payload for API
-                                const payload = {
-                                    email: email,
-                                    token: token,
-                                    password: password,
-                                    password_confirmation: passwordConfirmation
-                                };
+                        // Prepare payload for API
+                        const payload = {
+                            email: email,
+                            token: token,
+                            password: password,
+                            password_confirmation: passwordConfirmation
+                        };
 
-                                // fetch('https://stwagapi-production.up.railway.app/api/auth/reset-password', {
-                                //     method: 'POST',
-                                //     headers: {
-                                //         'Content-Type': 'application/json',
-                                //         'Accept': 'application/json',
-                                //     },
-                                //     body: JSON.stringify(payload)
-                                // })
-                                // .then(response => {
-                                //     if (!response.ok) {
-                                //         return response.json().then(data => { throw data; });
-                                //     }
-                                //     return response.json();
-                                // })
-                                // .then(data => {
-                                //     form.style.display = 'none';
-                                //     // Show a success message (you can customize this)
-                                //     alert(data.message || 'Password reset successful!');
-                                // })
-                                // .catch(error => {
-                                //     if (error.errors) {
-                                //         let messages = Object.values(error.errors).flat().join('\n');
-                                //         alert('Validation Error:\n' + messages);
-                                //     } else if (error.message) {
-                                //         alert(error.message);
-                                //     } else {
-                                //         alert('An unexpected error occurred. Please try again.');
-                                //     }
-                                // });
+                        // fetch('https://stwagapi-production.up.railway.app/api/auth/reset-password', {
+                        //     method: 'POST',
+                        //     headers: {
+                        //         'Content-Type': 'application/json',
+                        //         'Accept': 'application/json',
+                        //     },
+                        //     body: JSON.stringify(payload)
+                        // })
+                        // .then(response => {
+                        //     if (!response.ok) {
+                        //         return response.json().then(data => { throw data; });
+                        //     }
+                        //     return response.json();
+                        // })
+                        // .then(data => {
+                        //     form.style.display = 'none';
+                        //     // Show a success message (you can customize this)
+                        //     alert(data.message || 'Password reset successful!');
+                        // })
+                        // .catch(error => {
+                        //     if (error.errors) {
+                        //         let messages = Object.values(error.errors).flat().join('\n');
+                        //         alert('Validation Error:\n' + messages);
+                        //     } else if (error.message) {
+                        //         alert(error.message);
+                        //     } else {
+                        //         alert('An unexpected error occurred. Please try again.');
+                        //     }
+                        // });
 
-                                //     fetch('https://stwagapi-production.up.railway.app/api/auth/reset-password', {
-                                //             method: 'POST',
-                                //             headers: {
-                                //                 'Content-Type': 'application/json',
-                                //                 'Accept': 'application/json',
-                                //             },
-                                //             body: JSON.stringify({
-                                //                 email: email,
-                                //                 token: token,
-                                //                 password: password,
-                                //                 password_confirmation: passwordConfirmation
-                                //             })
-                                //         })
-                                //         .then(response => {
-                                //             if (!response.ok) {
-                                //                 return response.json().then(data => {
-                                //                     throw data;
-                                //                 });
-                                //             }
-                                //             return response.json();
-                                //         })
-                                //         .then(data => {
-                                //             form.style.display = 'none'; // Hide the form
-                                //             successMessage.style.display = 'block'; // Show the success message
-                                //             successMessage.innerText = data.message ||
-                                //                 'Password reset successful!'; // Show backend message
-                                //         })
-                                //         .catch(error => {
-                                //             console.error('Error:', error);
-                                //             if (error.errors) {
-                                //                 let messages = Object.values(error.errors).flat().join('\n');
-                                //                 alert('Validation Error:\n' + messages);
-                                //             } else if (error.message) {
-                                //                 alert(error.message);
-                                //             } else {
-                                //                 alert('An unexpected error occurred. Please try again.');
-                                //             }
-                                //         });
-                                // });
+                        //     fetch('https://stwagapi-production.up.railway.app/api/auth/reset-password', {
+                        //             method: 'POST',
+                        //             headers: {
+                        //                 'Content-Type': 'application/json',
+                        //                 'Accept': 'application/json',
+                        //             },
+                        //             body: JSON.stringify({
+                        //                 email: email,
+                        //                 token: token,
+                        //                 password: password,
+                        //                 password_confirmation: passwordConfirmation
+                        //             })
+                        //         })
+                        //         .then(response => {
+                        //             if (!response.ok) {
+                        //                 return response.json().then(data => {
+                        //                     throw data;
+                        //                 });
+                        //             }
+                        //             return response.json();
+                        //         })
+                        //         .then(data => {
+                        //             form.style.display = 'none'; // Hide the form
+                        //             successMessage.style.display = 'block'; // Show the success message
+                        //             successMessage.innerText = data.message ||
+                        //                 'Password reset successful!'; // Show backend message
+                        //         })
+                        //         .catch(error => {
+                        //             console.error('Error:', error);
+                        //             if (error.errors) {
+                        //                 let messages = Object.values(error.errors).flat().join('\n');
+                        //                 alert('Validation Error:\n' + messages);
+                        //             } else if (error.message) {
+                        //                 alert(error.message);
+                        //             } else {
+                        //                 alert('An unexpected error occurred. Please try again.');
+                        //             }
+                        //         });
+
+
+                    });
                 </script>
 
 
