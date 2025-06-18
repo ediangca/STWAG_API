@@ -49,7 +49,6 @@ form.addEventListener('submit', function (event) {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            // 'X-CSRF-TOKEN': '{{ csrf_token() }}' // Not needed for API routes
         },
         body: JSON.stringify({
             email: email,
