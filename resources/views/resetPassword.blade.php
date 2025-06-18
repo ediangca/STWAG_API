@@ -151,7 +151,7 @@
                             placeholder="Enter new password">
                         <span class="position-absolute top-50 end-0 translate-middle-y me-3 toggle-password"
                             data-target="#password" style="cursor: pointer;">
-                            <i class="fa-solid fa-eye"></i>
+                            {{-- <i class="fa-solid fa-eye"></i> --}}
                         </span>
                         <div class="invalid-feedback">
                             Please enter your new password.
@@ -164,7 +164,7 @@
                             class="form-control" required placeholder="Confirm new password">
                         <span class="position-absolute top-50 end-0 translate-middle-y me-3 toggle-password"
                             data-target="#password_confirmation" style="cursor: pointer;">
-                            <i class="fa-solid fa-eye"></i>
+                            {{-- <i class="fa-solid fa-eye"></i> --}}
                         </span>
                         <div class="invalid-feedback" id="password-match-error">
                             Passwords do not match.
