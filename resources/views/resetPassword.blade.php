@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="{{ asset('img/stwag-logo.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
 
     <title>STWAG</title>
     <style>
@@ -147,11 +149,10 @@
                         <label for="password" class="form-label">New Password</label>
                         <input type="password" name="password" id="password" class="form-control" required
                             placeholder="Enter new password">
-                        <button type="button"
-                            class="btn btn-outline-secondary btn-sm position-absolute top-50 end-0 translate-middle-y me-2 toggle-password"
-                            data-target="#password">
-                            Show
-                        </button>
+                        <span class="position-absolute top-50 end-0 translate-middle-y me-3 toggle-password"
+                            data-target="#password" style="cursor: pointer;">
+                            <i class="fa-solid fa-eye"></i>
+                        </span>
                         <div class="invalid-feedback">
                             Please enter your new password.
                         </div>
@@ -161,11 +162,10 @@
                         <label for="password_confirmation" class="form-label">Confirm Password</label>
                         <input type="password" name="password_confirmation" id="password_confirmation"
                             class="form-control" required placeholder="Confirm new password">
-                        <button type="button"
-                            class="btn btn-outline-secondary btn-sm position-absolute top-50 end-0 translate-middle-y me-2 toggle-password"
-                            data-target="#password_confirmation">
-                            Show
-                        </button>
+                        <span class="position-absolute top-50 end-0 translate-middle-y me-3 toggle-password"
+                            data-target="#password_confirmation" style="cursor: pointer;">
+                            <i class="fa-solid fa-eye"></i>
+                        </span>
                         <div class="invalid-feedback" id="password-match-error">
                             Passwords do not match.
                         </div>
@@ -173,24 +173,26 @@
 
                     <button type="submit" class="btn btn-primary w-100">Reset Password</button>
                 </form>
-
-                <!-- Toggle Password and Match Validation Script -->
                 <script>
-                    // Toggle Password Visibility
-                    document.querySelectorAll('.toggle-password').forEach(button => {
-                        button.addEventListener('click', function() {
+                    // Toggle Password Visibility using FontAwesome icons
+                    document.querySelectorAll('.toggle-password').forEach(span => {
+                        span.addEventListener('click', function() {
                             const targetInput = document.querySelector(this.getAttribute('data-target'));
+                            const icon = this.querySelector('i');
+
                             if (targetInput.type === 'password') {
                                 targetInput.type = 'text';
-                                this.textContent = 'Hide';
+                                icon.classList.remove('fa-eye');
+                                icon.classList.add('fa-eye-slash');
                             } else {
                                 targetInput.type = 'password';
-                                this.textContent = 'Show';
+                                icon.classList.remove('fa-eye-slash');
+                                icon.classList.add('fa-eye');
                             }
                         });
                     });
 
-                    // Validate Password Match
+                    // Validate Password Match on Submit
                     const form = document.querySelector('form');
                     form.addEventListener('submit', function(event) {
                         const password = document.getElementById('password');
