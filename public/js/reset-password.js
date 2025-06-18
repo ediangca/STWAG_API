@@ -22,16 +22,27 @@ document.querySelectorAll('.toggle-password').forEach(span => {
 const form = document.getElementById('resetPasswordForm');
 const successMessage = document.getElementById('successMessage');
 
+
+
 form.addEventListener('submit', function (event) {
     event.preventDefault(); // prevent normal form submit
 
     // const email = "{{ $email }}";
     // const token = "{{ $token }}";
-    
+
     const token = document.getElementById('token').value;
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     const passwordConfirmation = document.getElementById('password_confirmation').value;
+
+    // Basic check if passwords match
+    if (password !== passwordConfirmation) {
+        const errorDiv = document.getElementById('password-match-error');
+        errorDiv.style.display = 'block';
+        return;
+    } else {
+        document.getElementById('password-match-error').style.display = 'none';
+    }
 
     fetch(`${this.apiUrl}/api/auth/reset-password`, {
         method: 'POST',
