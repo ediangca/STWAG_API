@@ -81,13 +81,12 @@ class WithdrawController extends Controller
 
         $user_id = $request->input('user_id');
 
-        $wallets = Wallet::where('user_id', $user_id)
-            // ->whereNotIn('source', ['BET', 'WTH'])
+        $wallets = Wallet::where('user_id', $user_id)->where('confirmFlag', 1)
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $totalPoints = $wallets->where('confirmFlag', 1)->sum('points');
-        $totalUnwithdrawable = $wallets->where('confirmFlag', 1)->whereIn('source', ['CBK', 'BUN', 'REF',])->sum('points');
+        $totalPoints = $wallets->where('confirmFlag', 1)->sum('points') ?? 0;
+        $totalUnwithdrawable = $wallets->where('confirmFlag', 1)->whereIn('source', ['CBK', 'BUN', 'REF',])->sum('points')  ?? 0;
         $totalWithdrawable = $totalPoints -  $totalUnwithdrawable;
 
         $withdraw_id = $request->has('withdraw_id') ? $request->input('withdraw_id') : uniqid('WTH') . date('YmdHis');
@@ -197,17 +196,10 @@ class WithdrawController extends Controller
             'wallets' => $wallets
         ]);
 
-        $totalPoints = 0;
-        $totalUnwithdrawable = 0;
-        $totalWithdrawable = 0;
+        $totalPoints = $wallets->sum('points') ?? 0;
+        $totalUnwithdrawable = $wallets->whereIn('source', ['CBK', 'BUN', 'REF'])->sum('points') ?? 0;
+        $totalWithdrawable = $totalPoints -  $totalUnwithdrawable;
 
-        if ($wallets->isEmpty()) {
-            return response()->json(['message' => 'No wallets found for this user'], 404);
-        } else {
-            $totalPoints = $wallets->sum('points');
-            $totalUnwithdrawable = $wallets->whereIn('source', ['CBK', 'BUN', 'REF'])->sum('points');
-            $totalWithdrawable = $totalPoints -  $totalUnwithdrawable;
-        }
 
         // Check if the points for this withdraw exceed the total withdrawable points
         if ($withdraw->points > $totalWithdrawable) {

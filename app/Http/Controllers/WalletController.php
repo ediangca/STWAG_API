@@ -125,7 +125,7 @@ class WalletController extends Controller
 
         $wallet = Wallet::create([
             'user_id' => $request->input('user_id'),
-            'points' => $request->input('points'),
+            'points' => -abs($request->input('points')),
             'ref_id' => $request->input('ref_id'),
             'source' => $request->input('source'),
             'withdrawableFlag' => in_array($request->input('source'), ['BET', 'CBK', 'WTH']) ? false : true,
@@ -270,20 +270,19 @@ class WalletController extends Controller
         }
 
         $wallets = Wallet::where('user_id', $user_id)
-            // ->whereNotIn('source', ['BET', 'WTH'])
             ->orderBy('created_at', 'desc')
             ->get();
 
         $totalPoints = $wallets->where('confirmFlag', 1)->sum('points');
 
-        $totalBUNN = $wallets->where('confirmFlag', 1)->whereIn('source', ['BUN'])->sum('points');
-        $totalREF = $wallets->where('confirmFlag', 1)->whereIn('source', ['REF'])->sum('points');
-        $totalTOP = $wallets->where('confirmFlag', 1)->whereIn('source', ['TOP'])->sum('points');
-        $totalINC = $wallets->where('confirmFlag', 1)->whereIn('source', ['INC'])->sum('points');
-        $totalCBK = $wallets->where('confirmFlag', 1)->whereIn('source', ['CBK'])->sum('points');
-        $totalBET = $wallets->where('confirmFlag', 1)->whereIn('source', ['BET'])->sum('points');
-        $totalWIN = $wallets->where('confirmFlag', 1)->whereIn('source', ['WIN'])->sum('points');
-        $totalWTH = $wallets->where('confirmFlag', 1)->whereIn('source', ['WTH'])->sum('points');
+        $totalBUNN = $wallets->where('confirmFlag', 1)->whereIn('source', ['BUN'])->sum('points') ?? 0;
+        $totalREF = $wallets->where('confirmFlag', 1)->whereIn('source', ['REF'])->sum('points') ?? 0;
+        $totalTOP = $wallets->where('confirmFlag', 1)->whereIn('source', ['TOP'])->sum('points') ?? 0;
+        $totalINC = $wallets->where('confirmFlag', 1)->whereIn('source', ['INC'])->sum('points') ?? 0;
+        $totalCBK = $wallets->where('confirmFlag', 1)->whereIn('source', ['CBK'])->sum('points') ?? 0;
+        $totalBET = $wallets->where('confirmFlag', 1)->whereIn('source', ['BET'])->sum('points') ?? 0;
+        $totalWIN = $wallets->where('confirmFlag', 1)->whereIn('source', ['WIN'])->sum('points') ?? 0;
+        $totalWTH = $wallets->where('confirmFlag', 1)->whereIn('source', ['WTH'])->sum('points') ?? 0;
         $totalUnwithdrawable = $wallets->where('confirmFlag', 1)->whereIn('source', ['CBK', 'BUN', 'REF',])->sum('points');
 
         if ($wallets->isEmpty()) {
@@ -329,24 +328,29 @@ class WalletController extends Controller
         }
 
         $wallets = Wallet::where('user_id', $user_id)
-            ->whereIn('source', ['BUN', 'TOP', 'INC', 'WIN'])
-            ->where('withdrawableFlag', 1)
-            ->where('confirmFlag', 1)
+            ->orderBy('created_at', 'desc')
             ->get();
 
-        if ($wallets->isEmpty()) {
-            return response()->json(['message' => 'No withdrawable sources found for this user'], 404);
-        }
+        $totalPoints = $wallets->where('confirmFlag', 1)->sum('points');
 
-        $sum = Wallet::where('user_id', $user_id)
-            ->whereIn('source', ['BUN', 'TOP', 'INC', 'WIN'])
-            ->where('withdrawableFlag', 1)
-            ->where('confirmFlag', 1)
-            ->sum('points');
+        $totalBUNN = $wallets->where('confirmFlag', 1)->whereIn('source', ['BUN'])->sum('points') ?? 0;
+        $totalREF = $wallets->where('confirmFlag', 1)->whereIn('source', ['REF'])->sum('points') ?? 0;
+        $totalTOP = $wallets->where('confirmFlag', 1)->whereIn('source', ['TOP'])->sum('points') ?? 0;
+        $totalINC = $wallets->where('confirmFlag', 1)->whereIn('source', ['INC'])->sum('points') ?? 0;
+        $totalCBK = $wallets->where('confirmFlag', 1)->whereIn('source', ['CBK'])->sum('points') ?? 0;
+        $totalBET = $wallets->where('confirmFlag', 1)->whereIn('source', ['BET'])->sum('points') ?? 0;
+        $totalWIN = $wallets->where('confirmFlag', 1)->whereIn('source', ['WIN'])->sum('points') ?? 0;
+        $totalWTH = $wallets->where('confirmFlag', 1)->whereIn('source', ['WTH'])->sum('points') ?? 0;
+
+
+        $totalUnwithdrawable = $wallets->where('confirmFlag', 1)->whereIn('source', ['CBK', 'BUN', 'REF',])->sum('points');
+
+        $totalUnwithdrawable = $wallets->where('confirmFlag', 1)->whereIn('source', ['CBK', 'BUN', 'REF',])->sum('points')  ?? 0;
+        $totalWithdrawable = $totalPoints -  $totalUnwithdrawable;
 
         return response()->json([
             'user_id' => $user_id,
-            'sum_withdrawable_points' => $sum,
+            'sum_withdrawable_points' => $totalWithdrawable,
             'withdrawable_sources' => $wallets
         ]);
     }
