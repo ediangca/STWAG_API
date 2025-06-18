@@ -539,28 +539,38 @@ class AuthController extends Controller
         $token = $request->query('token');
         $email = $request->query('email');
 
+
         $user = User::where('email', $email)->first();
-        if (!$user) {
-            return response()->json(['message' => 'User email not found']);
+
+        $resetToken = DB::table('password_reset_tokens')->where('email', $user->email)->first();
+        if (!$resetToken || $resetToken->token !== $token) {
+            return view('customMail')
+                ->with('customSubject', 'Invalid Reset Token')
+                ->with('customMessage', 'The reset token is invalid or has expired. Please request a new password reset link.');
         }
 
         return view('resetPassword', compact('token', 'email'))
-        ->with('user', $user)
-        ->with('customSubject', "Reset Your Password")
-        ->with('customMessage', "To secure your account, please set a new password below. Kindly verify your credentials before submitting. Thank you for your attention.");
-        
+            ->with('user', $user)
+            ->with('customSubject', "Reset Your Password")
+            ->with('customMessage', "To secure your account, please set a new password below. Kindly verify your credentials before submitting. Thank you for your attention.");
     }
     /**
      * Handle password reset
      */
-    public function resetPassword1(Request $request)
+    public function resetPassword(Request $request)
     {
-        // Validate the request
-        $request->validate([
-            'email' => 'required|email|exists:users,email',
-            'token' => 'required|string',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+        try {
+            // Validate the request
+            $request->validate([
+                'email' => 'required|email|exists:users,email',
+                'token' => 'required|string',
+                'password' => 'required|string|min:8|confirmed',
+            ]);
+            Log::info('Reset Password Validation passed');
+        } catch (ValidationException $e) {
+            Log::error('Validation failed', ['errors' => $e->errors()]);
+            return response()->json(['errors' => $e->errors()], 422);
+        }
 
         // Verify token
         $passwordReset = DB::table('password_reset_tokens')
@@ -569,16 +579,17 @@ class AuthController extends Controller
             ->first();
 
         if (!$passwordReset) {
-            return response()->json([
-                'message' => 'Invalid token or email'
-            ], 400);
+            return view('customMail')
+                ->with('customSubject', 'Invalid Reset Token')
+                ->with('customMessage', 'The reset token is invalid or has expired. Please request a new password reset link.');
         }
 
         // Check if token is expired (e.g., 1 hour)
         if (now()->diffInMinutes($passwordReset->created_at) > 60) {
-            return response()->json([
-                'message' => 'Token has expired'
-            ], 400);
+            return view('customMail')
+                ->with('customSubject', 'Token Expired')
+                ->with('customMessage', 'The reset token has expired. Please request a new password reset link.');
+            // return response()->json(['message' => 'Token has expired'], 400);
         }
 
         // Update user password
@@ -590,18 +601,56 @@ class AuthController extends Controller
             ->where('email', $request->email)
             ->delete();
 
-        return response()->json([
-            'message' => 'Password successfully reset'
-        ], 200);
+
+        $user = User::where('email', $request->email)->first();
+
+        try {
+            // Send email notification if needed
+            if (method_exists($user, 'sendEmail')) {
+                $user->sendEmail(
+                    $user,
+                    'Password Reset Successful',
+                    'Your password has been successfully reset. You can now log in with your new password. New Password:' . $request->password. '. Thank you for using STWAG APP!'
+                );
+            }
+            Log::info('Password reset email sent', ['user_id' => $user->user_id, 'email' => $user->email]);
+        } catch (Exception $e) {
+            Log::error('Error sending email verification', ['error' => $e->getMessage()]);
+            // return response()->json(['message' => 'User registered but failed to send verification email.'], 201);
+        }
+
+        return view('customMail')
+            ->with('customSubject', 'Password Reset Successful')
+            ->with('customMessage', 'Your password has been successfully reset. You can now log in with your new password.');
     }
 
-    public function resetPassword(Request $request)
+    public function resetPassword1(Request $request)
     {
-        $request->validate([
-            'token' => 'required',
-            'email' => 'required|email',
-            'password' => 'required|min:8|confirmed',
-        ]);
+
+        try {
+            $request->validate([
+                'token' => 'required',
+                'email' => 'required|email',
+                'password' => 'required|min:8|confirmed',
+            ]);
+            Log::info('Reset Password Validation passed');
+        } catch (ValidationException $e) {
+            Log::error('Validation failed', ['errors' => $e->errors()]);
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return view('customMail')
+                ->with('user', $user)
+                ->with('customSubject', 'Invalid Email')
+                ->with('customMessage', 'The email address you provided is not registered. Please check your email or register a new account.');
+        }
+
+        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+        $user = User::where('email', $request->email)->first();
+        Log::error('Reset Details', ['email' => $request->email, 'token' => $request->token, 'password' => $request->password]);
 
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
@@ -611,6 +660,10 @@ class AuthController extends Controller
             }
         );
 
+        return view('customMail')
+            ->with('user', $user)
+            ->with('customSubject', 'Invalid Verification Link')
+            ->with('customMessage', 'The verification link is invalid or has expired. Please request a new verification email.');
         return $status == Password::PASSWORD_RESET
             ? redirect('/login')->with('status', __($status))
             : back()->withErrors(['email' => [__($status)]]);

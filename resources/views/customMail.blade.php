@@ -119,17 +119,19 @@
                     {{ $customSubject }}
                 </div>
             @endif
-            <div>
-                Hello, <strong>
-                    {{ $user ? $user->firstname . ' ' . substr($user->lastname, 0, 1).'.' : 'STWAG User' }}</strong>!
-            </div>
+            @if (isset($user))
+                <div>
+                    Hello, <strong>
+                        {{ $user ? $user->firstname . ' ' . substr($user->lastname, 0, 1) . '.' : 'STWAG User' }}</strong>!
+                </div>
+            @endif
             <div style="margin-top: 18px;">
                 @if (isset($customMessage))
                     {{ $customMessage }}
                 @else
                     Thank you for being a valued member of our community.
                 @endif
-                
+
                 @if (isset($customAction))
                     <div class="action" style="text-align: center;">
                         <a href="{{ $customURL }}" class="btn" target="_blank">
