@@ -128,7 +128,7 @@
                 @else
                     Thank you for being a valued member of our community.
                 @endif
-                
+
                 <form method="POST" action="{{ route('password.update') }}"
                     class="w-100 mx-auto mt-5 p-4 border rounded shadow-sm" style="max-width: 400px;">
                     @csrf
@@ -146,6 +146,9 @@
                         <label for="password" class="form-label">New Password</label>
                         <input type="password" name="password" id="password" class="form-control" required
                             placeholder="Enter new password">
+                        @if ($errors->has('password'))
+                            <span class="text-danger">{{ $errors->first('password') }}</span>
+                        @endif
                     </div>
 
                     <div class="mb-4">
@@ -155,7 +158,6 @@
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100">Reset Password</button>
-
 
                 </form>
 

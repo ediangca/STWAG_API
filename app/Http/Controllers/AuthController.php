@@ -615,8 +615,7 @@ class AuthController extends Controller
             }
             Log::info('Password reset email sent', ['user_id' => $user->user_id, 'email' => $user->email]);
         } catch (Exception $e) {
-            Log::error('Error sending email verification', ['error' => $e->getMessage()]);
-            // return response()->json(['message' => 'User registered but failed to send verification email.'], 201);
+            Log::error('Error sending password reset email', ['error' => $e->getMessage()]);
         }
 
         return view('customMail')
