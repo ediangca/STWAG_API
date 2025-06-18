@@ -178,7 +178,6 @@
                     <button id="submit" type="submit" class="btn btn-primary w-100">Reset Password</button>
                 </form>
                 <script>
-                    var appUrl = 'https://stwagapi-production.up.railway.app';
 
                     // Toggle Password Visibility with FontAwesome icons
                     document.querySelectorAll('.toggle-password').forEach(span => {
@@ -227,7 +226,7 @@
                             document.getElementById('password-match-error').style.display = 'none';
                         }
 
-                        fetch(`${apiUrl}/api/auth/reset-password`, {
+                        fetch('https://stwagapi-production.up.railway.app/api/auth/reset-password', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
