@@ -225,9 +225,6 @@
                             document.getElementById('password-match-error').style.display = 'none';
                         }
 
-                        alert(
-                            'Please wait while we process your request. This may take a few seconds.'
-                        );
 
                         // Prepare payload for API
                         const payload = {
@@ -237,6 +234,9 @@
                             password_confirmation: passwordConfirmation
                         };
 
+                        alert(
+                            'Please wait while we process your request. This may take a few seconds.'
+                        );
                         // fetch('https://stwagapi-production.up.railway.app/api/auth/reset-password', {
                         //     method: 'POST',
                         //     headers: {
