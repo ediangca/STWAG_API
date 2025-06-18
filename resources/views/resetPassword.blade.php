@@ -128,35 +128,90 @@
                 @else
                     Thank you for being a valued member of our community.
                 @endif
-                
+
                 <form method="POST" action="{{ route('password.update') }}"
-                    class="w-100 mx-auto mt-5 p-4 border rounded shadow-sm" style="max-width: 400px;">
+                    class="w-100 mx-auto mt-5 p-4 border rounded shadow-sm needs-validation" style="max-width: 400px;"
+                    novalidate>
                     @csrf
 
                     <input type="hidden" name="token" value="{{ $token }}">
                     <input type="hidden" name="email" value="{{ $email }}">
 
                     @if (isset($customSubject))
-                        <div class="subject">
+                        <div class="subject text-center fw-bold mb-3">
                             {{ $customSubject }}
                         </div>
                     @endif
 
-                    <div class="mb-3">
+                    <div class="mb-3 position-relative">
                         <label for="password" class="form-label">New Password</label>
                         <input type="password" name="password" id="password" class="form-control" required
                             placeholder="Enter new password">
+                        <button type="button"
+                            class="btn btn-outline-secondary btn-sm position-absolute top-50 end-0 translate-middle-y me-2 toggle-password"
+                            data-target="#password">
+                            Show
+                        </button>
+                        <div class="invalid-feedback">
+                            Please enter your new password.
+                        </div>
                     </div>
 
-                    <div class="mb-4">
+                    <div class="mb-4 position-relative">
                         <label for="password_confirmation" class="form-label">Confirm Password</label>
                         <input type="password" name="password_confirmation" id="password_confirmation"
                             class="form-control" required placeholder="Confirm new password">
+                        <button type="button"
+                            class="btn btn-outline-secondary btn-sm position-absolute top-50 end-0 translate-middle-y me-2 toggle-password"
+                            data-target="#password_confirmation">
+                            Show
+                        </button>
+                        <div class="invalid-feedback" id="password-match-error">
+                            Passwords do not match.
+                        </div>
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100">Reset Password</button>
-
                 </form>
+
+                <!-- Toggle Password and Match Validation Script -->
+                <script>
+                    // Toggle Password Visibility
+                    document.querySelectorAll('.toggle-password').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const targetInput = document.querySelector(this.getAttribute('data-target'));
+                            if (targetInput.type === 'password') {
+                                targetInput.type = 'text';
+                                this.textContent = 'Hide';
+                            } else {
+                                targetInput.type = 'password';
+                                this.textContent = 'Show';
+                            }
+                        });
+                    });
+
+                    // Validate Password Match
+                    const form = document.querySelector('form');
+                    form.addEventListener('submit', function(event) {
+                        const password = document.getElementById('password');
+                        const confirmPassword = document.getElementById('password_confirmation');
+                        const errorDiv = document.getElementById('password-match-error');
+
+                        // Reset custom error message
+                        confirmPassword.classList.remove('is-invalid');
+                        errorDiv.style.display = 'none';
+
+                        if (password.value !== confirmPassword.value) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            confirmPassword.classList.add('is-invalid');
+                            errorDiv.style.display = 'block';
+                        } else {
+                            form.classList.add('was-validated');
+                        }
+                    });
+                </script>
+
 
             </div>
         </div>
