@@ -106,7 +106,11 @@
         }
 
         .btn:hover {
-            background: #2a7270;
+            background: #2a7270 !important;
+        }
+
+        .toggle-password {
+            top: 55px !important;
         }
     </style>
 </head>
@@ -196,7 +200,7 @@
 
                     alert(
                         'Please check your email for the password reset link. If you did not receive an email, please check your spam folder or contact support.'
-                        );
+                    );
                     // Handle form submission
                     const form = document.getElementById('resetPasswordForm');
                     const successMessage = document.getElementById('successMessage');
