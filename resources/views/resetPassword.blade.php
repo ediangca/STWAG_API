@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" type="image/png" href="{{ asset('img/stwag-logo.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -172,82 +173,6 @@
 
                     <button type="submit" class="btn btn-primary w-100">Reset Password</button>
                 </form>
-                <script>
-                    // Toggle Password Visibility with FontAwesome icons
-                    document.querySelectorAll('.toggle-password').forEach(span => {
-                        span.addEventListener('click', function() {
-                            const targetInput = document.querySelector(this.getAttribute('data-target'));
-                            const icon = this.querySelector('i');
-
-                            if (targetInput.type === 'password') {
-                                targetInput.type = 'text';
-                                icon.classList.remove('fa-eye');
-                                icon.classList.add('fa-eye-slash');
-                            } else {
-                                targetInput.type = 'password';
-                                icon.classList.remove('fa-eye-slash');
-                                icon.classList.add('fa-eye');
-                            }
-                        });
-                    });
-
-                    // Handle form submission
-                    document.getElementById('resetPasswordForm').addEventListener('submit', function(event) {
-                        event.preventDefault();
-
-                        const token = document.getElementById('token').value;
-                        const email = document.getElementById('email').value;
-                        const password = document.getElementById('password').value;
-                        const passwordConfirmation = document.getElementById('password_confirmation').value;
-
-                        // Basic check if passwords match
-                        if (password !== passwordConfirmation) {
-                            const errorDiv = document.getElementById('password-match-error');
-                            errorDiv.style.display = 'block';
-                            return;
-                        } else {
-                            document.getElementById('password-match-error').style.display = 'none';
-                        }
-
-                        fetch('https://stwagapi-production.up.railway.app/api/auth/reset-password', { // Adjust the route if needed
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Accept': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}' // not needed if API routes are exempt from CSRF
-                                },
-                                body: JSON.stringify({
-                                    email: email,
-                                    token: token,
-                                    password: password,
-                                    password_confirmation: passwordConfirmation
-                                })
-                            })
-                            .then(response => {
-                                if (!response.ok) {
-                                    return response.json().then(data => {
-                                        throw data;
-                                    });
-                                }
-                                return response.json();
-                            })
-                            .then(data => {
-                                alert('Password reset successful! You can now log in.');
-                                window.location.href = '/login'; // redirect to login page
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                if (error.errors) {
-                                    let messages = Object.values(error.errors).flat().join('\n');
-                                    alert('Validation Error:\n' + messages);
-                                } else {
-                                    alert('An unexpected error occurred. Please try again.');
-                                }
-                            });
-                    });
-                </script>
-
-
 
             </div>
         </div>
@@ -258,6 +183,8 @@
             &copy; {{ date('Y') }} STWAG. All rights reserved.
         </div>
     </div>
+
+    <script src="{{ asset('js/reset-password.js') }}"></script>
 </body>
 
 </html>
