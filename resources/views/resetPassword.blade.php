@@ -319,7 +319,7 @@
         </div>
     </div>
 
-    {{-- <script src="{{ asset('js/reset-password.js') }}"></script> --}}
+    // {{-- <script src="{{ asset('js/reset-password.js') }}"></script> --}}
 </body>
 
 </html>
