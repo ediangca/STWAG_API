@@ -3,7 +3,6 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" type="image/png" href="{{ asset('img/stwag-logo.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -173,7 +172,6 @@
 
                     <button type="submit" class="btn btn-primary w-100">Reset Password</button>
                 </form>
-                
                 <!-- Success Message (hidden by default) -->
                 <div id="successMessage" class="alert alert-success mt-3" style="display: none;">
                     Your password has been successfully reset! You can now log in with your new credentials.

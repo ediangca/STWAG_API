@@ -139,13 +139,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
 
-    Route::controller(AuthController::class)->group(function () {
+    // Route::controller(AuthController::class)->group(function () {
         // Route::post('/logout', [AuthController::class, 'logout']);
         // Route::post('/refresh', [AuthController::class, 'r efresh']);
 
         // Route::get('/users', 'index');
         // Route::get('/users/{id}', 'getUserById');
-    });
+    // });
 });
 
 

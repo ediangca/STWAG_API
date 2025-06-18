@@ -559,6 +559,7 @@ class AuthController extends Controller
      */
     public function resetPassword(Request $request)
     {
+        Log::info('Starting resetPassword', ['session_id' => session()->getId()]);
         try {
             // Validate the request
             $request->validate([
@@ -571,7 +572,8 @@ class AuthController extends Controller
             Log::error('Validation failed', ['errors' => $e->errors()]);
             return response()->json(['errors' => $e->errors()], 422);
         }
-
+        // Rest of the function...
+        Log::info('Ending resetPassword', ['session_id' => session()->getId()]);
         // Verify token
         $passwordReset = DB::table('password_reset_tokens')
             ->where('email', $request->email)
@@ -605,7 +607,7 @@ class AuthController extends Controller
                 $user->sendEmail(
                     $user,
                     'Password Reset Successful',
-                    'Your password has been successfully reset. You can now log in with your new password. New Password:' . $request->password. '. Thank you for using STWAG APP!'
+                    'Your password has been successfully reset. You can now log in with your new password. New Password:' . $request->password . '. Thank you for using STWAG APP!'
                 );
             }
             Log::info('Password reset email sent', ['user_id' => $user->user_id, 'email' => $user->email]);
