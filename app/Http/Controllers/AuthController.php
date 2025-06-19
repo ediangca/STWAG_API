@@ -559,6 +559,7 @@ class AuthController extends Controller
      */
     public function resetPassword(Request $request)
     {
+        Log::info('Reset password endpoint hit', ['route' => $request->path()]);
         Log::info('Starting resetPassword', ['session_id' => session()->getId()]);
         try {
             // Validate the request
