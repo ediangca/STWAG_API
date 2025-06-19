@@ -255,7 +255,7 @@
                         fetch('https://stwagapi-production.up.railway.app/api/auth/reset-password', {
                                 method: 'POST',
                                 headers: {
-                                    'X-CSRF-TOKEN': csrf_token,
+                                    // 'X-CSRF-TOKEN': csrf_token,
                                     'Content-Type': 'application/json',
                                     'Accept': 'application/json',
                                 },
@@ -282,7 +282,7 @@
                                     let messages = Object.values(error.errors).flat().join('\n');
                                     alert('Validation Error:\n' + messages);
                                 } else if (error.message) {
-                                    alert(error.message);
+                                    alert('Error Message: ' + error.message + ' ' + csrf_token);
                                 } else {
                                     alert('An unexpected error occurred. Please try again.');
                                 }
