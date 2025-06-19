@@ -131,17 +131,19 @@
         </div>
         <div class="body-content">
 
-            <div>
+            <div id="greetings">
                 Hello, <strong>
                     {{ $user ? $user->firstname . ' ' . substr($user->lastname, 0, 1) . '.' : 'STWAG User' }}</strong>!
             </div>
             <div style="margin-top: 18px;">
 
-                @if (isset($customMessage))
-                    {{ $customMessage }}
-                @else
-                    Thank you for being a valued member of our community.
-                @endif
+                <div id="message">
+                    @if (isset($customMessage))
+                        {{ $customMessage }}
+                    @else
+                        Thank you for being a valued member of our community.
+                    @endif
+                </div>
 
                 <form id="resetPasswordForm" class="w-100 mx-auto mt-5 p-4 border rounded shadow-sm"
                     style="max-width: 400px;">
@@ -208,6 +210,8 @@
                     );
                     // Handle form submission
                     const form = document.getElementById('resetPasswordForm');
+                    const greetings = document.getElementById('greetings');
+                    const message = document.getElementById('message');
                     const successMessage = document.getElementById('successMessage');
 
 
@@ -273,6 +277,8 @@
                             })
                             .then(data => {
                                 form.style.display = 'none';
+                                greetings.style.display = 'none';
+                                message.style.display = 'none';
                                 // Show a success message (you can customize this)
                                 alert(data.message || 'Password reset successful!');
                                 successMessage.style.display = 'block'; // Show the success message

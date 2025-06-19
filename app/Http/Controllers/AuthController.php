@@ -590,16 +590,20 @@ class AuthController extends Controller
         }
 
         // Update user password
-        User::where('email', $request->email)
-            ->update(['password' => Hash::make($request->password)]);
+        $user = User::where('email', $request->email);
+            // ->update(['password' => Hash::make($request->password)]);
+
+        $user->password = Hash::make($request->password);
+        $user->save();
 
         // Delete used token
         DB::table('password_reset_tokens')
             ->where('email', $request->email)
             ->delete();
 
+        Log::info('Password reset successful for user', ['email' => $request->email]);
 
-        $user = User::where('email', $request->email)->first();
+        // $user = User::where('email', $request->email)->first();
 
         try {
             // Send email notification if needed
