@@ -9,7 +9,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
 
     <title>STWAG</title>
     <style>
@@ -249,9 +250,12 @@
                         // Your error is about the sessions table, which is a Laravel backend/database issue.
                         // The code here is for frontend password reset and does not affect sessions table structure or queries.
 
+                        const csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
                         fetch('https://stwagapi-production.up.railway.app/api/auth/reset-password', {
                                 method: 'POST',
                                 headers: {
+                                    'X-CSRF-TOKEN': csrf_token,
                                     'Content-Type': 'application/json',
                                     'Accept': 'application/json',
                                 },
