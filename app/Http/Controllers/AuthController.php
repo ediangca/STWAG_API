@@ -572,8 +572,7 @@ class AuthController extends Controller
             Log::error('Validation failed', ['errors' => $e->errors()]);
             return response()->json(['errors' => $e->errors()], 422);
         }
-        // Rest of the function...
-        Log::info('Ending resetPassword', ['session_id' => session()->getId()]);
+
         // Verify token
         $passwordReset = DB::table('password_reset_tokens')
             ->where('email', $request->email)
