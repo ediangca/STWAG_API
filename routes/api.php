@@ -53,8 +53,7 @@ Route::prefix('auth')->group(function () {
     // Route::get('/reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
 });
 
-// In routes/web.php
-Route::get('/auth/reset-password', [AuthController::class, 'showResetForm'])->name('password.reset');
+Route::post('/auth/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
 
 // Route::put('/users/avatar/{id}', [AuthController::class, 'updateAvatarById']);
