@@ -49,11 +49,9 @@ Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
 Route::prefix('auth')->group(function () {
     Route::post('/', [AuthController::class, 'login']);
     Route::post('/forgotPassword', [AuthController::class, 'forgotPassword']);
-    // Route::post('/resetPassword', [AuthController::class, 'resetPassword']);
-    // Route::get('/reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 });
 
-Route::post('/auth/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
 
 // Route::put('/users/avatar/{id}', [AuthController::class, 'updateAvatarById']);
@@ -138,11 +136,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/refresh', [AuthController::class, 'refresh']);
 
     // Route::controller(AuthController::class)->group(function () {
-        // Route::post('/logout', [AuthController::class, 'logout']);
-        // Route::post('/refresh', [AuthController::class, 'r efresh']);
+    // Route::post('/logout', [AuthController::class, 'logout']);
+    // Route::post('/refresh', [AuthController::class, 'r efresh']);
 
-        // Route::get('/users', 'index');
-        // Route::get('/users/{id}', 'getUserById');
+    // Route::get('/users', 'index');
+    // Route::get('/users/{id}', 'getUserById');
     // });
 });
 
