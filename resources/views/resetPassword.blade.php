@@ -205,9 +205,9 @@
                         });
                     });
 
-                    alert(
-                        'Please check your email for the password reset link. If you did not receive an email, please check your spam folder or contact support.'
-                    );
+                    // alert(
+                    //     'Please check your email for the password reset link. If you did not receive an email, please check your spam folder or contact support.'
+                    // );
                     // Handle form submission
                     const form = document.getElementById('resetPasswordForm');
                     const greetings = document.getElementById('greetings');
@@ -245,9 +245,9 @@
                             password_confirmation: passwordConfirmation
                         };
 
-                        alert(
-                            'Please wait while we process your request. This may take a few seconds.'
-                        );
+                        // alert(
+                        //     'Please wait while we process your request. This may take a few seconds.'
+                        // );
 
 
                         // The code below is unrelated to your Blade file's password reset logic.
