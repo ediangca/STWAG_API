@@ -250,18 +250,18 @@
                         // Your error is about the sessions table, which is a Laravel backend/database issue.
                         // The code here is for frontend password reset and does not affect sessions table structure or queries.
 
-                        const csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                        // const csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
                         fetch('https://stwagapi-production.up.railway.app/api/auth/reset-password', {
                                 method: 'POST',
                                 headers: {
-                                    'X-CSRF-TOKEN': csrf_token,
+                                    // 'X-CSRF-TOKEN': csrf_token,
                                     'Content-Type': 'application/json',
                                     'Accept': 'application/json',
                                 },
                                 body: JSON.stringify(payload),
-                                // credentials: 'omit', // force no cookies/CSRF
-                                credentials: 'same-origin' // also important for CSRF cookie validation
+                                credentials: 'omit', // force no cookies/CSRF
+                                // credentials: 'same-origin' // also important for CSRF cookie validation
                             })
                             .then(response => {
                                 if (!response.ok) {
@@ -284,7 +284,7 @@
                                     let messages = Object.values(error.errors).flat().join('\n');
                                     alert('Validation Error:\n' + messages);
                                 } else if (error.message) {
-                                    alert('Error Message: ' + error.message + ' ' + csrf_token);
+                                    alert('Error Message: ' + error.message);
                                 } else {
                                     alert('An unexpected error occurred. Please try again.');
                                 }
