@@ -259,9 +259,9 @@
                                     'Content-Type': 'application/json',
                                     'Accept': 'application/json',
                                 },
+                                body: JSON.stringify(payload),
                                 // credentials: 'omit', // force no cookies/CSRF
                                 credentials: 'same-origin' // also important for CSRF cookie validation
-                                body: JSON.stringify(payload)
                             })
                             .then(response => {
                                 if (!response.ok) {
