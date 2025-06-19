@@ -25,8 +25,8 @@ return new class extends Migration
             $table->string('uplinecode')->nullable();
             $table->integer('level'); // 1, 2, 3 and if type is member it will automatically generated depended on the uplinecode
             $table->integer('avatar')->default(0);
-            $table->string('uuid')->unique();
-            $table->string('devicemodel');
+            $table->string('uuid')->unique()->nullable(); //unique identifier for the user
+            $table->string('devicemodel')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
