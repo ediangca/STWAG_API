@@ -34,7 +34,7 @@ class PasswordResetMail extends Mailable
                 'user' => $this->user,
                 'customSubject' => 'Password Reset Request',
                 'customAction' => 'Reset Password',
-                'customURL' => env('APP_URL') . '/api/auth/reset-password?token=' . $this->token . '&email=' . urlencode($this->user->email),
+                'customURL' => env('APP_URL') . '/auth/reset-password?token=' . $this->token . '&email=' . urlencode($this->user->email),
                 'customMessage' => 'We received a request to reset your password for your STWAG account. Click the button below to reset your password. If you did not request a password reset, please ignore this email.'
             ]);
     }
