@@ -290,10 +290,9 @@ class AuthController extends Controller
         Log::info('Login request received', $request->all());
 
         if (
-            !$request->has('email') || !$request->has('password')
-            //  || !$request->has('uuid')
+            !$request->has('email') || !$request->has('password') || !$request->has('uiid') || !$request->has('devicemodel')
         ) {
-            return response()->json(['message' => 'Email and password are required'], 400);
+            return response()->json(['message' => 'Email, Password, UIID, and Devicemodel are required.'], 400);
         }
 
         if (!filter_var($request->email, FILTER_VALIDATE_EMAIL)) {
@@ -305,6 +304,18 @@ class AuthController extends Controller
                 'email' => 'required|email',
                 'password' => 'required',
                 // 'uuid' => 'required',
+                'uiid' => [
+                    'required',
+                    function ($attribute, $value, $fail) use ($request) {
+                        $user = \App\Models\User::where('uuid', $value)
+                            ->where('email', '!=', $request->email)
+                            ->first();
+                        if ($user) {
+                            $fail('The UIID is already associated with another user.');
+                        }
+                    }
+                ],
+                'devicemodel' => 'required|string|max:255',
             ]);
 
             Log::info('Validation passed');
@@ -312,7 +323,6 @@ class AuthController extends Controller
             Log::error('Validation failed', ['errors' => $e->errors()]);
             return response()->json(['errors' => $e->errors()], 422);
         }
-
 
         $user = User::where('email', $request->email)->first();
 
@@ -326,20 +336,25 @@ class AuthController extends Controller
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid Password'], 401);
         }
-        // if ($user->uuid != $request->uuid) {
-        //     return response()->json(['message' => 'Device is not registered'], 401);
-        // }
 
+        $isUIIDupdated = false;
+        // Check if UUID is provided and update if necessary
+        if (is_null($user->uuid)) {
+            $uuid = $request->input('uuid');
+            if (!$uuid) {
+                return response()->json(['message' => 'UUID is required for update'], 400);
+            }
+            if (User::where('uuid', $uuid)->exists()) {
+                return response()->json(['message' => 'Another user is already logged in on this device.'], 409);
+            }
+            $user->uuid = $uuid;
+            $user->devicemodel = $uuid;
+            $user->save();
+            $isUIIDupdated = true;
+        }
 
         Log::info('User check', ['user_id' => optional($user)->user_id, 'email' => $request->email]);
 
-
-        // Create the API token for the user
-        // $token = $user->createToken('API Token')->plainTextToken;
-
-        // return response()->json([
-        //     'token' => $token
-        // ]);
 
         try {
             // Send email notification if needed
@@ -358,7 +373,7 @@ class AuthController extends Controller
         return response()->json([
             'user' => $user,
             'token' => $user->createToken('API Token')->plainTextToken,
-            'message' => 'Login successful'
+            'message' => 'Login successful' . ($isUIIDupdated ? ' and Device updated.' : '')
         ]);
     }
 
