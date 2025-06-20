@@ -266,7 +266,6 @@
                                     'X-CSRF-TOKEN': csrfToken
                                 },
                                 body: JSON.stringify(payload),
-                                credentials: 'include', // send cookies/CSRF if same origin
                                 withCredentials: true // send cookies/CSRF if same origin
                             })
                             .then(response => {
