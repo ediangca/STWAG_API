@@ -16,12 +16,12 @@
     <form id="resetPasswordForm">
         <div class="mb-3">
             <label>Email address</label>
-            <input type="email" class="form-control" name="email" required placeholder="Enter your email">
+            <input type="email" class="form-control" name="email" required placeholder="Enter your email" value="{{ $email }}">
         </div>
 
         <div class="mb-3">
             <label>Token</label>
-            <input type="text" class="form-control" name="token" required placeholder="Enter reset token">
+            <input type="text" class="form-control" name="token" required placeholder="Enter reset token" value="{{ $token }}">
         </div>
 
         <div class="mb-3">
