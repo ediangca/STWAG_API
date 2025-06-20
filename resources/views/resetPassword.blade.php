@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    
+
     <link rel="icon" type="image/png" href="{{ asset('img/stwag-logo.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -241,8 +241,8 @@
                         };
 
                         console.log('Payload:', payload);
-                        
-                        const csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+                        // const csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
                         fetch('https://stwagapi-production.up.railway.app/api/auth/reset-password', {
                                 method: 'POST',
@@ -256,6 +256,8 @@
                                 // credentials: 'same-origin' // also important for CSRF cookie validation
                             })
                             .then(response => {
+
+                                console.log('Payload:', payload);
                                 if (!response.ok) {
                                     return response.json().then(data => {
                                         throw data;
@@ -264,6 +266,8 @@
                                 return response.json();
                             })
                             .then(data => {
+
+                                console.log('Payload:', payload);
                                 form.style.display = 'none';
                                 // Show a success message (you can customize this)
                                 alert(data.message || 'Password reset successful!');
@@ -272,6 +276,8 @@
                                     'Password reset successful!'; // Show backend message
                             })
                             .catch(error => {
+
+                                console.log('Payload:', payload);
                                 if (error.errors) {
                                     let messages = Object.values(error.errors).flat().join('\n');
                                     alert('Validation Error:\n' + messages);
