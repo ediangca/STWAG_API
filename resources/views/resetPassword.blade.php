@@ -131,17 +131,22 @@
         </div>
         <div class="body-content">
 
-            <div>
+            <div id="greetings">
                 Hello, <strong>
                     {{ $user ? $user->firstname . ' ' . substr($user->lastname, 0, 1) . '.' : 'STWAG User' }}</strong>!
             </div>
             <div style="margin-top: 18px;">
 
-                @if (isset($customMessage))
-                    {{ $customMessage }}
-                @else
-                    Thank you for being a valued member of our community.
-                @endif
+                <div id="message">
+                    @if (isset($customMessage))
+                        {{ $customMessage }}
+                    @else
+                        Thank you for being a valued member of our community.
+                    @endif
+                </div>
+                <div id="succesMessage">
+                    Password reset successful! You can now log in with your new password.
+                </div>
 
                 <form id="resetPasswordForm" class="w-100 mx-auto mt-5 p-4 border rounded shadow-sm"
                     style="max-width: 400px;">
@@ -211,6 +216,8 @@
                     // Handle form submission
                     const form = document.getElementById('resetPasswordForm');
                     const successMessage = document.getElementById('successMessage');
+                    const gretting = document.getElementById('greetings');
+                    const message = document.getElementById('message');
 
 
 
@@ -251,8 +258,8 @@
                         // credentials: 'same-origin', // send cookies/CSRF if same origin
                         // credentials: 'omit', // Don't send cookies/CSRF
                         // credentials: 'include', // send cookies/CSRF if same origin
+                        // console.log('Payload:', payload);
 
-                        console.log('Payload:', payload);
                         fetch('https://stwagapi-production.up.railway.app/api/auth/resetpassword', {
                                 method: 'POST',
                                 headers: {
@@ -261,11 +268,10 @@
                                     'X-CSRF-TOKEN': csrfToken
                                 },
                                 body: JSON.stringify(payload),
-                                // credentials: 'same-origin', // send cookies/CSRF if same origin
                                 withCredentials: true // send cookies/CSRF if same origin
                             })
                             .then(response => {
-                                console.log('Payload Response:', payload);
+                                // console.log('Payload Response:', payload);
                                 if (!response.ok) {
                                     return response.json().then(data => {
                                         throw data;
@@ -274,16 +280,18 @@
                                 return response.json();
                             })
                             .then(data => {
-                                console.log('Payload Data:', payload);
+                                // console.log('Payload Data:', payload);
                                 form.style.display = 'none';
-                                alert(data.message || 'Password reset successful!');
+                                gretting.style.display = 'none';
+                                message.style.display = 'none';
+                                // alert(data.message || 'Password reset successful!');
                                 if (successMessage) {
                                     successMessage.style.display = 'block';
                                     successMessage.innerText = data.message || 'Password reset successful!';
                                 }
                             })
                             .catch(error => {
-                                console.log('Payload Catch:', payload);
+                                // console.log('Payload Catch:', payload);
                                 if (error.errors) {
                                     let messages = Object.values(error.errors).flat().join('\n');
                                     alert('Validation Error:\n' + messages);
