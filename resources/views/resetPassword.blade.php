@@ -261,7 +261,7 @@
                                 },
                                 // credentials: 'omit', // Don't send cookies/CSRF
                                 // credentials: 'include', // send cookies/CSRF if same origin
-                                credentials: 'same-origin', // send cookies/CSRF if same origin
+                                // credentials: 'same-origin', // send cookies/CSRF if same origin
                                 withCredentials: true // send cookies/CSRF if same origin
                             })
                             .then(response => {
