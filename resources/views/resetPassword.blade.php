@@ -181,7 +181,8 @@
                         </div>
                     </div>
 
-                    <button id="submit" type="submit" class="btn btn-primary w-100">Reset Password</button>
+                    <button id="submit" type="submit" class="btn btn-primary w-100" onclick="this.disabled=true;this.innerText='Processing...';this.form.submit();">Reset Password</button>
+                    
                 </form>
                 <script>
                     // Toggle Password Visibility with FontAwesome icons
