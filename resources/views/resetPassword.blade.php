@@ -243,17 +243,18 @@
                         console.log('Payload:', payload);
 
                         // const csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                        // 'X-CSRF-TOKEN': csrf_token,    
+                        // credentials: 'same-origin' // also important for CSRF cookie validation
+
 
                         fetch('https://stwagapi-production.up.railway.app/api/auth/reset-password', {
                                 method: 'POST',
                                 headers: {
-                                    // 'X-CSRF-TOKEN': csrf_token,
                                     'Content-Type': 'application/json',
                                     'Accept': 'application/json',
                                 },
                                 body: JSON.stringify(payload),
                                 credentials: 'omit', // force no cookies/CSRF
-                                // credentials: 'same-origin' // also important for CSRF cookie validation
                             })
                             .then(response => {
 
