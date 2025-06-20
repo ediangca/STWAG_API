@@ -95,7 +95,7 @@ class AuthController extends Controller
         }
 
         if (User::where('uuid', $request->uuid)->exists()) {
-            return response()->json(['message' => 'UUID already exists'], 409);
+            return response()->json(['message' => 'Device is already associated with another user.'], 409);
         }
 
         $user_id = DB::selectOne('SELECT GenerateUserAccID() AS user_id')->user_id;
@@ -311,7 +311,7 @@ class AuthController extends Controller
                             ->where('email', '!=', $request->email)
                             ->first();
                         if ($user) {
-                            $fail('The UIID is already associated with another user.');
+                            $fail('Device is already associated with another user.');
                         }
                     }
                 ],
@@ -342,9 +342,9 @@ class AuthController extends Controller
         if (is_null($user->uuid)) {
             $uuid = $request->input('uuid');
             if (!$uuid) {
-                return response()->json(['message' => 'UUID is required for update'], 400);
+                return response()->json(['message' => 'Device UIID is required for update'], 400);
             }
-            if (User::where('uuid', $uuid)->exists()) {
+            if (User::where('uuid', $uuid)->where('user_id', '!=', $user->user_id)->exists()) {
                 return response()->json(['message' => 'Another user is already logged in on this device.'], 409);
             }
             $user->uuid = $uuid;
