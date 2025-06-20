@@ -245,7 +245,6 @@
                             token: token,
                             password: password,
                             password_confirmation: passwordConfirmation
-                            csrfToken: csrfToken
                         };
 
                         // 'Content-Type': 'application/json',
