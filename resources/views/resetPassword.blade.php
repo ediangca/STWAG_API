@@ -249,8 +249,6 @@
 
                         // 'Content-Type': 'application/json',
                         // credentials: 'same-origin', // send cookies/CSRF if same origin
-                        // credentials: 'omit', // Don't send cookies/CSRF
-                        // credentials: 'same-origin', // send cookies/CSRF if same origin
 
                         console.log('Payload:', payload);
                         fetch('https://stwagapi-production.up.railway.app/api/auth/resetpassword', {
@@ -261,7 +259,9 @@
                                     'X-CSRF-TOKEN': csrfToken
                                 },
                                 body: JSON.stringify(payload),
-                                credentials: 'same-origin', // send cookies/CSRF if same origin
+                                // credentials: 'omit', // Don't send cookies/CSRF
+                                credentials: 'include', // send cookies/CSRF if same origin
+                                // credentials: 'same-origin', // send cookies/CSRF if same origin
                                 withCredentials: true // send cookies/CSRF if same origin
                             })
                             .then(response => {
