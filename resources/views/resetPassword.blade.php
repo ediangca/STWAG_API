@@ -257,7 +257,7 @@
                             })
                             .then(response => {
 
-                                console.log('Payload:', payload);
+                                console.log('Payload Response:', payload);
                                 if (!response.ok) {
                                     return response.json().then(data => {
                                         throw data;
@@ -267,7 +267,7 @@
                             })
                             .then(data => {
 
-                                console.log('Payload:', payload);
+                                console.log('Payload Data:', payload);
                                 form.style.display = 'none';
                                 // Show a success message (you can customize this)
                                 alert(data.message || 'Password reset successful!');
@@ -277,12 +277,12 @@
                             })
                             .catch(error => {
 
-                                console.log('Payload:', payload);
+                                console.log('Payload Catch:', payload);
                                 if (error.errors) {
                                     let messages = Object.values(error.errors).flat().join('\n');
                                     alert('Validation Error:\n' + messages);
                                 } else if (error.message) {
-                                    alert('Error Message: ' + error.message + ' ' + csrf_token);
+                                    alert('Error Message: ' + error.message);
                                 } else {
                                     alert('An unexpected error occurred. Please try again.');
                                 }
