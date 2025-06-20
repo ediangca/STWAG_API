@@ -131,10 +131,9 @@
         </div>
         <div class="body-content">
 
-            <div id="greetings">
-                Hello, <strong>
-                    {{ $user ? $user->firstname . ' ' . substr($user->lastname, 0, 1) . '.' : 'STWAG User' }}</strong>!
-            </div>
+            Hello, <strong>
+                {{ $user ? $user->firstname . ' ' . substr($user->lastname, 0, 1) . '.' : 'STWAG User' }}</strong>!
+
             <div style="margin-top: 18px;">
 
                 <div id="message">
@@ -144,7 +143,7 @@
                         Thank you for being a valued member of our community.
                     @endif
                 </div>
-                <div id="succesMessage">
+                <div id="succesMessage" style="display: none;">
                     Password reset successful! You can now log in with your new password.
                 </div>
 
@@ -216,7 +215,6 @@
                     // Handle form submission
                     const form = document.getElementById('resetPasswordForm');
                     const successMessage = document.getElementById('successMessage');
-                    const gretting = document.getElementById('greetings');
                     const message = document.getElementById('message');
 
 
@@ -282,8 +280,7 @@
                             .then(data => {
                                 // console.log('Payload Data:', payload);
                                 form.style.display = 'none';
-                                gretting.style.display = 'none';
-                                message.style.display = 'none';
+                                message.innerText =  'Password reset successful! You can now log in with your new password.';
                                 // alert(data.message || 'Password reset successful!');
                                 if (successMessage) {
                                     successMessage.style.display = 'block';
