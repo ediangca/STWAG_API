@@ -236,6 +236,8 @@
                         } else {
                             document.getElementById('password-match-error').style.display = 'none';
                         }
+                        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content');
 
                         // Prepare payload for API
                         const payload = {
@@ -243,10 +245,9 @@
                             token: token,
                             password: password,
                             password_confirmation: passwordConfirmation
+                            csrfToken: csrfToken
                         };
 
-                        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute(
-                            'content');
                         // 'Content-Type': 'application/json',
                         // credentials: 'same-origin', // send cookies/CSRF if same origin
 
@@ -260,8 +261,8 @@
                                 },
                                 body: JSON.stringify(payload),
                                 // credentials: 'omit', // Don't send cookies/CSRF
-                                credentials: 'include', // send cookies/CSRF if same origin
-                                // credentials: 'same-origin', // send cookies/CSRF if same origin
+                                // credentials: 'include', // send cookies/CSRF if same origin
+                                credentials: 'same-origin', // send cookies/CSRF if same origin
                                 withCredentials: true // send cookies/CSRF if same origin
                             })
                             .then(response => {
