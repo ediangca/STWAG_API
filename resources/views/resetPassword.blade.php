@@ -240,15 +240,8 @@
                             password_confirmation: passwordConfirmation
                         };
 
-                        // alert(
-                        //     'Please wait while we process your request. This may take a few seconds.'
-                        // );
-
-
-                        // The code below is unrelated to your Blade file's password reset logic.
-                        // Your error is about the sessions table, which is a Laravel backend/database issue.
-                        // The code here is for frontend password reset and does not affect sessions table structure or queries.
-
+                        console.log('Payload:', payload);
+                        
                         const csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
                         fetch('https://stwagapi-production.up.railway.app/api/auth/reset-password', {
