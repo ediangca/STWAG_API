@@ -266,6 +266,7 @@
                                     'X-CSRF-TOKEN': csrfToken
                                 },
                                 body: JSON.stringify(payload),
+                                credentials: 'same-origin', // send cookies/CSRF if same origin
                                 withCredentials: true // send cookies/CSRF if same origin
                             })
                             .then(response => {
@@ -280,7 +281,7 @@
                             .then(data => {
                                 // console.log('Payload Data:', payload);
                                 form.style.display = 'none';
-                                message.innerText =  'Password reset successful! You can now log in with your new password.';
+                                message.innerText = 'Password reset successful! You can now log in with your new password.';
                                 // alert(data.message || 'Password reset successful!');
                                 if (successMessage) {
                                     successMessage.style.display = 'block';
