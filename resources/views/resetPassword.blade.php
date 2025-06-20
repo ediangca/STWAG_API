@@ -245,6 +245,8 @@
                             password_confirmation: passwordConfirmation
                         };
 
+                        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content');
                         // 'Content-Type': 'application/json',
                         // credentials: 'same-origin', // send cookies/CSRF if same origin
 
@@ -254,8 +256,7 @@
                                 headers: {
                                     'Accept': 'application/json',
                                     'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                                        'content')
+                                    'XCSRF-TOKEN': csrfToken
                                 },
                                 body: JSON.stringify(payload),
                                 // credentials: 'omit', // Don't send cookies/CSRF
