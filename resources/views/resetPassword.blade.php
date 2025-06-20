@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    </script>
     <link rel="icon" type="image/png" href="{{ asset('img/stwag-logo.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -145,7 +146,7 @@
 
                 <form id="resetPasswordForm" class="w-100 mx-auto mt-5 p-4 border rounded shadow-sm"
                     style="max-width: 400px;">
-
+                    @csrf
                     <input type="hidden" id="token" name="token" value="{{ $token }}">
                     <input type="hidden" id="email" name="email" value="{{ $email }}">
 
@@ -244,12 +245,12 @@
                         };
 
                         console.log('Payload:', payload);
-
                         fetch('https://stwagapi-production.up.railway.app/api/auth/reset-password', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
                                     'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                                 },
                                 body: JSON.stringify(payload),
                                 credentials: 'omit', // force no cookies/CSRF
