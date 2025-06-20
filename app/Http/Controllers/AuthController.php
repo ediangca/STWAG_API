@@ -553,8 +553,6 @@ class AuthController extends Controller
     {
         $token = $request->query('token');
         $email = $request->query('email');
-
-
         $user = User::where('email', $email)->first();
 
         $resetToken = DB::table('password_reset_tokens')->where('email', $user->email)->first();
