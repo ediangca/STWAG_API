@@ -250,12 +250,12 @@
                                 method: 'POST',
                                 headers: {
                                     'Accept': 'application/json',
+                                    'Content-Type': 'application/json',
                                 },
                                 body: JSON.stringify(payload),
-                                credentials: 'omit',
+                                credentials: 'omit', // Don't send cookies/CSRF
                             })
                             .then(response => {
-
                                 console.log('Payload Response:', payload);
                                 if (!response.ok) {
                                     return response.json().then(data => {
@@ -265,17 +265,15 @@
                                 return response.json();
                             })
                             .then(data => {
-
                                 console.log('Payload Data:', payload);
                                 form.style.display = 'none';
-                                // Show a success message (you can customize this)
                                 alert(data.message || 'Password reset successful!');
-                                successMessage.style.display = 'block'; // Show the success message
-                                successMessage.innerText = data.message ||
-                                    'Password reset successful!'; // Show backend message
+                                if (successMessage) {
+                                    successMessage.style.display = 'block';
+                                    successMessage.innerText = data.message || 'Password reset successful!';
+                                }
                             })
                             .catch(error => {
-
                                 console.log('Payload Catch:', payload);
                                 if (error.errors) {
                                     let messages = Object.values(error.errors).flat().join('\n');
@@ -287,7 +285,6 @@
                                 }
                             })
                             .finally(() => {
-                                // Re-enable the button if form is still visible (i.e., not successful)
                                 if (form.style.display !== 'none') {
                                     submitBtn.disabled = false;
                                     submitBtn.innerText = 'Reset Password';
