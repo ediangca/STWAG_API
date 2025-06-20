@@ -181,7 +181,7 @@
                         </div>
                     </div>
 
-                    <button id="submit" type="submit" class="btn btn-primary w-100" onclick="this.disabled=true;this.innerText='Processing...';this.form.submit();">Reset Password</button>
+                    <button id="submitBtn" type="submit" class="btn btn-primary w-100">Reset Password</button>
                     
                 </form>
                 <script>
@@ -215,8 +215,9 @@
                     form.addEventListener('submit', function(event) {
                         event.preventDefault(); // prevent normal form submit
 
-                        // const email = "{{ $email }}";
-                        // const token = "{{ $token }}";
+                        const submitBtn = document.getElementById('submitBtn');
+                        submitBtn.disabled = true;
+                        submitBtn.innerText = 'Processing...';
 
                         const token = document.getElementById('token').value;
                         const email = document.getElementById('email').value;
@@ -227,11 +228,12 @@
                         if (password !== passwordConfirmation) {
                             const errorDiv = document.getElementById('password-match-error');
                             errorDiv.style.display = 'block';
+                            submitBtn.disabled = false;
+                            submitBtn.innerText = 'Reset Password';
                             return;
                         } else {
                             document.getElementById('password-match-error').style.display = 'none';
                         }
-
 
                         // Prepare payload for API
                         const payload = {
@@ -242,11 +244,6 @@
                         };
 
                         console.log('Payload:', payload);
-
-                        // const csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                        // 'X-CSRF-TOKEN': csrf_token,    
-                        // credentials: 'same-origin' // also important for CSRF cookie validation
-
 
                         fetch('https://stwagapi-production.up.railway.app/api/auth/reset-password', {
                                 method: 'POST',
@@ -287,6 +284,13 @@
                                     alert('Error Message: ' + error.message);
                                 } else {
                                     alert('An unexpected error occurred. Please try again.');
+                                }
+                            })
+                            .finally(() => {
+                                // Re-enable the button if form is still visible (i.e., not successful)
+                                if (form.style.display !== 'none') {
+                                    submitBtn.disabled = false;
+                                    submitBtn.innerText = 'Reset Password';
                                 }
                             });
 
