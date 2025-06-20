@@ -37,7 +37,6 @@ Route::get('/mercaral', function () {
     return response()->json(['message' => 'pangit']);
 });
 
-
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail']);
@@ -52,22 +51,11 @@ Route::prefix('auth')->group(function () {
     Route::post('/resetpassword', [AuthController::class, 'resetPassword']);
 });
 
-
-
 // Route::put('/users/avatar/{id}', [AuthController::class, 'updateAvatarById']);
 Route::get('/users', [AuthController::class, 'index']);
 Route::get('/users/{user_id}', [AuthController::class, 'userInfo']);
 Route::put('/users/{user_id}', [AuthController::class, 'updateUserById'])->name('users.update');
 Route::delete('/users/{user_id}', [AuthController::class, 'deleteUserById'])->name('users.delete');
-
-
-// Route::get('/users/{id}', [AuthController::class, 'getUserById']);
-
-// Route::get('/users/{id}/downline', [AuthController::class, 'getDownlines']);
-// Route::get('/users/{id}/upline', [AuthController::class, 'getUpline']);
-
-
-// Route::get('/users/type/{type}', [AuthController::class, 'getUserByType']);
 
 // Lottery Routes
 // Route::apiResource('lottery_sessions', LotteryController::class);
@@ -146,17 +134,3 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-Route::controller(AuthController::class)->group(function () {
-
-
-    // Route::get('/users', 'index');
-
-    //     Route::post('/register', 'register');
-    //     Route::post('/login', 'login');
-    //     Route::get('/users', 'getAllUsers');
-    //     Route::get('/users/{id}', 'getUserById');
-
-    //     Route::get('/users/{id}/downline/', 'getDownlines');
-    //     Route::get('/users/{id}/upline/', 'getUpline');
-
-});
