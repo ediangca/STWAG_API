@@ -256,7 +256,7 @@
                                 headers: {
                                     'Accept': 'application/json',
                                     'Content-Type': 'application/json',
-                                    'XCSRF-TOKEN': csrfToken
+                                    'X-CSRF-TOKEN': csrfToken
                                 },
                                 body: JSON.stringify(payload),
                                 // credentials: 'omit', // Don't send cookies/CSRF
