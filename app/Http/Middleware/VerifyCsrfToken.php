@@ -12,8 +12,8 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        'api/*', // exclude all API routes
-        'api/auth/reset-password'
+        // 'api/*', // exclude all API routes
+        // 'api/auth/reset-password'
         // Only add 'auth/reset-password' if you want to exclude CSRF for this POST route
     ];
 }
