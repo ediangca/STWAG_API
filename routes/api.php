@@ -49,7 +49,7 @@ Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
 Route::prefix('auth')->group(function () {
     Route::post('/', [AuthController::class, 'login']);
     Route::post('/forgotPassword', [AuthController::class, 'forgotPassword']);
-    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+    Route::post('/resetpassword', [AuthController::class, 'resetPassword']);
 });
 
 

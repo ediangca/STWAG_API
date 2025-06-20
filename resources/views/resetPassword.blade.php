@@ -244,7 +244,7 @@
                         };
 
                         console.log('Payload:', payload);
-                        fetch('https://stwagapi-production.up.railway.app/api/auth/reset-password', {
+                        fetch('https://stwagapi-production.up.railway.app/api/auth/resetpassword', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -252,7 +252,7 @@
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                                 },
                                 body: JSON.stringify(payload),
-                                credentials: 'omit', // force no cookies/CSRF
+                                credentials: 'same-origin', // send cookies/CSRF if same origin
                             })
                             .then(response => {
 
