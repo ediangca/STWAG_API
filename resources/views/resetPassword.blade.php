@@ -259,7 +259,7 @@
                                     'Content-Type': 'application/json',
                                 },
                                 credentials: 'omit', // Don't send cookies/CSRF
-                                withCredentials: true // send cookies/CSRF if same origin
+                                // withCredentials: true // send cookies/CSRF if same origin
                             })
                             .then(response => {
                                 console.log('Payload Response:', payload);

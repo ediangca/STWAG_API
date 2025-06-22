@@ -6,6 +6,7 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
+        'http://localhost:8100',
         'http://localhost:8000',
         'http://127.0.0.1:8000',
         'https://stwagapi-production.up.railway.app',
@@ -29,5 +30,5 @@ return [
 
     'max_age' =>  0,
 
-    'supports_credentials' => false, // 👈 Enable support credentials
+    'supports_credentials' => true, // 👈 Enable support credentials
 ];
