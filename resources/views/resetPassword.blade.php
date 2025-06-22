@@ -154,7 +154,7 @@
                     <input type="hidden" id="email" name="email" value="{{ $email }}">
 
                     @if (isset($customSubject))
-                        <div class="subject text-center fw-bold mb-3">
+                        <div id="message" class="subject text-center fw-bold mb-3">
                             {{ $customSubject }}
                         </div>
                     @endif
@@ -212,7 +212,7 @@
                     // );
                     // Handle form submission
                     const form = document.getElementById('resetPasswordForm');
-                    const successMessage = document.getElementById('successMessage');
+                    const successMessage = document.getElementById('message');
 
 
 
@@ -280,7 +280,6 @@
                                 form.style.display = 'none';
                                 alert(data.message || 'Password reset successful!');
                                 if (successMessage) {
-                                    successMessage.style.display = 'block';
                                     successMessage.innerText = data.message || 'Password reset successful!';
                                 }
                             })
