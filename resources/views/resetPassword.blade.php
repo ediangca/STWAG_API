@@ -140,17 +140,12 @@
             </div>
             <div style="margin-top: 18px;">
 
-                <div id="message">
+                <p id="message" style="display: none;">
                     @if (isset($customMessage))
                         {{ $customMessage }}
                     @else
                         Thank you for being a valued member of our community.
                     @endif
-                </div>
-
-                <p id="successMesage" style="display: none;">
-                    Your password has been successfully reset. You can now log in with your new password. <br>
-                    Enjoy your experience with STWAG!
                 </p>
 
                 <form id="resetPasswordForm" class="w-100 mx-auto mt-5 p-4 border rounded shadow-sm"
@@ -220,7 +215,6 @@
                     // Handle form submission
                     const form = document.getElementById('resetPasswordForm');
                     const message = document.getElementById('message');
-                    const successMessage = document.getElementById('successMesage');
 
 
 
@@ -286,11 +280,9 @@
                             .then(data => {
                                 console.log('Payload Data:', payload);
                                 form.style.display = 'none';
-                                message.style.display = 'none';
                                 // alert(data.message || 'Password reset successful!');
-                                if (successMessage) {
-                                    successMessage.style.display = 'block';
-                                    successMessage.innerText = data.message || 'Password reset successful!';
+                                if (message) {
+                                    message.innerText = data.message || 'Password reset successful!';
                                 }
                             })
                             .catch(error => {
