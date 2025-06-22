@@ -249,7 +249,6 @@
                             password_confirmation: passwordConfirmation
                         };
 
-                        // 'Content-Type': 'application/json',
                         // 'X-CSRF-TOKEN': csrfToken
                         // credentials: 'same-origin', // send cookies/CSRF if same origin
                         // credentials: 'include', // send cookies/CSRF if same origin
@@ -262,9 +261,9 @@
                                 headers: {
                                     'Accept': 'application/json',
                                     'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': csrfToken // CSRF token for security
+                                    // 'X-CSRF-TOKEN': csrfToken // CSRF token for security
                                 },
-                                credentials: 'same-origin', // omit cookies/CSRF
+                                // credentials: 'include', // omit cookies/CSRF
                                 // withCredentials: true, // send cookies/CSRF if same origin,
                             })
                             .then(response => {
