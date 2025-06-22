@@ -149,7 +149,8 @@
                 </div>
 
                 <p id="successMesage" style="display: none;">
-                    Your password has been successfully reset. You can now log in with your new password.
+                    Your password has been successfully reset. You can now log in with your new password. <br>
+                    Enjoy your experience with STWAG!
                 </p>
 
                 <form id="resetPasswordForm" class="w-100 mx-auto mt-5 p-4 border rounded shadow-sm"
