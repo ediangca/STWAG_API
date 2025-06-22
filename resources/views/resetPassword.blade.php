@@ -140,11 +140,17 @@
             </div>
             <div style="margin-top: 18px;">
 
-                @if (isset($customMessage))
-                    {{ $customMessage }}
-                @else
-                    Thank you for being a valued member of our community.
-                @endif
+                <div id="message">
+                    @if (isset($customMessage))
+                        {{ $customMessage }}
+                    @else
+                        Thank you for being a valued member of our community.
+                    @endif
+                </div>
+
+                <p id="successMesage" class="text-success" style="display: none;">
+                    Your password has been successfully reset. You can now log in with your new password.
+                </p>
 
                 <form id="resetPasswordForm" class="w-100 mx-auto mt-5 p-4 border rounded shadow-sm"
                     style="max-width: 400px;">
@@ -212,7 +218,7 @@
                     // );
                     // Handle form submission
                     const form = document.getElementById('resetPasswordForm');
-                    const successMessage = document.getElementById('message');
+                    const successMessage = document.getElementById('successMesage');
 
 
 
@@ -278,7 +284,7 @@
                             .then(data => {
                                 console.log('Payload Data:', payload);
                                 form.style.display = 'none';
-                                alert(data.message || 'Password reset successful!');
+                                // alert(data.message || 'Password reset successful!');
                                 if (successMessage) {
                                     successMessage.innerText = data.message || 'Password reset successful!';
                                 }
