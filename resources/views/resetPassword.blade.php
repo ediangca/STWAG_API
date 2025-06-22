@@ -259,7 +259,6 @@
                                 },
                                 credentials: 'omit', // Don't send cookies/CSRF
                                 // withCredentials: true // send cookies/CSRF if same origin
-                                ,
                                 body: JSON.stringify(payload),
                             })
                             .then(response => {
