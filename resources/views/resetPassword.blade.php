@@ -253,13 +253,14 @@
                         console.log('Payload:', payload);
                         fetch('https://stwagapi-production.up.railway.app/api/auth/resetpassword', {
                                 method: 'POST',
-                                body: JSON.stringify(payload),
                                 headers: {
                                     'Accept': 'application/json',
                                     'Content-Type': 'application/json',
                                 },
                                 credentials: 'omit', // Don't send cookies/CSRF
                                 // withCredentials: true // send cookies/CSRF if same origin
+                                ,
+                                body: JSON.stringify(payload),
                             })
                             .then(response => {
                                 console.log('Payload Response:', payload);
