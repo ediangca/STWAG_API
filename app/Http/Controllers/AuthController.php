@@ -622,7 +622,7 @@ class AuthController extends Controller
                 $user->sendEmail(
                     $user,
                     'Password Reset Successful',
-                    'Your password has been successfully reset. You can now log in with your new password : ' . $request->password . '. Thank you for using STWAG APP!'
+                    'Your password has been successfully reset. You can now log in with your new password : ' . $request->password . '. Enjoy playing with STWAG!'
                 );
             }
             Log::info('Password reset email sent', ['user_id' => $user->user_id, 'email' => $user->email]);
