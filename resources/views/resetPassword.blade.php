@@ -148,7 +148,7 @@
                     @endif
                 </div>
 
-                <p id="successMesage" class="text-success" style="display: none;">
+                <p id="successMesage" style="display: none;">
                     Your password has been successfully reset. You can now log in with your new password.
                 </p>
 
@@ -218,6 +218,7 @@
                     // );
                     // Handle form submission
                     const form = document.getElementById('resetPasswordForm');
+                    const message = document.getElementById('message');
                     const successMessage = document.getElementById('successMesage');
 
 
@@ -284,8 +285,10 @@
                             .then(data => {
                                 console.log('Payload Data:', payload);
                                 form.style.display = 'none';
+                                message.style.display = 'none';
                                 // alert(data.message || 'Password reset successful!');
                                 if (successMessage) {
+                                    successMessage.style.display = 'block';
                                     successMessage.innerText = data.message || 'Password reset successful!';
                                 }
                             })
