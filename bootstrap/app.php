@@ -31,6 +31,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+
+        $middleware->validateCsrfTokens(except: [
+            'api/*', // Exclude all API routes from CSRF verification
+            'api/auth/resetpassword', // Specific route for password reset in API
+            // 'sanctum/csrf-cookie', // Uncomment if using Sanctum for SPA authentication
+        ]);
+        
         // Global middleware or route groups can go here
         $middleware->append(\App\Http\Middleware\AuthMiddleware::class);
 

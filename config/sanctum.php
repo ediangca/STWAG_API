@@ -26,7 +26,7 @@ return [
         'https://stwagapi-production.up.railway.app,
         https://stwagapi-production.up.railway.app:8000,
         https://stwagapi-production.up.railway.app:443,
-        https://stwagapi-production.up.railway.app:41830' .
+        https://stwagapi-production.up.railway.app:41830',
             Sanctum::currentApplicationUrlWithPort()
     ))),
 
