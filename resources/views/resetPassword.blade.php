@@ -257,7 +257,7 @@
                                     'Accept': 'application/json',
                                     'Content-Type': 'application/json',
                                 },
-                                credentials: 'include'
+                                credentials: 'include',
                                 // withCredentials: true // send cookies/CSRF if same origin
                                 body: JSON.stringify(payload),
                             })
