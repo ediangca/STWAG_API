@@ -264,8 +264,8 @@
                                     'Content-Type': 'application/json',
                                     'X-CSRF-TOKEN': csrfToken // CSRF token for security
                                 },
-                                credentials: 'omit', // omit cookies/CSRF
-                                withCredentials: true, // send cookies/CSRF if same origin,
+                                credentials: 'include', // omit cookies/CSRF
+                                // withCredentials: true, // send cookies/CSRF if same origin,
                             })
                             .then(response => {
                                 console.log('Payload Response:', payload);
