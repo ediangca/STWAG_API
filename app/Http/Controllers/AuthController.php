@@ -631,7 +631,7 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'message' => 'Password reset successful. You can now log in with your new password.',
+            'message' => 'Password has been successfully reset. You can now log in with your new password.',
             'user' => $user
         ], 200);
     }
