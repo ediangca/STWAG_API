@@ -144,7 +144,7 @@
 
                 <form id="resetPasswordForm" class="w-100 mx-auto mt-5 p-4 border rounded shadow-sm"
                     style="max-width: 400px;">
-                    
+
                     <input type="hidden" id="token" name="token" value="{{ $token }}">
                     <input type="hidden" id="email" name="email" value="{{ $email }}">
 
@@ -233,8 +233,8 @@
                         } else {
                             document.getElementById('password-match-error').style.display = 'none';
                         }
-                        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute(
-                            'content');
+                        // const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute(
+                        //     'content');
 
                         // Prepare payload for API
                         const payload = {
