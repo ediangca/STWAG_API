@@ -245,6 +245,9 @@
                         };
 
                         // 'Content-Type': 'application/json',
+                        // 'X-CSRF-TOKEN': csrfToken
+                        // credentials: 'same-origin', // send cookies/CSRF if same origin
+                        // credentials: 'include', // send cookies/CSRF if same origin
                         // credentials: 'same-origin', // send cookies/CSRF if same origin
 
                         console.log('Payload:', payload);
@@ -254,12 +257,9 @@
                                 headers: {
                                     'Accept': 'application/json',
                                     'Content-Type': 'application/json',
-                                    // 'X-CSRF-TOKEN': csrfToken
                                 },
                                 credentials: 'omit', // Don't send cookies/CSRF
-                                // credentials: 'include', // send cookies/CSRF if same origin
-                                // credentials: 'same-origin', // send cookies/CSRF if same origin
-                                withCredentials: false // send cookies/CSRF if same origin
+                                withCredentials: true // send cookies/CSRF if same origin
                             })
                             .then(response => {
                                 console.log('Payload Response:', payload);
