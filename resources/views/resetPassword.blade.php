@@ -48,7 +48,7 @@
         .header h2 {
             margin: 0;
             font-size: 28px;
-            color: #49b5b2;
+            color: #006A71;
             letter-spacing: 1px;
         }
 
@@ -75,7 +75,7 @@
         .action a {
             display: inline-block;
             padding: 12px 28px;
-            background: #49b5b2;
+            background: #006A71;
             color: #fff !important;
             border-radius: 5px;
             text-decoration: none;
@@ -91,7 +91,7 @@
 
         .footer span {
             font-weight: bold;
-            color: #49b5b2;
+            color: #006A71;
         }
 
         .copyright {
@@ -116,7 +116,7 @@
         }
 
         .btn:hover {
-            background: #2a7270 !important;
+            background: #008d97 !important;
         }
 
         .toggle-password {

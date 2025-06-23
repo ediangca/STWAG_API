@@ -10,8 +10,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+
     <title>STWAG</title>
     <style>
         body {
@@ -44,7 +45,7 @@
         .header h2 {
             margin: 0;
             font-size: 28px;
-            color: #49b5b2;
+            color: #006A71;
             letter-spacing: 1px;
         }
 
@@ -71,7 +72,7 @@
         .action a {
             display: inline-block;
             padding: 12px 28px;
-            background: #49b5b2;
+            background: #006A71;
             color: #fff !important;
             border-radius: 5px;
             text-decoration: none;
@@ -102,7 +103,7 @@
         .btn {
             display: inline-block;
             padding: 12px 28px;
-            background: #49b5b2;
+            background: #006A71;
             color: #fff !important;
             border-radius: 5px;
             text-decoration: none;
@@ -112,7 +113,7 @@
         }
 
         .btn:hover {
-            background: #2a7270;
+            background: #008d97;
         }
     </style>
 </head>
