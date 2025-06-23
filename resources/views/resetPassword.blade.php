@@ -278,7 +278,7 @@
                                 return response.json();
                             })
                             .then(data => {
-                                console.log('Payload Data:', payload);
+                                // console.log('Payload Data:', payload);
                                 form.style.display = 'none';
                                 // alert(data.message || 'Password reset successful!');
                                 if (message) {
@@ -286,7 +286,7 @@
                                 }
                             })
                             .catch(error => {
-                                console.log('Payload Catch:', payload);
+                                // console.log('Payload Catch:', payload);
                                 if (error.errors) {
                                     let messages = Object.values(error.errors).flat().join('\n');
                                     alert('Validation Error:\n' + messages);
@@ -295,6 +295,7 @@
                                 } else {
                                     alert('An unexpected error occurred. Please try again.');
                                 }
+                                submitBtn.disabled = false;
                             })
                             .finally(() => {
                                 if (form.style.display !== 'none') {
