@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="STWAG - Spin to Win and Gain">
-    <link rel="icon" type="image/png" href="{{ asset('img/stwag-logo.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('img/stwaglogo.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -128,7 +128,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="{{ asset('img/stwag-logo.png') }}" alt="STWAG Logo" style="height: 100px;">
+            <img src="{{ asset('img/stwaglogo.png') }}" alt="STWAG Logo" style="height: 100px;">
             <h2>STWAG</h2>
             <em>(Spin to Win and Gain)</em>
         </div>

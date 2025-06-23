@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="{{ asset('img/stwag-logo.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('img/stwaglogo.png') }}">
     <title>STWAG</title>
     <style>
         body {
@@ -109,7 +109,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="{{ asset('img/stwag-logo.png') }}" alt="STWAG Logo" style="height: 100px;">
+            <img src="{{ asset('img/stwaglogo.png') }}" alt="STWAG Logo" style="height: 100px;">
             <h2>STWAG</h2>
             <em>(Spin to Win and Gain)</em>
         </div>
@@ -141,9 +141,11 @@
                 @endif
             </div>
         </div>
-        <div class="footer">
-            Regards, <br><span>Your STWAG App Team</span>
-        </div>
+        @if (isset($user))
+            <div class="footer">
+                Regards, <br><span>Your STWAG App Team</span>
+            </div>
+        @endif
         <div class="copyright">
             &copy; {{ date('Y') }} STWAG. All rights reserved.
         </div>
