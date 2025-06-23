@@ -140,7 +140,7 @@
             </div>
             <div style="margin-top: 18px;">
 
-                <p id="message" style="display: none;">
+                <p id="message">
                     @if (isset($customMessage))
                         {{ $customMessage }}
                     @else
