@@ -204,12 +204,6 @@ class AuthController extends Controller
             'source' => 'BUN', // Bonus type
         ]);
 
-        // try {
-        //     $user->notify(new \Illuminate\Auth\Notifications\VerifyEmail);
-        // } catch (\Exception $e) {
-        //     Log::error('Failed to send verification success email', ['error' => $e->getMessage()]);
-        // }
-
         try {
             // Send email notification if needed
             if (method_exists($user, 'sendEmail')) {
@@ -290,7 +284,7 @@ class AuthController extends Controller
         Log::info('Login request received', $request->all());
 
         if (
-            !$request->has('email') || !$request->has('password') || !$request->has('uiid') || !$request->has('devicemodel')
+            !$request->has('email') || !$request->has('password') || !$request->has('uuid') || !$request->has('devicemodel')
         ) {
             return response()->json(['message' => 'Email, Password, UIID, and Devicemodel are required.'], 400);
         }
@@ -515,7 +509,10 @@ class AuthController extends Controller
         if (!$user) {
             return response()->json(['message' => 'Email not found!'], 404);
         }
-        Log::error('Requesting User to Reset password', ['user' => $user]);
+
+        if (!$user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Email not verified. Please check and verify your email before requesting forgot password.'], 403);
+        }
 
         // Generate token and store in password_reset_tokens
         $token = Str::random(64);
@@ -604,17 +601,23 @@ class AuthController extends Controller
             return response()->json(['message' => 'Token has expired'], 400);
         }
 
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return response()->json(['message' => 'Email not found'], 404);
+        }
+        
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+        Log::info('Password reset successful', ['user_id' => $user->user_id, 'email' => $user->email]);
         // Update user password
-        User::where('email', $request->email)
-            ->update(['password' => Hash::make($request->password)]);
+        // User::where('email', $request->email)
+        //     ->update(['password' => Hash::make($request->password)]);
 
         // Delete used token
         DB::table('password_reset_tokens')
             ->where('email', $request->email)
             ->delete();
-
-
-        $user = User::where('email', $request->email)->first();
 
         try {
             // Send email notification if needed
