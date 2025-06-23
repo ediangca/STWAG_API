@@ -298,7 +298,7 @@ class AuthController extends Controller
                 'email' => 'required|email',
                 'password' => 'required',
                 // 'uuid' => 'required',
-                'uiid' => [
+                'uuid' => [
                     'required',
                     function ($attribute, $value, $fail) use ($request) {
                         $user = \App\Models\User::where('uuid', $value)
