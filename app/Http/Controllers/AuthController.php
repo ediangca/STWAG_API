@@ -564,6 +564,7 @@ class AuthController extends Controller
             ->with('customSubject', "Reset Your Password")
             ->with('customMessage', "To secure your account, please set a new password below. Kindly verify your credentials before submitting.");
     }
+
     /**
      * Handle password reset
      */
@@ -684,7 +685,6 @@ class AuthController extends Controller
         return response()->json($users);
     }
 
-
     public function getUserById(Request $request, $id)
     {
         $user = User::find($id);
@@ -767,7 +767,6 @@ class AuthController extends Controller
         return response()->json(['message' => 'Email updated successfully']);
     }
 
-
     public function updateAvatarById(Request $request, $id)
     {
         if (!$request->has('avatar')) {
@@ -789,7 +788,6 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Avatar updated successfully']);
     }
-
 
     public function deleteUserById(Request $request, $id)
     {
@@ -851,5 +849,44 @@ class AuthController extends Controller
         }
 
         return response()->json($upline);
+    }
+
+    public function getDownlinesByLevel($user_id)
+    {
+        $user = User::find($user_id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $result = [];
+        $currentLevelUsers = [$user];
+        $level = 1;
+
+        while (!empty($currentLevelUsers)) {
+            $nextLevelUsers = [];
+            $levelUsers = [];
+
+            foreach ($currentLevelUsers as $parentUser) {
+                $downlines = User::where('uplinecode', $parentUser->referencecode)->get();
+                foreach ($downlines as $downline) {
+                    $levelUsers[] = $downline;
+                    $nextLevelUsers[] = $downline;
+                }
+            }
+
+            if (!empty($levelUsers)) {
+                $result['level_' . $level] = $levelUsers;
+            }
+
+            $currentLevelUsers = $nextLevelUsers;
+            $level++;
+        }
+
+        if (empty($result)) {
+            return response()->json(['message' => 'No downlines found'], 404);
+        }
+
+        return response()->json($result);
     }
 }
