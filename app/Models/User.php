@@ -3,7 +3,6 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-
 use App\Mail\CustomMail as MailCustomMail;
 use App\Notifications\CustomMail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

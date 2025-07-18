@@ -315,7 +315,7 @@ class AuthController extends Controller
             Log::info('Validation passed');
         } catch (ValidationException $e) {
             Log::error('Validation failed', ['errors' => $e->errors()]);
-            return response()->json(['errors' => $e->errors()], 422);
+            return response()->json(['errors' => $e->errors()], 409);
         }
 
         $user = User::where('email', $request->email)->first();
@@ -342,7 +342,7 @@ class AuthController extends Controller
                 return response()->json(['message' => 'Another user is already logged in on this device.'], 409);
             }
             $user->uuid = $uuid;
-            $user->devicemodel = $uuid;
+            $user->devicemodel = $request->input('devicemodel');
             $user->save();
             $isUIIDupdated = true;
         }
@@ -876,7 +876,7 @@ class AuthController extends Controller
             }
 
             if (!empty($levelUsers)) {
-                $result['level_' . $level] = $levelUsers;
+                $result[$level] = $levelUsers;
             }
 
             $currentLevelUsers = $nextLevelUsers;
