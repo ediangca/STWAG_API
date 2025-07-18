@@ -862,6 +862,10 @@ class AuthController extends Controller
         
         Log::info('Getting downlines by level', ['user_id' => $user_id, 'referencecode' => $user->referencecode]);
 
+        if($user->level == 0) {
+            return response()->json(['message' => 'Root user has no downlines'], 404);
+        }
+
         $result = [];
         $currentLevelUsers = [$user];
         $level = 1;
