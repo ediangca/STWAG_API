@@ -824,7 +824,7 @@ class AuthController extends Controller
         return response()->json($user);
     }
 
-    public function getDownlines(Request $request, $id)
+    public function getDownlinesByID(Request $request, $id)
     {
         $user = User::find($id);
 
