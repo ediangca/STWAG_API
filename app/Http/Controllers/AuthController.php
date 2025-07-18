@@ -327,7 +327,7 @@ class AuthController extends Controller
             Log::info('Validation passed');
         } catch (ValidationException $e) {
             Log::error('Validation failed', ['errors' => $e->errors()]);
-            return response()->json(['errors' => $e->errors()], 409);
+            return response()->json(['message' => $e->errors()], 409);
         }
 
         $user = User::where('email', $request->email)->first();
@@ -901,7 +901,7 @@ class AuthController extends Controller
                     $levelUsers[] = $downline;
                     $nextLevelUsers[] = $downline;
                 }
-            }
+            }   
 
             if (!empty($levelUsers)) {
                 $result[$level] = $levelUsers;
