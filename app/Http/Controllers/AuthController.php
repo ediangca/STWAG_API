@@ -131,6 +131,18 @@ class AuthController extends Controller
             return response()->json(['message' => 'Level exceeded.'], 404);
         }
 
+        if (strtolower($request->type) == "admin") {
+            $level = 0;
+        } else {
+            // Find the upline user by the provided uplinecode
+            $upline = User::where('referencecode', $request->uplinecode)->first();
+            if (!$upline) {
+                return response()->json(['message' => 'Upline reference code not found.'], 404);
+            }
+            // Set the new user's level as one higher than the upline's level
+            $level = $upline->level + 1;
+        }
+
         $user = User::create([
             'user_id' => $user_id, // Pass the generated user_id
             'firstname' => $request->firstname,
@@ -866,13 +878,20 @@ class AuthController extends Controller
             return response()->json(['message' => 'Root user has no downlines'], 404);
         }
 
+        // Initialize the result array
+        $allDownlines = User::where('uplinecode', $user->referencecode)->get();
+        if ($allDownlines->isEmpty()) {
+            return response()->json(['message' => 'No downlines found'], 404);
+        }
+        return response()->json($allDownlines);
+
         $result = [];
         $currentLevelUsers = [$user];
         $level = 1;
 
         while (!empty($currentLevelUsers)) {
-            Log::info(!empty($currentLevelUsers) ? 'Current level users found' : 'No current level users found', ['level' => $level, 'currentLevelUsersCount' => count($currentLevelUsers)]);
-            Log::info('Processing level', ['level' => $level, 'currentLevelUsersCount' => count($currentLevelUsers)]);
+            // Log::info(!empty($currentLevelUsers) ? 'Current level users found' : 'No current level users found', ['level' => $level, 'currentLevelUsersCount' => count($currentLevelUsers)]);
+            // Log::info('Processing level', ['level' => $level, 'currentLevelUsersCount' => count($currentLevelUsers)]);
             $nextLevelUsers = [];
             $levelUsers = [];
 
