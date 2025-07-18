@@ -606,7 +606,7 @@ class AuthController extends Controller
         if (!$user) {
             return response()->json(['message' => 'Email not found'], 404);
         }
-        
+
 
         $user->password = Hash::make($request->password);
         $user->save();
@@ -721,6 +721,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
 
+        Log::info('Validation passed');
         $user->update($request->all());
 
         return response()->json(['message' => 'User updated successfully']);
