@@ -721,7 +721,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        Log::info('Validation passed');
+        Log::info('Updating user', ['user_id' => $user_id, 'data' => $request->all()]);
         $user->update($request->all());
 
         return response()->json(['message' => 'User updated successfully']);
@@ -859,12 +859,16 @@ class AuthController extends Controller
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
         }
+        
+        Log::info('Getting downlines by level', ['user_id' => $user_id, 'referencecode' => $user->referencecode]);
 
         $result = [];
         $currentLevelUsers = [$user];
         $level = 1;
 
         while (!empty($currentLevelUsers)) {
+            Log::info(!empty($currentLevelUsers) ? 'Current level users found' : 'No current level users found', ['level' => $level, 'currentLevelUsersCount' => count($currentLevelUsers)]);
+            Log::info('Processing level', ['level' => $level, 'currentLevelUsersCount' => count($currentLevelUsers)]);
             $nextLevelUsers = [];
             $levelUsers = [];
 
