@@ -837,8 +837,14 @@ class AuthController extends Controller
         if ($downlines->isEmpty()) {
             return response()->json(['message' => 'No downlines found'], 404);
         }
+        // Add total downlines for each downline
+        $downlinesWithTotal = $downlines->map(function ($downline) {
+            $totalDownlines = \App\Models\User::where('uplinecode', $downline->referencecode)->count();
+            $downline->total_downlines = $totalDownlines;
+            return $downline;
+        });
 
-        return response()->json($downlines);
+        return response()->json($downlinesWithTotal);
     }
 
     public function getUpline(Request $request, $id)
