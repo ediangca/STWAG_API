@@ -882,7 +882,7 @@ class AuthController extends Controller
         $totalMembers = 0;
 
         while (!empty($currentLevelUsers)) {
-            $totalMembers += count($currentLevelUsers);
+            // $totalMembers += count($currentLevelUsers);
             Log::info(!empty($currentLevelUsers) ? 'Current level users found' : 'No current level users found', ['level' => $level, 'currentLevelUsersCount' => count($currentLevelUsers)]);
             Log::info('Processing level', ['level' => $level, 'currentLevelUsersCount' => count($currentLevelUsers)]);
             $nextLevelUsers = [];
