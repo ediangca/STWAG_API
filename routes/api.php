@@ -56,7 +56,8 @@ Route::get('/users', [AuthController::class, 'index']);
 Route::get('/users/{user_id}', [AuthController::class, 'userInfo']);
 Route::put('/users/{user_id}', [AuthController::class, 'updateUserById'])->name('users.update');
 Route::delete('/users/{user_id}', [AuthController::class, 'deleteUserById'])->name('users.delete');
-Route::get('/users/{user_id}/downlines', [AuthController::class, 'getDownlinesByLevel'])->name('users.downlines');
+Route::get('/users/{user_id}/leveldownlines', [AuthController::class, 'getDownlinesByLevel'])->name('users.leveldownlines');
+Route::get('/users/{user_id}/downlines', [AuthController::class, 'getDownlinesByID'])->name('users.downlines');
 
 // Lottery Routes
 // Route::apiResource('lottery_sessions', LotteryController::class);
