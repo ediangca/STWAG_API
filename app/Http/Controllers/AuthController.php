@@ -869,18 +869,20 @@ class AuthController extends Controller
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
         }
-        
+
         Log::info('Getting downlines by level', ['user_id' => $user_id, 'referencecode' => $user->referencecode]);
 
-        if($user->level == 0) {
+        if ($user->level == 0) {
             return response()->json(['message' => 'Root user has no downlines'], 404);
         }
 
         $result = [];
         $currentLevelUsers = [$user];
         $level = 1;
+        $totalMembers = 0;
 
         while (!empty($currentLevelUsers)) {
+            $totalMembers += count($currentLevelUsers);
             Log::info(!empty($currentLevelUsers) ? 'Current level users found' : 'No current level users found', ['level' => $level, 'currentLevelUsersCount' => count($currentLevelUsers)]);
             Log::info('Processing level', ['level' => $level, 'currentLevelUsersCount' => count($currentLevelUsers)]);
             $nextLevelUsers = [];
@@ -891,6 +893,7 @@ class AuthController extends Controller
                 foreach ($downlines as $downline) {
                     $levelUsers[] = $downline;
                     $nextLevelUsers[] = $downline;
+                    $totalMembers++;
                 }
             }
 
@@ -906,6 +909,6 @@ class AuthController extends Controller
             return response()->json(['message' => 'No downlines found'], 404);
         }
 
-        return response()->json($result);
+        return response()->json(['total' => $totalMembers, $result]);
     }
 }
