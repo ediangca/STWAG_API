@@ -114,7 +114,7 @@ class WithdrawController extends Controller
         $wallet = Wallet::create([
             'wallet_id' => uniqid('WLT') . '-' . substr($request->input('user_id'), 10) . date('YmdHis'),
             'user_id' => $user_id,
-            'points' => $points,
+            'points' => -abs($points),
             'withdrawableFlag' => false,
             'ref_id' => $withdraw_id,
             'source' => 'WTH',
