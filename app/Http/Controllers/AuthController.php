@@ -55,9 +55,9 @@ class AuthController extends Controller
 
         foreach ($users as $memberUser) {
             if ($memberUser->type === 'Member') {
-                $memberUser->total_members = $this->countDownlines($memberUser->referencecode);
+                $memberUser->total_downlines = $this->countDownlines($memberUser->referencecode);
             } else {
-                $memberUser->total_members = 0;
+                $memberUser->total_downlines = 0;
             }
         }
 
