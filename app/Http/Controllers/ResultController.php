@@ -224,7 +224,7 @@ class ResultController extends Controller
             // Attach wallet details to each winner
             $winners = $winningBets->map(function ($bet) use ($wallets) {
                 //FAQ: There's an intance that user will bet same number but may differ about time and the points bet, point of this, can we change this part to sum
-                $wallet = $wallets->where('user_id', $bet->user_id)->first();
+                $wallet = $wallets->where('user_id', $bet->user->user_id)->first();
                 return [
                     'user_id' => $bet->user->user_id ?? null,
                     'avatat' => $bet->user->avatar ?? 0,
