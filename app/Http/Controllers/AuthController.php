@@ -35,6 +35,16 @@ class AuthController extends Controller
     /**
      * Display a listing of the resource.
      */
+    // public function index()
+    // {
+    //     $users = User::all();
+
+    //     if ($users->isEmpty()) {
+    //         return response()->json(['message' => 'No users found'], 404);
+    //     }
+    //     return response()->json($users);
+    // }
+    
     public function index()
     {
         $users = User::all();
@@ -44,20 +54,8 @@ class AuthController extends Controller
         }
 
         foreach ($users as $memberUser) {
-            $totalMembers = 0;
-
             if ($memberUser->type === 'Member') {
-                $firstDownline = User::where('uplinecode', $memberUser->referencecode)->get();
-
-                foreach ($firstDownline as $downlineUser) {
-                    $downlinesCount = User::where('uplinecode', $downlineUser->referencecode)
-                        ->where('type', 'Member')
-                        ->count();
-
-                    $totalMembers += $downlinesCount;
-                }
-
-                $memberUser->total_members = $totalMembers;
+                $memberUser->total_members = $this->countDownlines($memberUser->referencecode);
             } else {
                 $memberUser->total_members = 0;
             }
@@ -66,6 +64,21 @@ class AuthController extends Controller
         return response()->json($users);
     }
 
+
+    private function countDownlines($referenceCode)
+    {
+        $directDownlines = User::where('uplinecode', $referenceCode)
+            ->where('type', 'Member')
+            ->get();
+
+        $count = $directDownlines->count();
+
+        foreach ($directDownlines as $downline) {
+            $count += $this->countDownlines($downline->referencecode);
+        }
+
+        return $count;
+    }
 
     public function register(Request $request)
     {
