@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use PDO;
 
 class AuthController extends Controller
 {
@@ -36,15 +37,37 @@ class AuthController extends Controller
      */
     public function index()
     {
-
         $users = User::all();
-
 
         if ($users->isEmpty()) {
             return response()->json(['message' => 'No users found'], 404);
         }
+
+        foreach ($users as $memberUser) {
+            $totalMembers = 0;
+
+            if ($memberUser->type === 'Member') {
+                $firstDownline = User::where('uplinecode', $memberUser->referencecode)
+                    ->where('type', 'Member')
+                    ->get();
+
+                foreach ($firstDownline as $downlineUser) {
+                    $downlinesCount = User::where('uplinecode', $downlineUser->referencecode)
+                        ->where('type', 'Member')
+                        ->count();
+
+                    $totalMembers += $downlinesCount;
+                }
+
+                $memberUser->total_members = $totalMembers;
+            } else {
+                $memberUser->total_members = 0;
+            }
+        }
+
         return response()->json($users);
     }
+
 
     public function register(Request $request)
     {
