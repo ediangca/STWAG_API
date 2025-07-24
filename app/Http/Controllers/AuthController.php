@@ -47,9 +47,7 @@ class AuthController extends Controller
             $totalMembers = 0;
 
             if ($memberUser->type === 'Member') {
-                $firstDownline = User::where('uplinecode', $memberUser->referencecode)
-                    ->where('type', 'Member')
-                    ->get();
+                $firstDownline = User::where('uplinecode', $memberUser->referencecode)->get();
 
                 foreach ($firstDownline as $downlineUser) {
                     $downlinesCount = User::where('uplinecode', $downlineUser->referencecode)
