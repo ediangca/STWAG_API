@@ -112,7 +112,7 @@ class AuthController extends Controller
                 'lastname' => 'required|string|max:255',
                 'birthdate' => 'required|date',
                 'email' => 'required|string|email|max:255|unique:users',
-                'contactno' => 'required|string|email|max:11|unique:users',
+                'contactno' => 'required|string||max:11|unique:users',
                 'password' => 'required|string|min:6',
                 'type' => 'required|string|max:255|nullable', //default user
                 // 'referencecode' => 'required|string|max:255', //generated
