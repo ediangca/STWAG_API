@@ -241,10 +241,16 @@ class AuthController extends Controller
         try {
             // Send email notification if needed
             if (method_exists($user, 'sendEmail')) {
+                $message = 'Congratulations! Your email has been verified and your account is now active. You can Login to STWAG APP.';
+
+                if ($user->type === 'User') {
+                    $message .= ' Enjoy your 10 points bonus!';
+                }
+
                 $user->sendEmail(
                     $user,
                     'Email Verified Successfully',
-                    'Congratulations! Your email has been verified and your account is now active. You can Login to STWAG APP, Enjoy your 10 points bonus!'
+                    $message
                 );
             }
             Log::info('Verification success email sent to user', ['user_id' => $user->user_id, 'email' => $user->email]);
