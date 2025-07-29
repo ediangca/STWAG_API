@@ -238,16 +238,6 @@ class AuthController extends Controller
         $user->markEmailAsVerified();
         $user->save();
 
-        $wallet = Wallet::create([
-            'wallet_id' => uniqid('WLT') . '-' . substr($user->user_id, 5) . date('YmdHis'),
-            'user_id' => $user->user_id,
-            'points' => 10,
-            'ref_id' => uniqid('BUN') . '-' . substr($user->user_id, 5) . date('YmdHis'),
-            'withdrawableFlag' => false,
-            'confirmFlag' => true,
-            'source' => 'BUN', // Bonus type
-        ]);
-
         try {
             // Send email notification if needed
             if (method_exists($user, 'sendEmail')) {
@@ -265,35 +255,60 @@ class AuthController extends Controller
 
         Log::info('Email verified successfully', ['user_id' => $user->id, 'email' => $user->email,  'uplinecode' => $user->uplinecode]);
 
-        $upline = User::where('referencecode', $user->uplinecode)->get();
-        if ($upline) {
-            Wallet::create([
-                'wallet_id' => uniqid('WLT') . '-' . substr($upline->user_id, 4) . date('YmdHis'),
-                'user_id' => $upline->user_id,
-                'points' => 5,
-                'ref_id' => uniqid('REF') . '-' . substr($user->user_id, 4) . date('YmdHis'),
+        if ($user->type == "User") {
+
+            $wallet = Wallet::create([
+                'wallet_id' => uniqid('WLT') . '-' . substr($user->user_id, 5) . date('YmdHis'),
+                'user_id' => $user->user_id,
+                'points' => 10,
+                'ref_id' => uniqid('BUN') . '-' . substr($user->user_id, 5) . date('YmdHis'),
                 'withdrawableFlag' => false,
                 'confirmFlag' => true,
-                'source' => 'REF',
+                'source' => 'BUN', // Bonus type
             ]);
 
-            Log::info('Referral bonus added to upline', ['upline_user_id' => $upline->user_id, 'points' => 5]);
-            try {
 
-                if (method_exists($upline, 'sendEmail')) {
-                    $user->sendEmail(
-                        $upline,
-                        'Referral Bonus Earned!',
-                        'Congratulations! You have received a 5 points referral bonus 
+            $upline = User::where('referencecode', $user->uplinecode)->get();
+            if ($upline) {
+                Wallet::create([
+                    'wallet_id' => uniqid('WLT') . '-' . substr($upline->user_id, 4) . date('YmdHis'),
+                    'user_id' => $upline->user_id,
+                    'points' => 5,
+                    'ref_id' => uniqid('REF') . '-' . substr($user->user_id, 4) . date('YmdHis'),
+                    'withdrawableFlag' => false,
+                    'confirmFlag' => true,
+                    'source' => 'REF',
+                ]);
+
+                Log::info('Referral bonus added to upline', ['upline_user_id' => $upline->user_id, 'points' => 5]);
+                try {
+
+                    if (method_exists($upline, 'sendEmail')) {
+                        $user->sendEmail(
+                            $upline,
+                            'Referral Bonus Earned!',
+                            'Congratulations! You have received a 5 points referral bonus 
                         because your downline (' . $user->firstname . ' ' . $user->lastname . ', ' . $user->email . ') 
                         has verified their email. Thank you for referring! Refer more friends to earn more bonuses!'
-                    );
+                        );
+                    }
+                    Log::info('Referral bonus notification sent to upline', ['upline_email' => $upline->email]);
+                } catch (Exception $e) {
+                    Log::error('Failed to send referral bonus notification to upline', ['error' => $e->getMessage()]);
                 }
-                Log::info('Referral bonus notification sent to upline', ['upline_email' => $upline->email]);
-            } catch (Exception $e) {
-                Log::error('Failed to send referral bonus notification to upline', ['error' => $e->getMessage()]);
             }
+            // Return the VIEW after successful verification
+            return view('customMail')->with('user', $user)
+                ->with('customSubject', 'Email Verification Successful')
+                ->with('customMessage', 'Greetings! Your email address has been successfully verified.
+        Your account is now active and you have received a 10 points  bonus. You can Login to STWAG APP, Thank you for joining STWAG.');
         }
+
+
+        // Return the VIEW after successful verification
+        return view('customMail')->with('user', $user)
+            ->with('customSubject', 'Email Verification Successful')
+            ->with('customMessage', 'Greetings! Your email address has been successfully verified. You can Login to STWAG APP, Thank you!');
 
 
         /**
@@ -307,11 +322,6 @@ class AuthController extends Controller
         // Return the JSON after successful verification
         // return response()->json(['message' => 'Email verified successfully. Enjoy 10 points Bunos, Thank you!']);
 
-        // Return the VIEW after successful verification
-        return view('customMail')->with('user', $user)
-            ->with('customSubject', 'Email Verification Successful')
-            ->with('customMessage', 'Greetings! Your email address has been successfully verified.
-        Your account is now active and you have received a 10 points  bonus. You can Login to STWAG APP, Thank you for joining STWAG.');
     }
 
     public function customUserMail($user_id)
