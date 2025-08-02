@@ -237,7 +237,7 @@ class TopUpController extends Controller
                     $user->sendEmail(
                         $user,
                         'Top Up Confirmed!',
-                        'Congratulations! Top Up has been confirmed. Your points have been added to your wallet. <br 
+                        'Congratulations! Top Up has been confirmed. Your points have been added to your wallet. <br> 
                         GCASH Ref. No. ' . $topup->gcash_ref_no . ' with ' . $topup->points . ' points. <br>
                         Thank you for using our service!'
                     );

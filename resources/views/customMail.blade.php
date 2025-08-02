@@ -140,11 +140,13 @@
                 </div>
             @endif
             <div style="margin-top: 18px;">
-                @if (isset($customMessage))
-                    {{ $customMessage }}
-                @else
-                    Thank you for being a valued member of our community.
-                @endif
+                <p>
+                    @if (isset($customMessage))
+                        {{ $customMessage }}
+                    @else
+                        Thank you for being a valued member of our community.
+                    @endif
+                </p>
 
                 @if (isset($customAction))
                     <div class="action" style="text-align: center;">
@@ -166,8 +168,7 @@
         </div>
     </div>
 
-    <script src="{{ asset('bootstrap/js/bootstrap.min.css') }}">
-    </script>
+    <script src="{{ asset('bootstrap/js/bootstrap.min.css') }}"></script>
 </body>
 
 </html>
