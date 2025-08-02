@@ -116,7 +116,7 @@ class AuthController extends Controller
                 'password' => 'required|string|min:6',
                 'type' => 'required|string|max:255|nullable', //default user
                 // 'referencecode' => 'required|string|max:255', //generated
-                'uplinecode' => 'string|max:255',
+                'uplinecode' => 'string|max:255|exists:users,referencecode', //if type is user, it will be the uplinecode
                 'avatar' => 'required|integer|nullable', //default 0
                 // 'level' => 'required|integer|nullable',
                 'uuid' => 'required|string|max:255|unique:users',
@@ -169,7 +169,7 @@ class AuthController extends Controller
             $level = 0;
         } else {
             $upline = User::where('referencecode', $request->uplinecode)->first();
-            if (!$upline) {
+            if (!$upline || $upline == null) {
                 return response()->json(['message' => 'Upline reference code not found.'], 404);
             }
             $level = $upline->level + 1;
