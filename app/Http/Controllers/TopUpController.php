@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\TopUp;
 use App\Models\User;
 use App\Models\Wallet;
+use Exception;
 use GuzzleHttp\Psr7\Message;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
@@ -33,12 +34,12 @@ class TopUpController extends Controller
             if (!$user->isEmpty()) {
                 // $topup->user_details = $user ?: null;
                 $topup->avatar = $user[0]->avatar;
-                $topup->fullname = $user[0]->firstname.' '.$user[0]->lastname;
+                $topup->fullname = $user[0]->firstname . ' ' . $user[0]->lastname;
             }
 
             return $topup;
         });
-        
+
 
         return response()->json($topups);
     }
@@ -219,9 +220,32 @@ class TopUpController extends Controller
         if ($topup->confirmFlag) {
             return response()->json(['message' => 'TopUp has already been confirmed'], 409);
         }
+        
 
         $topup->confirmFlag = $confirmFlag;
         $topup->save();
+
+        $user = User::where('user_id', $topup->user_id)->first();
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+        
+        try {
+
+            if (method_exists($user, 'sendEmail')) {
+                $user->sendEmail(
+                    $user,
+                    'Top Up Confirmed!',
+                    'Congratulations! Top Up has been confirmed successfully. Your points have been added to your wallet. 
+                        Ref. No. ' . $topup_id . ' with ' . $topup->points . ' points.
+                        Thank you for using our service!'
+                );
+            }
+            Log::info('Topup confirmattion sent to user ', ['email' => $user->email]);
+        } catch (Exception $e) {
+            // return response()->json(['message' => 'Failed to send Topup confirmation email', 'error' => $e->getMessage()], 500);
+            Log::error('Failed to send Topup confirmattion to user', ['error' => $e->getMessage()]);
+        }
 
         return response()->json([
             'message' => 'TopUp confirmed successfully',
