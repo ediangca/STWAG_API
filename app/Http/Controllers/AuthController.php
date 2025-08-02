@@ -273,12 +273,12 @@ class AuthController extends Controller
                 'source' => 'BUN', // Bonus type
             ]);
 
+            $uplineUser = User::where('referencecode', $user->uplinecode)->first();
 
-            $upline = User::where('referencecode', $user->uplinecode)->get();
-            if ($upline) {
+            if ($uplineUser) {
                 Wallet::create([
-                    'wallet_id' => uniqid('WLT') . '-' . substr($upline->user_id, 4) . date('YmdHis'),
-                    'user_id' => $upline->user_id,
+                    'wallet_id' => uniqid('WLT') . '-' . substr($uplineUser->user_id, 4) . date('YmdHis'),
+                    'user_id' => $uplineUser->user_id,
                     'points' => 5,
                     'ref_id' => uniqid('REF') . '-' . substr($user->user_id, 4) . date('YmdHis'),
                     'withdrawableFlag' => false,
@@ -286,19 +286,19 @@ class AuthController extends Controller
                     'source' => 'REF',
                 ]);
 
-                Log::info('Referral bonus added to upline', ['upline_user_id' => $upline->user_id, 'points' => 5]);
+                Log::info('Referral bonus added to upline', ['upline_user_id' => $uplineUser->user_id, 'points' => 5]);
                 try {
 
-                    if (method_exists($upline, 'sendEmail')) {
+                    if (method_exists($uplineUser, 'sendEmail')) {
                         $user->sendEmail(
-                            $upline,
+                            $uplineUser,
                             'Referral Bonus Earned!',
                             'Congratulations! You have received a 5 points referral bonus 
                         because your downline (' . $user->firstname . ' ' . $user->lastname . ', ' . $user->email . ') 
                         has verified their email. Thank you for referring! Refer more friends to earn more bonuses!'
                         );
                     }
-                    Log::info('Referral bonus notification sent to upline', ['upline_email' => $upline->email]);
+                    Log::info('Referral bonus notification sent to upline', ['upline_email' => $uplineUser->email]);
                 } catch (Exception $e) {
                     Log::error('Failed to send referral bonus notification to upline', ['error' => $e->getMessage()]);
                 }
