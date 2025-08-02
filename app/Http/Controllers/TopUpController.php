@@ -212,34 +212,36 @@ class TopUpController extends Controller
 
         $confirmFlag = (bool) $request->input('confirmFlag');
 
-        $topup = Wallet::where('ref_id', $topup_id)->first();
+        $topupWallet = Wallet::where('ref_id', $topup_id)->first();
 
-        if (!$topup) {
+        if (!$topupWallet) {
             return response()->json(['message' => 'TopUp not found'], 404);
         }
-        if ($topup->confirmFlag) {
+        if ($topupWallet->confirmFlag) {
             return response()->json(['message' => 'TopUp has already been confirmed'], 409);
         }
-        
 
-        $topup->confirmFlag = $confirmFlag;
-        $topup->save();
 
-        $user = User::where('user_id', $topup->user_id)->first();
+        $topupWallet->confirmFlag = $confirmFlag;
+        $topupWallet->save();
+
+        $user = User::where('user_id', $topupWallet->user_id)->first();
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
         }
-        
-        try {
 
-            if (method_exists($user, 'sendEmail')) {
-                $user->sendEmail(
-                    $user,
-                    'Top Up Confirmed!',
-                    'Congratulations! Top Up has been confirmed successfully. Your points have been added to your wallet. 
-                        Ref. No. ' . $topup_id . ' with ' . $topup->points . ' points.
+        try {
+            $topup = TopUp::where('topup_id', $topup_id)->first();
+            if ($topup) {
+                if (method_exists($user, 'sendEmail')) {
+                    $user->sendEmail(
+                        $user,
+                        'Top Up Confirmed!',
+                        'Congratulations! Top Up has been confirmed. Your points have been added to your wallet. 
+                        GCASH Ref. No. ' . $topup->gcash_ref_no . ' with ' . $topup->points . ' points.
                         Thank you for using our service!'
-                );
+                    );
+                }
             }
             Log::info('Topup confirmattion sent to user ', ['email' => $user->email]);
         } catch (Exception $e) {
@@ -249,7 +251,7 @@ class TopUpController extends Controller
 
         return response()->json([
             'message' => 'TopUp confirmed successfully',
-            'topup' => $topup
+            'topup' => $topupWallet
         ]);
     }
 
