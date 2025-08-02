@@ -161,9 +161,9 @@ class AuthController extends Controller
 
         Log::info('Upline level', ['level' => $level]);
 
-        if ($level >= 11) {
-            return response()->json(['message' => 'Level exceeded.'], 404);
-        }
+        // if ($level >= 11) {
+        //     return response()->json(['message' => 'Level exceeded.'], 404);
+        // }
 
         if (strtolower($request->type) == "admin") {
             $level = 0;
@@ -186,7 +186,7 @@ class AuthController extends Controller
             'type' => $request->type,
             'referencecode' => $referencecode, //generated
             // 'referencecode' => $request->referencecode,
-            'uplinecode' => in_array($request->type, ["root", "admin", "member"]) ? $request->type : $request->uplinecode,
+            'uplinecode' => in_array($request->type, ["Root", "Admin", "Member"]) ? $request->type : $request->uplinecode,
             'avatar' => $request->avatar,
             'level' => $level,
             'uuid' => $request->uuid,
@@ -205,7 +205,8 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'User successfully registered! Please check your email for verification.',
-            'user' => $user
+            'user' => $user,
+            'status' => 201
         ], 201);
     }
 
