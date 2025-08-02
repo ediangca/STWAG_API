@@ -64,7 +64,6 @@ class AuthController extends Controller
         return response()->json($users);
     }
 
-
     private function countDownlines($referenceCode)
     {
         $directDownlines = User::where('uplinecode', $referenceCode)
