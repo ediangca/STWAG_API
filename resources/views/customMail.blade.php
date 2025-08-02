@@ -22,7 +22,6 @@
             background: #f4f6fb;
             margin: 0;
             padding: 0;
-
             font-family: "Montserrat", sans-serif;
             font-optical-sizing: auto;
             font-weight: <weight>;
@@ -156,6 +155,7 @@
                 @endif
             </div>
         </div>
+        <br>
         @if (isset($user))
             <div class="footer">
                 Regards, <br><span>Your STWAG App Team</span>
