@@ -203,7 +203,7 @@ class BetController extends Controller
             if (($currentPoints + $incomingPoints) > 1000) {
                 return response()->json([
                     'number' => $number,
-                    'status' => 1,
+                    'status' => 0,
                     'message' => "Bet point limit exceeded for number {$number}. Only " . (1000 - $currentPoints) . " points allowed."
                 ], 403);
             }
@@ -296,6 +296,7 @@ class BetController extends Controller
         }
 
         return response()->json([
+            'status' => 1,
             'message' => $message,
             'bets' => $bets
         ], 201);
@@ -380,9 +381,8 @@ class BetController extends Controller
                 'result' => $result,
                 'bets' => $bets
             ], 201);
-
         } else {
-            
+
             return response()->json([
                 'date' => $date,
                 'session' => $session,
