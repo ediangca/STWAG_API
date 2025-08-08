@@ -187,18 +187,30 @@ class BetController extends Controller
         }
 
 
+
         // Validate bet limit for each number
         $numbers = collect($request->bets)->pluck('number')->unique();
+
         foreach ($numbers as $number) {
-            $currentCount = Bet::where('number', $number)->count();
-            $incomingCount = collect($request->bets)->where('number', $number)->count();
-            if (($currentCount + $incomingCount) > 1000) {
+            // Sum of existing points for this number and result_id
+            $currentPoints = Bet::where('number', $number)
+                ->where('result_id', $result_id)
+                ->sum('points');
+
+            // Sum of incoming points for this number (from request)
+            $incomingPoints = collect($request->bets)
+                ->where('number', $number)
+                ->sum('points');
+
+            // Check if total exceeds 1000
+            if (($currentPoints + $incomingPoints) > 1000) {
                 return response()->json([
                     'number' => $number,
-                    'message' => "Bet limit exceeded for number {$number}. Only " . (1000 - $currentCount) . " bets allowed."
+                    'message' => "Bet point limit exceeded for number {$number}. Only " . (1000 - $currentPoints) . " points allowed."
                 ], 403);
             }
         }
+
 
         $noOfBet = 1;
         // Place bets
@@ -371,9 +383,8 @@ class BetController extends Controller
                 'result' => $result,
                 'bets' => $bets
             ], 201);
-
         } else {
-            
+
             return response()->json([
                 'date' => $date,
                 'session' => $session,
