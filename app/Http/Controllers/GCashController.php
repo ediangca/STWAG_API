@@ -31,21 +31,26 @@ class GCashController extends Controller
             return response()->json(['message' => 'GCash number is required'], 400);
         }
         //
-        $data = $request->validate([
-            'gcashno' => 'required|string|max:45',
-        ]);
+
+        try {
+            $data = $request->validate([
+                'gcashno' => 'required|string|max:45|unique:gcash,gcashno',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
+        }
 
         $gcash = GCash::create($data);
         if (!$gcash) {
             return response()->json(['message' => 'Failed to create GCash number'], 500);
         }
-    
+
         return response()->json([
             'message' => 'GCash number created successfully',
             'gcash' => $gcash
         ], 201);
     }
-    
+
     /**
      * Display the specified resource.
      */
