@@ -201,20 +201,11 @@ class BetController extends Controller
 
             // Check if total exceeds 1000
             if (($currentPoints + $incomingPoints) > 1000) {
-                // return response()->json([
-                //     'number' => $number,
-                //     'message' => "Bet point limit exceeded for number {$number}. Only " . (1000 - $currentPoints) . " points allowed."
-                // ], 403);
-                throw ValidationException::withMessages([
-                        'number' => $number,
-                        'message' => "Bet point limit exceeded for number {$number}. Only. 1000 points allowed per number."
-                ]);
-                // return response()->json([
-                //     'errors' => [
-                //         'number' => $number,
-                //         'message' => "Bet point limit exceeded for number {$number}. Only. 1000 points allowed per number."
-                //     ]
-                // ], 403);
+                return response()->json([
+                    'number' => $number,
+                    'status' => 1,
+                    'message' => "Bet point limit exceeded for number {$number}. Only " . (1000 - $currentPoints) . " points allowed."
+                ], 403);
             }
         }
 
@@ -389,8 +380,9 @@ class BetController extends Controller
                 'result' => $result,
                 'bets' => $bets
             ], 201);
-        } else {
 
+        } else {
+            
             return response()->json([
                 'date' => $date,
                 'session' => $session,
