@@ -66,6 +66,13 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        
+        Schema::create('gcash', function (Blueprint $table) {
+            $table->id('gcashid');
+            $table->string('gcashno', 45);
+            $table->timestamps();
+        });
+
         Schema::create('wallets', function (Blueprint $table) {
             $table->string('wallet_id')->primary();
             $table->string('user_id')->index();

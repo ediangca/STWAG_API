@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BetController;
+use App\Http\Controllers\GCashController;
 use App\Http\Controllers\LotteryController;
 use App\Http\Controllers\ResultController;
 use App\Http\Controllers\TopUpController;
@@ -32,11 +33,6 @@ Route::get('/ping', function () {
     return response()->json(['message' => 'pong']);
 });
 
-
-Route::get('/mercaral', function () {
-    return response()->json(['message' => 'pangit']);
-});
-
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail']);
@@ -59,11 +55,17 @@ Route::delete('/users/{user_id}', [AuthController::class, 'deleteUserById'])->na
 Route::get('/users/{user_id}/leveldownlines', [AuthController::class, 'getDownlinesByLevel'])->name('users.leveldownlines');
 Route::get('/users/{user_id}/downlines', [AuthController::class, 'getDownlinesByID'])->name('users.downlines');
 
+// GCash Routes
+Route::get('/gcash', [GCashController::class, 'index']);
+Route::post('/gcash', [GCashController::class, 'store']);
+Route::get('/gcash/{id}', [GCashController::class, 'show']);
+Route::put('/gcash/{id}', [GCashController::class, 'update']);
+Route::delete('/gcash/{id}', [GCashController::class, 'destroy']);
+
 // Lottery Routes
 // Route::apiResource('lottery_sessions', LotteryController::class);
 Route::get('/lottery', [LotteryController::class, 'index']);
 Route::post('/lottery', [LotteryController::class, 'store']);
-
 
 // Bet Routes
 // Route::apiResource('bets', BetController::class);
@@ -119,6 +121,7 @@ Route::get('/test-mail', function () {
 
 
 // Authentication
+
 
 // Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
