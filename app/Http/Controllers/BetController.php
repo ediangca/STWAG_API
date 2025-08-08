@@ -204,7 +204,7 @@ class BetController extends Controller
                 return response()->json([
                     'number' => $number,
                     'status' => 0,
-                    'message' => "Bet point limit exceeded for number {$number}. Only " . (1000 - $currentPoints) . " points allowed."
+                    'message' => "Bet point limit exceeded for number {$number}. Only 1000 points allowed per number."
                 ], 403);
             }
         }
