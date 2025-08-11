@@ -7,6 +7,7 @@ use App\Models\Bet;
 use App\Models\Lottery;
 use App\Models\Result;
 use App\Models\Wallet;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -105,9 +106,10 @@ class BetController extends Controller
                 'bets.*.points' => 'required|numeric|min:1|max:1000',
             ]);
         } catch (ValidationException $e) {
-            return response()->json(['message' => 'Validation faileddasdasdasd', 'errors' => $e->errors()], 422);
+            return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
         }
-
+        
+        $currentTimestamp = Carbon::now()->format('Y-m-d H:i:s');
         $user_id = $request->user_id;
 
         $allowedPoints = [1, 5, 15, 10, 20, 30, 50, 70, 100, 150, 200, 300, 500, 700, 1000];
@@ -186,6 +188,22 @@ class BetController extends Controller
             return response()->json(['message' => 'Bet cannot placed. Draw has been already done!'], 403);
         }
 
+        $existingBets = DB::table('bets')
+            ->where('user_id', $request->user_id)
+            ->where('result_id', $request->result_id)
+            ->where('created_at', $currentTimestamp)
+            ->get(['number', 'points']);
+
+        // Convert both to comparable arrays
+        $submittedSet = collect($request->bets)->map(fn($b) => "{$b['number']}:{$b['points']}")->sort()->values();
+        $existingSet  = $existingBets->map(fn($b) => "{$b->number}:{$b->points}")->sort()->values();
+
+        if ($submittedSet->equals($existingSet)) {
+            throw ValidationException::withMessages([
+                'message' => ['This exact set of bets already exists for the given result and timestamp.']
+            ]);
+        }
+
 
         // Validate bet limit for each number
         $numbers = collect($request->bets)->pluck('number')->unique();
@@ -209,9 +227,23 @@ class BetController extends Controller
             }
         }
 
+        // Calculate total points
+        $totalPoints = collect($request->bets)->sum('points');
+        // Check if user has enough points in wallet
+        $userWallet = Wallet::where('user_id', $user_id)->sum('points');
+        if ($userWallet < $totalPoints) {
+            return response()->json([
+                'message' => 'Insufficient points in wallet. You have ' . $userWallet . ' points, but need ' . $totalPoints . ' points to place these bets.'
+            ], 403);
+        }
+        
+
+
+
         $noOfBet = 1;
         // Place bets
         foreach ($request->bets as $bet) {
+
             $existingBet = Bet::where('result_id', $result_id)
                 ->where('user_id', $user_id)
                 ->where('number', $bet['number'])
