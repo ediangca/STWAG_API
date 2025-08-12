@@ -108,8 +108,8 @@ class BetController extends Controller
         } catch (ValidationException $e) {
             return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
         }
-        
-        $currentTimestamp = Carbon::now()->format('Y-m-d H:i:s');
+
+
         $user_id = $request->user_id;
 
         $allowedPoints = [1, 5, 15, 10, 20, 30, 50, 70, 100, 150, 200, 300, 500, 700, 1000];
@@ -188,21 +188,32 @@ class BetController extends Controller
             return response()->json(['message' => 'Bet cannot placed. Draw has been already done!'], 403);
         }
 
+        $currentTime = Carbon::now();
+        $cutoffTime = $currentTime->copy()->subSeconds(30);
+
         $existingBets = DB::table('bets')
             ->where('user_id', $request->user_id)
             ->where('result_id', $request->result_id)
-            ->where('created_at', $currentTimestamp)
+            ->whereBetween('created_at', [$cutoffTime, $currentTime])
             ->get(['number', 'points']);
 
-        // Convert both to comparable arrays
-        $submittedSet = collect($request->bets)->map(fn($b) => "{$b['number']}:{$b['points']}")->sort()->values();
-        $existingSet  = $existingBets->map(fn($b) => "{$b->number}:{$b->points}")->sort()->values();
+        // Convert both to comparable sorted arrays
+        $submittedSet = collect($request->bets)
+            ->map(fn($b) => "{$b['number']}:{$b['points']}")
+            ->sort()
+            ->values();
+
+        $existingSet = $existingBets
+            ->map(fn($b) => "{$b->number}:{$b->points}")
+            ->sort()
+            ->values();
 
         if ($submittedSet->equals($existingSet)) {
             throw ValidationException::withMessages([
-                'message' => ['This exact set of bets already exists for the given result and timestamp.']
+                'message' => ['This exact set of bets already exists within the last 30 seconds for the given result.']
             ]);
         }
+
 
 
         // Validate bet limit for each number
@@ -236,7 +247,7 @@ class BetController extends Controller
                 'message' => 'Insufficient points in wallet. You have ' . $userWallet . ' points, but need ' . $totalPoints . ' points to place these bets.'
             ], 403);
         }
-        
+
 
 
 
