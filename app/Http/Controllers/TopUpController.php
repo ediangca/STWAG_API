@@ -228,9 +228,8 @@ class TopUpController extends Controller
         $topupWallet->confirmFlag = $confirmFlag;
         $topupWallet->updated_at = now();
         $topupWallet->save();
-
-
-        $topup = TopUp::where('topup_id', $topup_id)->get();
+        
+        $topup = TopUp::where('topup_id', $topup_id)->first();
         $topup->updated_at = now();
         $topup->save();
 

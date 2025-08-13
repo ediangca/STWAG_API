@@ -211,7 +211,7 @@ class WithdrawController extends Controller
         $withdrawDetail->save();
 
         
-        $withdraw = Withdraw::where('withdraw_id', $withdraw_id)->get();
+        $withdraw = Withdraw::where('withdraw_id', $withdraw_id)->first();
         $withdraw->updated_at = now();
         $withdraw->save();
 
