@@ -223,6 +223,7 @@ class TopUpController extends Controller
 
 
         $topupWallet->confirmFlag = $confirmFlag;
+        $topupWallet->updated_at = now();
         $topupWallet->save();
 
         $user = User::where('user_id', $topupWallet->user_id)->first();
