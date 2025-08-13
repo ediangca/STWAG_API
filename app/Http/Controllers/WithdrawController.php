@@ -207,6 +207,7 @@ class WithdrawController extends Controller
         }
 
         $withdrawDetail->confirmFlag = $confirmFlag;
+        $withdrawDetail->updated_at = now();
         $withdrawDetail->save();
 
         
