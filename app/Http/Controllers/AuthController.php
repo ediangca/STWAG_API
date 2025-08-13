@@ -72,9 +72,12 @@ class AuthController extends Controller
 
         $count = $directDownlines->count();
 
-        foreach ($directDownlines as $downline) {
-            $count += $this->countDownlines($downline->referencecode);
+        if ($count > 1) {
+            foreach ($directDownlines as $downline) {
+                $count += $this->countDownlines($downline->referencecode);
+            }
         }
+
 
         return $count;
     }
