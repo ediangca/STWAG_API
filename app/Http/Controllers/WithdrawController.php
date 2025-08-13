@@ -181,16 +181,16 @@ class WithdrawController extends Controller
 
         $confirmFlag = (bool) $request->input('confirmFlag');
 
-        $withdraw = Wallet::where('ref_id', $withdraw_id)->first();
+        $withdrawDetail = Wallet::where('ref_id', $withdraw_id)->first();
 
-        if (!$withdraw) {
+        if (!$withdrawDetail) {
             return response()->json(['message' => 'Withdraw not found'], 404);
         }
-        if ($withdraw->confirmFlag) {
+        if ($withdrawDetail->confirmFlag) {
             return response()->json(['message' => 'Withdraw has already been confirmed'], 409);
         }
 
-        $wallets = Wallet::where('user_id', $withdraw->user_id)->where('confirmFlag', 1)->get();
+        $wallets = Wallet::where('user_id', $withdrawDetail->user_id)->where('confirmFlag', 1)->get();
 
         Log::info('Wallets', [
             'wallets' => $wallets
@@ -202,11 +202,16 @@ class WithdrawController extends Controller
 
 
         // Check if the points for this withdraw exceed the total withdrawable points
-        if ($withdraw->points > $totalWithdrawable) {
+        if ($withdrawDetail->points > $totalWithdrawable) {
             return response()->json(['message' => ($totalWithdrawable == 0 ? 'Nothing' : 'Insuficient points') . ' to withdraw.'], 403);
         }
 
-        $withdraw->confirmFlag = $confirmFlag;
+        $withdrawDetail->confirmFlag = $confirmFlag;
+        $withdrawDetail->save();
+
+        
+        $withdraw = Withdraw::where('withdraw_id', $withdraw_id)->get();
+        $withdraw->updated_at = now();
         $withdraw->save();
 
         return response()->json([
