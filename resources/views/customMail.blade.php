@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet"> --}}
 
-    <title>STWAG</title>
+    <title>SWAG</title>
     <style>
         body {
             background: #f4f6fb;
@@ -160,11 +160,11 @@
         <br>
         @if (isset($user))
             <div class="footer">
-                Regards, <br><span>Your STWAG App Team</span>
+                Regards, <br><span>Your SWAG App Team</span>
             </div>
         @endif
         <div class="copyright">
-            &copy; {{ date('Y') }} STWAG. All rights reserved.
+            &copy; {{ date('Y') }} SWAG. All rights reserved.
         </div>
     </div>
 

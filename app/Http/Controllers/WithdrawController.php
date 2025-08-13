@@ -7,6 +7,7 @@ use App\Models\TopUp;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\Withdraw;
+use Exception;
 use GuzzleHttp\Psr7\Message;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
@@ -181,16 +182,20 @@ class WithdrawController extends Controller
 
         $confirmFlag = (bool) $request->input('confirmFlag');
 
-        $withdrawDetail = Wallet::where('ref_id', $withdraw_id)->first();
+        $withdrawWallet = Wallet::where('ref_id', $withdraw_id)->first();
 
-        if (!$withdrawDetail) {
+        if (!$withdrawWallet) {
             return response()->json(['message' => 'Withdraw not found'], 404);
         }
-        if ($withdrawDetail->confirmFlag) {
+        if ($withdrawWallet->confirmFlag) {
             return response()->json(['message' => 'Withdraw has already been confirmed'], 409);
         }
+        $user = User::where('user_id', $withdrawWallet->user_id)->first();
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
 
-        $wallets = Wallet::where('user_id', $withdrawDetail->user_id)->where('confirmFlag', 1)->get();
+        $wallets = Wallet::where('user_id', $withdrawWallet->user_id)->where('confirmFlag', 1)->get();
 
         Log::info('Wallets', [
             'wallets' => $wallets
@@ -202,22 +207,39 @@ class WithdrawController extends Controller
 
 
         // Check if the points for this withdraw exceed the total withdrawable points
-        if ($withdrawDetail->points > $totalWithdrawable) {
+        if ($withdrawWallet->points > $totalWithdrawable) {
             return response()->json(['message' => ($totalWithdrawable == 0 ? 'Nothing' : 'Insuficient points') . ' to withdraw.'], 403);
         }
 
-        $withdrawDetail->confirmFlag = $confirmFlag;
-        $withdrawDetail->updated_at = now();
-        $withdrawDetail->save();
-
+        $withdrawWallet->confirmFlag = $confirmFlag;
+        $withdrawWallet->updated_at = now();
+        $withdrawWallet->save();
         
         $withdraw = Withdraw::where('withdraw_id', $withdraw_id)->first();
         $withdraw->updated_at = now();
         $withdraw->save();
 
+        try {
+            if ($withdraw) {
+                if (method_exists($user, 'sendEmail')) {
+                    $user->sendEmail(
+                        $user,
+                        'Withdraw Approved!',
+                        'Congratulations! Withdraw request has been approved and sent to the 
+                        Account No. ' . $withdraw->contactno . ' with ' . $withdraw->points . ' points.
+                        Thank you for using our service!'
+                    );
+                }
+            }
+            Log::info('Withdraw approval sent to user ', ['email' => $user->email]);
+        } catch (Exception $e) {
+            // return response()->json(['message' => 'Failed to send Topup confirmation email', 'error' => $e->getMessage()], 500);
+            Log::error('Failed to send Withdraw approval to user', ['error' => $e->getMessage()]);
+        }
+
         return response()->json([
             'message' => 'Withdraw confirmed successfully',
-            'withdraw' => $withdraw
+            'withdraw' => $withdrawWallet
         ]);
     }
 

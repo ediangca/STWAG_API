@@ -234,14 +234,13 @@ class TopUpController extends Controller
         $topup->save();
 
         try {
-            $topupDetails = TopUp::where('topup_id', $topup_id)->first();
-            if ($topupDetails) {
+            if ($topup) {
                 if (method_exists($user, 'sendEmail')) {
                     $user->sendEmail(
                         $user,
                         'Top Up Confirmed!',
                         'Congratulations! Top Up has been confirmed. Your points have been added to your wallet. 
-                        GCASH Ref. No. ' . $topupDetails->gcash_ref_no . ' with ' . $topupDetails->points . ' points.
+                        GCASH Ref. No. ' . $topup->gcash_ref_no . ' with ' . $topup->points . ' points.
                         Thank you for using our service!'
                     );
                 }

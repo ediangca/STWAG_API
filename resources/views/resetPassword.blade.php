@@ -131,7 +131,7 @@
     <div class="container">
         <div class="header">
             <img src="{{ asset('img/stwaglogo.png') }}" alt="STWAG Logo" style="height: 100px;">
-            <h2>STWAG</h2>
+            <h2>SWAG</h2>
             <em>(Spin to Win and Gain)</em>
         </div>
         <div class="body-content">
@@ -316,7 +316,7 @@
             {{-- Regards, <br><span>Your STWAG App Team</span> --}}
         </div>
         <div class="copyright">
-            &copy; {{ date('Y') }} STWAG. All rights reserved.
+            &copy; {{ date('Y') }} SWAG. All rights reserved.
         </div>
     </div>
 
