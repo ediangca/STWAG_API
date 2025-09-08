@@ -130,7 +130,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="{{ asset('img/stwaglogo.png') }}" alt="STWAG Logo" style="height: 100px;">
+            <img src="{{ asset('img/stwaglogo.png') }}" alt="STWAG-Logo" style="height: 100px;">
             <h2>SWAG</h2>
             <em>(Spin to Win and Gain)</em>
         </div>
