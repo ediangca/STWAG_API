@@ -14,18 +14,21 @@ use App\Models\TopUp;
 use App\Models\Withdraw;
 use Illuminate\Support\Facades\Mail;
 
+// Route::get('/', function () {
+//     return response()->json([
+//         'ApiName' => 'STWAG',
+//         'laravel_version' => app()->version(), // Get the Laravel version
+//         // 'environment' => config('app.env'), // Get the environment,
+//         // 'environment' => env('APP_ENV', 'production'), // Get the environment,
+//         'version' => '1.0.0',
+//         'timezone' => config('app.timezone'), // Get the timezone
+//         'timestamp' => now()->toDateTimeString(),
+//         'message' => 'This API is under development. Please check back soon.',
+//         'Develop By' => 'Mr. Ebrahim Diangca and John Louis Mercaral, MIS',
+//     ]);
+// });
 Route::get('/', function () {
-    return response()->json([
-        'ApiName' => 'STWAG',
-        'laravel_version' => app()->version(), // Get the Laravel version
-        // 'environment' => config('app.env'), // Get the environment,
-        // 'environment' => env('APP_ENV', 'production'), // Get the environment,
-        'version' => '1.0.0',
-        'timezone' => config('app.timezone'), // Get the timezone
-        'timestamp' => now()->toDateTimeString(),
-        'message' => 'This API is under development. Please check back soon.',
-        'Develop By' => 'Mr. Ebrahim Diangca and John Louis Mercaral, MIS',
-    ]);
+    return view('index');
 });
 
 
