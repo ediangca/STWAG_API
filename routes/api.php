@@ -51,7 +51,7 @@ Route::prefix('auth')->group(function () {
 
 
 // Route::get('/users', [AuthController::class, 'index']);
-Route::middleware('auth:sanctum')->get('/users', [AuthController::class, 'index']);
+// Route::middleware('auth:sanctum')->get('/users', [AuthController::class, 'index']);
 Route::get('/users/{user_id}', [AuthController::class, 'userInfo']);
 Route::put('/users/{user_id}', [AuthController::class, 'updateUserById'])->name('users.update');
 Route::delete('/users/{user_id}', [AuthController::class, 'deleteUserById'])->name('users.delete');
@@ -130,4 +130,6 @@ Route::get('/test-mail', function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
+
+    Route::get('/users', [AuthController::class, 'index']);
 });
