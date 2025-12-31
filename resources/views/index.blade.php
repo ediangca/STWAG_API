@@ -45,8 +45,8 @@
         <p>Laravel Version: {{ app()->version() }}</p>
         <p>Timezone: {{ config('app.timezone') }}</p>
         <p>Timestamp: {{ now()->toDateTimeString() }}</p>
-        {{-- <p>This API is under development. Please check back soon.</p> --}}
         <hr style="margin: 1rem 0;">
+        <p>This API is under development. Please check back soon.</p>
         {{-- <p>Developed by: Mr. Ebrahim Diangca and John Louis Mercaral, MIS</p> --}}
     </div>
 </body>

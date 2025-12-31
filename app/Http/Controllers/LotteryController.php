@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Lottery;
 use App\Models\Bet;
 use App\Models\Result;
-
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -18,7 +18,12 @@ class LotteryController extends Controller
      */
     public function index()
     {
-        //
+        if (! Auth::check()) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Unauthenticated'
+            ], 401);
+        }
         $lottery = Lottery::all();
 
         if ($lottery->isEmpty()) {

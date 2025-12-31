@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\GCash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class GCashController extends Controller
 {
@@ -12,7 +13,12 @@ class GCashController extends Controller
      */
     public function index()
     {
-        //
+        if (! Auth::check()) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Unauthenticated'
+            ], 401);
+        }
         $gcash = GCash::all();
 
         if ($gcash->isEmpty()) {

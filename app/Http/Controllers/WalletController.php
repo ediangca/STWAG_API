@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\TopUp;
 use App\Models\Wallet;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
@@ -15,6 +16,12 @@ class WalletController extends Controller
      */
     public function index()
     {
+        if (! Auth::check()) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Unauthenticated'
+            ], 401);
+        }
         $wallets = Wallet::all();
 
         if ($wallets->isEmpty()) {

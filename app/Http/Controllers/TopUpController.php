@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Wallet;
 use Exception;
 use GuzzleHttp\Psr7\Message;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
 
@@ -18,6 +19,12 @@ class TopUpController extends Controller
      */
     public function index()
     {
+        if (! Auth::check()) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Unauthenticated'
+            ], 401);
+        }
         Log::info('Function: ' . 'TopupIndex');
         $topups = TopUp::orderBy('created_at', 'desc')->get();;
         if ($topups->isEmpty()) {

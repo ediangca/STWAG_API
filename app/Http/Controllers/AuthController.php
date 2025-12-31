@@ -48,7 +48,6 @@ class AuthController extends Controller
 
     public function index()
     {
-        // Ensure user is authenticated
         if (! Auth::check()) {
             return response()->json([
                 'status' => 401,

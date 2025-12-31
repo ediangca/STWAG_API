@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Result;
 use App\Models\User;
 use App\Models\Wallet;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class ResultController extends Controller
@@ -24,6 +25,12 @@ class ResultController extends Controller
      */
     public function index()
     {
+        if (! Auth::check()) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Unauthenticated'
+            ], 401);
+        }
         $results = Result::orderBy('result_id', 'desc')->get();
 
         if ($results->isEmpty()) {
