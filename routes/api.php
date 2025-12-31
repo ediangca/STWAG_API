@@ -49,9 +49,6 @@ Route::prefix('auth')->group(function () {
 
 // Route::put('/users/avatar/{id}', [AuthController::class, 'updateAvatarById']);
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/users', [AuthController::class, 'index']);
-});
 
 Route::get('/users/{user_id}', [AuthController::class, 'userInfo']);
 Route::put('/users/{user_id}', [AuthController::class, 'updateUserById'])->name('users.update');
@@ -136,7 +133,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Route::post('/logout', [AuthController::class, 'logout']);
     // Route::post('/refresh', [AuthController::class, 'r efresh']);
 
-    // Route::get('/users', 'index');
-    // Route::get('/users/{id}', 'getUserById');
-    // });
+    /* ------------ USERS ------------ */
+    Route::get('/users', [AuthController::class, 'index']);
 });
