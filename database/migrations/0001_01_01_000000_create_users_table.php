@@ -38,7 +38,7 @@ return new class extends Migration
         });
 
         Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary(); 
+            $table->string('id')->primary();
             $table->foreignId('user_id')->nullable()->index();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
@@ -66,7 +66,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        
+
         Schema::create('gcash', function (Blueprint $table) {
             $table->id('gcashid');
             $table->string('gcashno', 45);
@@ -114,6 +114,13 @@ return new class extends Migration
             $table->string('contactno', 11);
             $table->timestamps();
         });
+
+        Schema::create('grades', function (Blueprint $table) {
+            $table->id();
+            $table->string('codename'); // Define tokenable_type
+            $table->double('grade');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -130,5 +137,6 @@ return new class extends Migration
         Schema::dropIfExists('wallet_item');
         Schema::dropIfExists('topups');
         Schema::dropIfExists('withdraws');
+        Schema::dropIfExists('grades');
     }
 };
