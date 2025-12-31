@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STWAG API</title>
     <link rel="icon" type="image/png" href="{{ asset('img/stwaglogo.png') }}">
+    <!-- <link rel="icon" type="image/png" href="https://static.alwaysdata.com/aldjango/img/favicon.png" /> -->
     <!-- Optional: simple styling -->
     <style>
         body {
@@ -46,7 +47,7 @@
         <p>Timezone: {{ config('app.timezone') }}</p>
         <p>Timestamp: {{ now()->toDateTimeString() }}</p>
         <hr style="margin: 1rem 0;">
-        <p>This API is under development. Please check back soon.</p>
+        <p>This API powered by STWAG.</p>
         {{-- <p>Developed by: Mr. Ebrahim Diangca and John Louis Mercaral, MIS</p> --}}
     </div>
 </body>

@@ -20,12 +20,12 @@ class WithdrawController extends Controller
      */
     public function index()
     {
-        if (! Auth::check()) {
-            return response()->json([
-                'status' => 401,
-                'message' => 'Unauthenticated'
-            ], 401);
-        }
+        // if (! Auth::check()) {
+        //     return response()->json([
+        //         'status' => 401,
+        //         'message' => 'Unauthenticated'
+        //     ], 401);
+        // }
         Log::info('Function: ' . 'WithdrawIndex');
         $withdraws = Withdraw::orderBy('created_at', 'desc')->get();;
         if ($withdraws->isEmpty()) {

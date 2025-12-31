@@ -18,12 +18,12 @@ class LotteryController extends Controller
      */
     public function index()
     {
-        if (! Auth::check()) {
-            return response()->json([
-                'status' => 401,
-                'message' => 'Unauthenticated'
-            ], 401);
-        }
+        // if (! Auth::check()) {
+        //     return response()->json([
+        //         'status' => 401,
+        //         'message' => 'Unauthenticated'
+        //     ], 401);
+        // }
         $lottery = Lottery::all();
 
         if ($lottery->isEmpty()) {

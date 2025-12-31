@@ -25,12 +25,12 @@ class ResultController extends Controller
      */
     public function index()
     {
-        if (! Auth::check()) {
-            return response()->json([
-                'status' => 401,
-                'message' => 'Unauthenticated'
-            ], 401);
-        }
+        // if (! Auth::check()) {
+        //     return response()->json([
+        //         'status' => 401,
+        //         'message' => 'Unauthenticated'
+        //     ], 401);
+        // }
         $results = Result::orderBy('result_id', 'desc')->get();
 
         if ($results->isEmpty()) {
