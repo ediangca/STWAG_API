@@ -24,6 +24,7 @@ class AuthMiddleware
         // Ensure user is authenticated
         if (! Auth::check()) {
             return response()->json([
+                'status' => 401,
                 'message' => 'Unauthenticated'
             ], 401);
         }
