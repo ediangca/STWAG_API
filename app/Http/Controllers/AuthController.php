@@ -118,11 +118,11 @@ class AuthController extends Controller
                 'password' => 'required|string|min:6',
                 'type' => 'required|string|max:255|nullable', //default user
                 // 'referencecode' => 'required|string|max:255', //generated
-                'uplinecode' => 'string|max:255|exists:users,referencecode', //if type is user, it will be the uplinecode
+                'uplinecode' => 'string|max:255|exists:users,referencecode|nullable', //if type is user, it will be the uplinecode
                 'avatar' => 'required|integer|nullable', //default 0
                 // 'level' => 'required|integer|nullable',
-                'uuid' => 'required|string|max:255|unique:users',
-                'devicemodel' => 'required|string|max:255',
+                'uuid' => 'required|string|max:255|unique:users|nullable',
+                'devicemodel' => 'required|string|max:255|nullable',
             ]);
             Log::info('Validation passed');
         } catch (ValidationException $e) {
