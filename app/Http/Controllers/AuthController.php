@@ -8,6 +8,7 @@ use App\Models\Wallet;
 use App\Notifications\PasswordResetMail;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -47,6 +48,14 @@ class AuthController extends Controller
 
     public function index()
     {
+        // Ensure user is authenticated
+        if (! Auth::check()) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Unauthenticated'
+            ], 401);
+        }
+        
         $users = User::all();
 
         if ($users->isEmpty()) {

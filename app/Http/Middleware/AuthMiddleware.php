@@ -21,14 +21,6 @@ class AuthMiddleware
         // 👉 Example logic: log request URI
         Log::info('Incoming request to: ' . $request->getRequestUri());
 
-        // Ensure user is authenticated
-        if (! Auth::check()) {
-            return response()->json([
-                'status' => 401,
-                'message' => 'Unauthenticated'
-            ], 401);
-        }
-
         // Continue processing
         return $next($request);
     }
